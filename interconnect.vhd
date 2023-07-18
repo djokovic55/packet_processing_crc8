@@ -139,7 +139,7 @@ entity interconnect is
 		s_axi_int_arvalid_pb0: in std_logic;
 		s_axi_int_arready_pb0: out std_logic;
 
-        -- READ DATA CHANNEL
+		-- READ DATA CHANNEL
 		s_axi_int_rdata_pb0: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pb0: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pb0: out std_logic;
@@ -161,7 +161,7 @@ entity interconnect is
 		s_axi_int_awvalid_pb1: in std_logic;
 		s_axi_int_awready_pb1: out std_logic;
 
-        -- WRITE DATA CHANNEL
+		-- WRITE DATA CHANNEL
 		s_axi_int_wdata_pb1: in std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_wstrb_pb1: in std_logic_vector((C_S_AXI_INT_DATA_WIDTH/8)-1 downto 0);
 		s_axi_int_wlast_pb1: in std_logic;
@@ -169,13 +169,13 @@ entity interconnect is
 		s_axi_int_wvalid_pb1: in std_logic;
 		s_axi_int_wready_pb1: out std_logic;
 
-        -- WRITE RESPONSE CHANNEL
+		-- WRITE RESPONSE CHANNEL
 		s_axi_int_bresp_pb1: out std_logic_vector(1 downto 0);
 
 		s_axi_int_bvalid_pb1: out std_logic;
 		s_axi_int_bready_pb1: in std_logic;
 
-        -- READ ADDRESS CHANNEL
+		-- READ ADDRESS CHANNEL
 		s_axi_int_araddr_pb1: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
 		s_axi_int_arlen_pb1: in std_logic_vector(7 downto 0);
 		s_axi_int_arsize_pb1: in std_logic_vector(2 downto 0);
@@ -184,7 +184,7 @@ entity interconnect is
 		s_axi_int_arvalid_pb1: in std_logic;
 		s_axi_int_arready_pb1: out std_logic;
 
-        -- READ DATA CHANNEL
+		-- READ DATA CHANNEL
 		s_axi_int_rdata_pb1: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pb1: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pb1: out std_logic;
@@ -206,7 +206,7 @@ entity interconnect is
 		s_axi_int_awvalid_pp: in std_logic;
 		s_axi_int_awready_pp: out std_logic;
 
-        -- WRITE DATA CHANNEL
+		-- WRITE DATA CHANNEL
 		s_axi_int_wdata_pp: in std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_wstrb_pp: in std_logic_vector((C_S_AXI_INT_DATA_WIDTH/8)-1 downto 0);
 		s_axi_int_wlast_pp: in std_logic;
@@ -214,13 +214,13 @@ entity interconnect is
 		s_axi_int_wvalid_pp: in std_logic;
 		s_axi_int_wready_pp: out std_logic;
 
-        -- WRITE RESPONSE CHANNEL
+		-- WRITE RESPONSE CHANNEL
 		s_axi_int_bresp_pp: out std_logic_vector(1 downto 0);
 
 		s_axi_int_bvalid_pp: out std_logic;
 		s_axi_int_bready_pp: in std_logic;
 
-        -- READ ADDRESS CHANNEL
+		-- READ ADDRESS CHANNEL
 		s_axi_int_araddr_pp: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
 		s_axi_int_arlen_pp: in std_logic_vector(7 downto 0);
 		s_axi_int_arsize_pp: in std_logic_vector(2 downto 0);
@@ -229,7 +229,7 @@ entity interconnect is
 		s_axi_int_arvalid_pp: in std_logic;
 		s_axi_int_arready_pp: out std_logic;
 
-        -- READ DATA CHANNEL
+		-- READ DATA CHANNEL
 		s_axi_int_rdata_pp: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pp: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pp: out std_logic;
@@ -244,7 +244,7 @@ entity interconnect is
 		-- INTCON PORTS OF INCOMING MEMORY MODULE S1
 		--------------------------------------------------------------------------------
 
-        -- ADDRESS WRITE CHANNEL
+		-- ADDRESS WRITE CHANNEL
 		m_axi_int_awaddr_inmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
 		m_axi_int_awlen_inmem: out std_logic_vector(7 downto 0);
 		m_axi_int_awsize_inmem: out std_logic_vector(2 downto 0);
@@ -253,7 +253,7 @@ entity interconnect is
 		m_axi_int_awvalid_inmem: out std_logic;
 		m_axi_int_awready_inmem: in std_logic;
 
-        -- WRITE DATA CHANNEL
+		-- WRITE DATA CHANNEL
 		m_axi_int_wdata_inmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
 		m_axi_int_wstrb_inmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
 		m_axi_int_wlast_inmem: out std_logic;
@@ -261,12 +261,12 @@ entity interconnect is
 		m_axi_int_wvalid_inmem: out std_logic;
 		m_axi_int_wready_inmem: in std_logic;
 
-        -- WRITE RESPONSE CHANNEL
+		-- WRITE RESPONSE CHANNEL
 		m_axi_int_bresp_inmem: in std_logic_vector(1 downto 0);
 		m_axi_int_bvalid_inmem: in std_logic;
 		m_axi_int_bready_inmem: out std_logic;
 
-        -- READ ADDRESS CHANNEL
+		-- READ ADDRESS CHANNEL
 		m_axi_int_araddr_inmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
 		m_axi_int_arlen_inmem: out std_logic_vector(7 downto 0);
 		m_axi_int_arsize_inmem: out std_logic_vector(2 downto 0);
@@ -275,7 +275,7 @@ entity interconnect is
 		m_axi_int_arvalid_inmem: out std_logic;
 		m_axi_int_arready_inmem: in std_logic;
 
-        -- READ DATA CHANNEL
+		-- READ DATA CHANNEL
 		m_axi_int_rdata_inmem: in std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_inmem: in std_logic_vector(1 downto 0);
 		m_axi_int_rlast_inmem: in std_logic;
@@ -297,7 +297,7 @@ entity interconnect is
 		m_axi_int_awvalid_outmem: out std_logic;
 		m_axi_int_awready_outmem: in std_logic;
 
-        -- WRITE DATA CHANNEL
+		-- WRITE DATA CHANNEL
 		m_axi_int_wdata_outmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
 		m_axi_int_wstrb_outmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
 		m_axi_int_wlast_outmem: out std_logic;
@@ -305,12 +305,12 @@ entity interconnect is
 		m_axi_int_wvalid_outmem: out std_logic;
 		m_axi_int_wready_outmem: in std_logic;
 
-        -- WRITE RESPONSE CHANNEL
+		-- WRITE RESPONSE CHANNEL
 		m_axi_int_bresp_outmem: in std_logic_vector(1 downto 0);
 		m_axi_int_bvalid_outmem: in std_logic;
 		m_axi_int_bready_outmem: out std_logic;
 
-        -- READ ADDRESS CHANNEL
+		-- READ ADDRESS CHANNEL
 		m_axi_int_araddr_outmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
 		m_axi_int_arlen_outmem: out std_logic_vector(7 downto 0);
 		m_axi_int_arsize_outmem: out std_logic_vector(2 downto 0);
