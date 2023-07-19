@@ -339,9 +339,58 @@ checker  checker_int(
 
 	default disable iff reset;
 
-	//Aux code
+	reg awvalid_ack_ctrl;
 
-	// Write assertions
+	//TODO Aux code
+	// Count the number of valid ready pairs, which represent the number of successful transaction
+	// Based on that info generate last signal
+	always @(posedge clk or posedge reset) begin
+		if(reset) begin
+			awvalid_ack_ctrl <= 1'b0;
+		end
+		else begin
+			if(s_axi_int_awvalid_ctrl && s_axi_int_awready_ctrl) begin
+				awvalid_ack_ctrl <= 1'b1;
+			end
+			// FIX only when the current transaction is over
+			else if(s_axi_int_bvalid_ctrl && s_axi_int_bready_ctrl) begin
+				awvalid_ack_ctrl <= 1'b0;
+			end
+		end
+	end
+
+	//TODO Write properties
+
+	//TODO Master side properties
+	//####################################### Stability ######################################### 
+	// Write address channel
+	awvalid_hold_ctrl : assume property (s_axi_int_awvalid_ctrl  && !s_axi_int_awready_ctrl |=> s_axi_int_awvalid_ctrl);
+	awvalid_drop_ctrl : assume property (s_axi_int_awvalid_ctrl  && s_axi_int_awready_ctrl |=> !s_axi_int_awvalid_ctrl);
+
+	awaddr_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awaddr_ctrl) );
+	awlen_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awlen_ctrl) );
+	awsize_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awsize_ctrl) );
+	awburst_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awburst_ctrl) );
+
+	// Write channel signals get value only after successful handshake on write address channel  
+	wvalid_hold_ctrl: assume property(!awvalid_ack_ctrl |-> !s_axi_int_wvalid_ctrl);
+	wstrb_hold_ctrl: assume property(!awvalid_ack_ctrl |-> s_axi_int_wstrb_ctrl == 4'd0);
+	wlast_hold_ctrl: assume property(!awvalid_ack_ctrl |-> !s_axi_int_wlast_ctrl);
+
+	// Write response channel
+	bready_hold_ctrl: assume property(s_axi_int_bready_ctrl == 1'b1);
+
+
+	//TODO Slave side properties
+	//FIX the prefixes, only m_
+	awready_gen_inmem : assume property (m_axi_int_awvalid_inmem |=> m_axi_int_awready_inmem); 
+	wready_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
+	
+
+
+
+	
+
 	awready_ctrl_c: cover property(s_axi_int_awready_ctrl == 1'b1 ##1 s_axi_int_awready_ctrl == 1'b0);
 
 endchecker
