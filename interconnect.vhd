@@ -15,7 +15,7 @@
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- Test 1
+-- 
 ----------------------------------------------------------------------------------
 
 
@@ -139,7 +139,7 @@ entity interconnect is
 		s_axi_int_arvalid_pb0: in std_logic;
 		s_axi_int_arready_pb0: out std_logic;
 
-		-- READ DATA CHANNEL
+        -- READ DATA CHANNEL
 		s_axi_int_rdata_pb0: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pb0: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pb0: out std_logic;
@@ -161,7 +161,7 @@ entity interconnect is
 		s_axi_int_awvalid_pb1: in std_logic;
 		s_axi_int_awready_pb1: out std_logic;
 
-		-- WRITE DATA CHANNEL
+        -- WRITE DATA CHANNEL
 		s_axi_int_wdata_pb1: in std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_wstrb_pb1: in std_logic_vector((C_S_AXI_INT_DATA_WIDTH/8)-1 downto 0);
 		s_axi_int_wlast_pb1: in std_logic;
@@ -169,13 +169,13 @@ entity interconnect is
 		s_axi_int_wvalid_pb1: in std_logic;
 		s_axi_int_wready_pb1: out std_logic;
 
-		-- WRITE RESPONSE CHANNEL
+        -- WRITE RESPONSE CHANNEL
 		s_axi_int_bresp_pb1: out std_logic_vector(1 downto 0);
 
 		s_axi_int_bvalid_pb1: out std_logic;
 		s_axi_int_bready_pb1: in std_logic;
 
-		-- READ ADDRESS CHANNEL
+        -- READ ADDRESS CHANNEL
 		s_axi_int_araddr_pb1: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
 		s_axi_int_arlen_pb1: in std_logic_vector(7 downto 0);
 		s_axi_int_arsize_pb1: in std_logic_vector(2 downto 0);
@@ -184,7 +184,7 @@ entity interconnect is
 		s_axi_int_arvalid_pb1: in std_logic;
 		s_axi_int_arready_pb1: out std_logic;
 
-		-- READ DATA CHANNEL
+        -- READ DATA CHANNEL
 		s_axi_int_rdata_pb1: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pb1: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pb1: out std_logic;
@@ -206,7 +206,7 @@ entity interconnect is
 		s_axi_int_awvalid_pp: in std_logic;
 		s_axi_int_awready_pp: out std_logic;
 
-		-- WRITE DATA CHANNEL
+        -- WRITE DATA CHANNEL
 		s_axi_int_wdata_pp: in std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_wstrb_pp: in std_logic_vector((C_S_AXI_INT_DATA_WIDTH/8)-1 downto 0);
 		s_axi_int_wlast_pp: in std_logic;
@@ -214,13 +214,13 @@ entity interconnect is
 		s_axi_int_wvalid_pp: in std_logic;
 		s_axi_int_wready_pp: out std_logic;
 
-		-- WRITE RESPONSE CHANNEL
+        -- WRITE RESPONSE CHANNEL
 		s_axi_int_bresp_pp: out std_logic_vector(1 downto 0);
 
 		s_axi_int_bvalid_pp: out std_logic;
 		s_axi_int_bready_pp: in std_logic;
 
-		-- READ ADDRESS CHANNEL
+        -- READ ADDRESS CHANNEL
 		s_axi_int_araddr_pp: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
 		s_axi_int_arlen_pp: in std_logic_vector(7 downto 0);
 		s_axi_int_arsize_pp: in std_logic_vector(2 downto 0);
@@ -229,7 +229,7 @@ entity interconnect is
 		s_axi_int_arvalid_pp: in std_logic;
 		s_axi_int_arready_pp: out std_logic;
 
-		-- READ DATA CHANNEL
+        -- READ DATA CHANNEL
 		s_axi_int_rdata_pp: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pp: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pp: out std_logic;
@@ -244,7 +244,7 @@ entity interconnect is
 		-- INTCON PORTS OF INCOMING MEMORY MODULE S1
 		--------------------------------------------------------------------------------
 
-		-- ADDRESS WRITE CHANNEL
+        -- ADDRESS WRITE CHANNEL
 		m_axi_int_awaddr_inmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
 		m_axi_int_awlen_inmem: out std_logic_vector(7 downto 0);
 		m_axi_int_awsize_inmem: out std_logic_vector(2 downto 0);
@@ -253,7 +253,7 @@ entity interconnect is
 		m_axi_int_awvalid_inmem: out std_logic;
 		m_axi_int_awready_inmem: in std_logic;
 
-		-- WRITE DATA CHANNEL
+        -- WRITE DATA CHANNEL
 		m_axi_int_wdata_inmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
 		m_axi_int_wstrb_inmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
 		m_axi_int_wlast_inmem: out std_logic;
@@ -261,12 +261,12 @@ entity interconnect is
 		m_axi_int_wvalid_inmem: out std_logic;
 		m_axi_int_wready_inmem: in std_logic;
 
-		-- WRITE RESPONSE CHANNEL
+        -- WRITE RESPONSE CHANNEL
 		m_axi_int_bresp_inmem: in std_logic_vector(1 downto 0);
 		m_axi_int_bvalid_inmem: in std_logic;
 		m_axi_int_bready_inmem: out std_logic;
 
-		-- READ ADDRESS CHANNEL
+        -- READ ADDRESS CHANNEL
 		m_axi_int_araddr_inmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
 		m_axi_int_arlen_inmem: out std_logic_vector(7 downto 0);
 		m_axi_int_arsize_inmem: out std_logic_vector(2 downto 0);
@@ -275,7 +275,7 @@ entity interconnect is
 		m_axi_int_arvalid_inmem: out std_logic;
 		m_axi_int_arready_inmem: in std_logic;
 
-		-- READ DATA CHANNEL
+        -- READ DATA CHANNEL
 		m_axi_int_rdata_inmem: in std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_inmem: in std_logic_vector(1 downto 0);
 		m_axi_int_rlast_inmem: in std_logic;
@@ -297,7 +297,7 @@ entity interconnect is
 		m_axi_int_awvalid_outmem: out std_logic;
 		m_axi_int_awready_outmem: in std_logic;
 
-		-- WRITE DATA CHANNEL
+        -- WRITE DATA CHANNEL
 		m_axi_int_wdata_outmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
 		m_axi_int_wstrb_outmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
 		m_axi_int_wlast_outmem: out std_logic;
@@ -305,12 +305,12 @@ entity interconnect is
 		m_axi_int_wvalid_outmem: out std_logic;
 		m_axi_int_wready_outmem: in std_logic;
 
-		-- WRITE RESPONSE CHANNEL
+        -- WRITE RESPONSE CHANNEL
 		m_axi_int_bresp_outmem: in std_logic_vector(1 downto 0);
 		m_axi_int_bvalid_outmem: in std_logic;
 		m_axi_int_bready_outmem: out std_logic;
 
-		-- READ ADDRESS CHANNEL
+        -- READ ADDRESS CHANNEL
 		m_axi_int_araddr_outmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
 		m_axi_int_arlen_outmem: out std_logic_vector(7 downto 0);
 		m_axi_int_arsize_outmem: out std_logic_vector(2 downto 0);
@@ -563,6 +563,7 @@ begin
 
 	--------------------------------------------------------------------------------
 	-- READ ADDRESS DECODER 
+	
 	--------------------------------------------------------------------------------
 	ar_dec: process(int_araddr) 
 	begin
@@ -594,6 +595,9 @@ begin
 	)
 	begin
 		case(gnt) is 
+
+		-- // BUG When 0000 then pp module is enabled
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				int_awaddr <= s_axi_int_awaddr_ctrl;
 				int_awlen <= s_axi_int_awlen_ctrl;
@@ -612,14 +616,18 @@ begin
 				int_awsize <= s_axi_int_awsize_pb1;
 				int_awburst <= s_axi_int_awburst_pb1;
 				int_awvalid <= s_axi_int_awvalid_pb1;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				int_awaddr <= s_axi_int_awaddr_pp;
 				int_awlen <= s_axi_int_awlen_pp;
 				int_awsize <= s_axi_int_awsize_pp;
 				int_awburst <= s_axi_int_awburst_pp;
 				int_awvalid <= s_axi_int_awvalid_pp;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				int_awaddr <= (others => '0');
+				int_awlen <= (others => '0');
+				int_awsize <= (others => '0');
+				int_awburst <= (others => '0') ;
+				int_awvalid <= '0';
 		end case;
 	
 	end process;
@@ -684,23 +692,21 @@ begin
 
 	awready_demux_gnt : process (int_awready, gnt)
 	begin 
-		-- default
-		s_axi_int_awready_ctrl <= '0';
-		s_axi_int_awready_pb0 <= '0';
-		s_axi_int_awready_pb1 <= '0';
-		s_axi_int_awready_pp <= '0';
-
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				s_axi_int_awready_ctrl <= int_awready;
 			when "0010" =>
 				s_axi_int_awready_pb0 <= int_awready;
 			when "0100" =>
 				s_axi_int_awready_pb1 <= int_awready;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				s_axi_int_awready_pp <= int_awready;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				s_axi_int_awready_ctrl <= '0';
+				s_axi_int_awready_pb0 <= '0';
+				s_axi_int_awready_pb1 <= '0';
+				s_axi_int_awready_pp <= '0';
 		end case;
 	end process;
 
@@ -717,6 +723,7 @@ begin
 					)
 	begin 
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				int_wdata <= s_axi_int_wdata_ctrl;
 				int_wstrb <= s_axi_int_wstrb_ctrl; 
@@ -732,13 +739,16 @@ begin
 				int_wstrb <= s_axi_int_wstrb_pb1; 
 				int_wlast <= s_axi_int_wlast_pb1; 
 				int_wvalid <= s_axi_int_wvalid_pb1;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				int_wdata <= s_axi_int_wdata_pp;
 				int_wstrb <= s_axi_int_wstrb_pp; 
 				int_wlast <= s_axi_int_wlast_pp; 
 				int_wvalid <= s_axi_int_wvalid_pp;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				int_wdata <= (others => '0');
+				int_wstrb <= (others => '0'); 
+				int_wlast <= '0'; 
+				int_wvalid <= '0';
 		end case;
 	end process;
 
@@ -798,23 +808,23 @@ begin
 
 	wready_demux_gnt : process (int_wready, gnt)
 	begin 
-		-- default
-		s_axi_int_wready_ctrl <= '0';
-		s_axi_int_wready_pb0 <= '0';
-		s_axi_int_wready_pb1 <= '0';
-		s_axi_int_wready_pp <= '0';
 
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				s_axi_int_wready_ctrl <= int_wready;
 			when "0010" =>
 				s_axi_int_wready_pb0 <= int_wready;
 			when "0100" =>
 				s_axi_int_wready_pb1 <= int_wready;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				s_axi_int_wready_pp <= int_wready;
-				assert false report "Invalid gnt value" severity error;
+			when others =>
+				-- default
+				s_axi_int_wready_ctrl <= '0';
+				s_axi_int_wready_pb0 <= '0';
+				s_axi_int_wready_pb1 <= '0';
+				s_axi_int_wready_pp <= '0';
 		end case;
 	end process;
 	--------------------------------------------------------------------------------
@@ -858,23 +868,23 @@ begin
 
 	bvalid_demux_gnt : process (int_bvalid, gnt)
 	begin 
-		-- default
-		s_axi_int_bvalid_ctrl <= '0';
-		s_axi_int_bvalid_pb0 <= '0';
-		s_axi_int_bvalid_pb1 <= '0';
-		s_axi_int_bvalid_pp <= '0';
 
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				s_axi_int_bvalid_ctrl <= int_bvalid;
 			when "0010" =>
 				s_axi_int_bvalid_pb0 <= int_bvalid;
 			when "0100" =>
 				s_axi_int_bvalid_pb1 <= int_bvalid;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				s_axi_int_bvalid_pp <= int_bvalid;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				-- default
+				s_axi_int_bvalid_ctrl <= '0';
+				s_axi_int_bvalid_pb0 <= '0';
+				s_axi_int_bvalid_pb1 <= '0';
+				s_axi_int_bvalid_pp <= '0';
 		end case;
 	end process;
 
@@ -884,16 +894,17 @@ begin
 					)
 	begin 
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				int_bready <= s_axi_int_bready_ctrl;
 			when "0010" =>
 				int_bready <= s_axi_int_bready_pb0;
 			when "0100" =>
 				int_bready <= s_axi_int_bready_pb1;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				int_bready <= s_axi_int_bready_pp;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				int_bready <= '0';
 		end case;
 	end process;
 
@@ -934,6 +945,7 @@ begin
 	)
 	begin
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				int_araddr <= s_axi_int_araddr_ctrl;
 				int_arlen <= s_axi_int_arlen_ctrl;
@@ -952,14 +964,18 @@ begin
 				int_arsize <= s_axi_int_arsize_pb1;
 				int_arburst <= s_axi_int_arburst_pb1;
 				int_arvalid <= s_axi_int_arvalid_pb1;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				int_araddr <= s_axi_int_araddr_pp;
 				int_arlen <= s_axi_int_arlen_pp;
 				int_arsize <= s_axi_int_arsize_pp;
 				int_arburst <= s_axi_int_arburst_pp;
 				int_arvalid <= s_axi_int_arvalid_pp;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				int_araddr <= (others => '0');
+				int_arlen <= (others => '0');
+				int_arsize <= (others => '0');
+				int_arburst <= (others => '0');
+				int_arvalid <= '0';
 		end case;
 	
 	end process;
@@ -1023,23 +1039,23 @@ begin
 
 	arready_demux_gnt : process (int_arready, gnt)
 	begin 
-		-- default
-		s_axi_int_arready_ctrl <= '0';
-		s_axi_int_arready_pb0 <= '0';
-		s_axi_int_arready_pb1 <= '0';
-		s_axi_int_arready_pp <= '0';
 
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				s_axi_int_arready_ctrl <= int_arready;
 			when "0010" =>
 				s_axi_int_arready_pb0 <= int_arready;
 			when "0100" =>
 				s_axi_int_arready_pb1 <= int_arready;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				s_axi_int_arready_pp <= int_arready;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				-- default
+				s_axi_int_arready_ctrl <= '0';
+				s_axi_int_arready_pb0 <= '0';
+				s_axi_int_arready_pb1 <= '0';
+				s_axi_int_arready_pp <= '0';
 		end case;
 	end process;
 	--------------------------------------------------------------------------------
@@ -1101,23 +1117,23 @@ begin
 
 	rvalid_demux_gnt : process (int_rvalid, gnt)
 	begin 
-		-- default
-		s_axi_int_rvalid_ctrl <= '0';
-		s_axi_int_rvalid_pb0 <= '0';
-		s_axi_int_rvalid_pb1 <= '0';
-		s_axi_int_rvalid_pp <= '0';
 
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				s_axi_int_rvalid_ctrl <= int_rvalid;
 			when "0010" =>
 				s_axi_int_rvalid_pb0 <= int_rvalid;
 			when "0100" =>
 				s_axi_int_rvalid_pb1 <= int_rvalid;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				s_axi_int_rvalid_pp <= int_rvalid;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				-- default
+				s_axi_int_rvalid_ctrl <= '0';
+				s_axi_int_rvalid_pb0 <= '0';
+				s_axi_int_rvalid_pb1 <= '0';
+				s_axi_int_rvalid_pp <= '0';
 		end case;
 	end process;
 
@@ -1127,16 +1143,17 @@ begin
 					)
 	begin 
 		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
 			when "0001" =>
 				int_rready <= s_axi_int_rready_ctrl;
 			when "0010" =>
 				int_rready <= s_axi_int_rready_pb0;
 			when "0100" =>
 				int_rready <= s_axi_int_rready_pb1;
-			-- when "1000" =>
-			when others =>
+			when "1000" =>
 				int_rready <= s_axi_int_rready_pp;
-				-- assert false report "Invalid gnt value" severity error;
+			when others =>
+				int_rready <= '0';
 		end case;
 	end process;
 

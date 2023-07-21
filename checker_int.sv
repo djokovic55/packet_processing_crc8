@@ -383,6 +383,8 @@ checker  checker_int(
 	awvalid_drop_ctrl : assume property (awvalid_ack_ctrl |=> !s_axi_int_awvalid_ctrl);
 
 	awaddr_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awaddr_ctrl) );
+	awaddr_value_ctrl : assume property ( s_axi_int_awaddr_ctrl[23:16] == 8'h00);
+
 	awlen_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awlen_ctrl) );
 	awsize_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awsize_ctrl) );
 	awburst_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awburst_ctrl) );
@@ -397,7 +399,7 @@ checker  checker_int(
 	// wvalid_gen_ctrl: assume property(awvalid_ack_ctrl |=> s_axi_int_wvalid_ctrl);
 
 	// Write response channel
-	bready_hold_ctrl: assume property(wvalid_ack_ctrl |=> s_axi_int_bready_ctrl);
+	bready_hold_ctrl: assume property(wvalid_ack_ctrl |=> s_axi_int_bready_ctrl); 
 	// Assume that read is not possible 
 	arvalid_shut_ctrl: assume property(!s_axi_int_arvalid_ctrl)
 	rvalid_shut_ctrl: assume property(!s_axi_int_rvalid_ctrl)
@@ -415,6 +417,7 @@ checker  checker_int(
 
 	awready_ctrl_c: cover property(!s_axi_int_awready_ctrl ##1 !s_axi_int_awready_ctrl);
 	awvalid_inmem_c: cover property(m_axi_int_awvalid_inmem);
+	ctrl_inmem_com: cover property(m_axi_int_awvalid_inmem && s_axi_int_awready_ctrl);
 
 endchecker
 
