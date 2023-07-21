@@ -398,16 +398,22 @@ checker  checker_int(
 
 	// Write response channel
 	bready_hold_ctrl: assume property(wvalid_ack_ctrl |=> s_axi_int_bready_ctrl);
+	// Assume that read is not possible 
+	arvalid_shut_ctrl: assume property(!s_axi_int_arvalid_ctrl)
+	rvalid_shut_ctrl: assume property(!s_axi_int_rvalid_ctrl)
 
 
 	//TODO Slave side properties
 	awready_gen_inmem : assume property (m_axi_int_awvalid_inmem |=> m_axi_int_awready_inmem); 
 	wready_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
 	// bvalid_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
+
+	//TODO Other properties
+	// assume that gnt is always 0001 -> only ctrl - inmem communication
 	
 	//OPTIMIZE COVER
 
-	awready_ctrl_c: cover property(!s_axi_int_awready_ctrl ##1 !_axi_int_awready_ctrl);
+	awready_ctrl_c: cover property(!s_axi_int_awready_ctrl ##1 !s_axi_int_awready_ctrl);
 	awvalid_inmem_c: cover property(m_axi_int_awvalid_inmem);
 
 endchecker
