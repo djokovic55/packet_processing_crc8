@@ -401,17 +401,14 @@ checker  checker_int(
 
 
 	//TODO Slave side properties
-	//FIX the prefixes, only m_
 	awready_gen_inmem : assume property (m_axi_int_awvalid_inmem |=> m_axi_int_awready_inmem); 
 	wready_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
 	// bvalid_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
 	
+	//OPTIMIZE COVER
 
-
-
-	
-
-	awready_ctrl_c: cover property(s_axi_int_awready_ctrl ##1 !s_axi_int_awready_ctrl);
+	awready_ctrl_c: cover property(!s_axi_int_awready_ctrl ##1 !_axi_int_awready_ctrl);
+	awvalid_inmem_c: cover property(m_axi_int_awvalid_inmem);
 
 endchecker
 
