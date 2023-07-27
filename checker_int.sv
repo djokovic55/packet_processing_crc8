@@ -339,48 +339,47 @@ checker  checker_int(
 
 	default disable iff reset;
 
-	reg awvalid_ack_ctrl;
-	reg wvalid_ack_ctrl;
+	reg aw_hs_ctrl;
+	reg w_hs_ctrl;
 
-	//TODO Aux code
+	//SECTION Aux code
 	// Count the number of valid ready pairs, which represent the number of successful transaction
 	// Based on that info generate last signal
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
-			awvalid_ack_ctrl <= 1'b0;
+			aw_hs_ctrl <= 1'b0;
 		end
 		else begin
 			if(s_axi_int_awvalid_ctrl && s_axi_int_awready_ctrl) begin
-				awvalid_ack_ctrl <= 1'b1;
+				aw_hs_ctrl <= 1'b1;
 			end
 			// FIX only when the current transaction is over
 			else if(s_axi_int_bvalid_ctrl && s_axi_int_bready_ctrl) begin
-				awvalid_ack_ctrl <= 1'b0;
+				aw_hs_ctrl <= 1'b0;
 			end
 		end
 	end
 
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
-			wvalid_ack_ctrl <= 1'b0;
+			w_hs_ctrl <= 1'b0;
 		end
 		else begin
 			if(s_axi_int_wvalid_ctrl && s_axi_int_wready_ctrl) begin
-				wvalid_ack_ctrl <= 1'b1;
+				w_hs_ctrl <= 1'b1;
 			end
 			else if(s_axi_int_bvalid_ctrl && s_axi_int_bready_ctrl) begin
-				wvalid_ack_ctrl <= 1'b0;
+				w_hs_ctrl <= 1'b0;
 			end
 		end
 	end
 
-	//TODO Write properties
 
-	//TODO Master side properties
+	//SECTION Master side properties
 	//####################################### Stability ######################################### 
 	// Write address channel
 	awvalid_hold_ctrl : assume property (s_axi_int_awvalid_ctrl  && !s_axi_int_awready_ctrl |=> s_axi_int_awvalid_ctrl);
-	awvalid_drop_ctrl : assume property (awvalid_ack_ctrl |=> !s_axi_int_awvalid_ctrl);
+	awvalid_drop_ctrl : assume property (aw_hs_ctrl |=> !s_axi_int_awvalid_ctrl);
 
 	awaddr_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awaddr_ctrl) );
 	awaddr_value_ctrl : assume property ( s_axi_int_awaddr_ctrl[23:16] == 8'h00);
@@ -390,27 +389,28 @@ checker  checker_int(
 	awburst_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awburst_ctrl) );
 
 	// Write channel signals get value only after successful handshake on write address channel  
-	wvalid_write_phase_hold_ctrl: assume property(!awvalid_ack_ctrl |-> !s_axi_int_wvalid_ctrl);
+	wvalid_write_phase_hold_ctrl: assume property(!aw_hs_ctrl |-> !s_axi_int_wvalid_ctrl);
 	wvalid_hold_ctrl : assume property (s_axi_int_wvalid_ctrl  && !s_axi_int_wready_ctrl |=> s_axi_int_wvalid_ctrl);
 
-	wstrb_hold_ctrl: assume property(!wvalid_ack_ctrl |-> $stable(s_axi_int_wstrb_ctrl));
-	wlast_hold_ctrl: assume property(!wvalid_ack_ctrl |-> !s_axi_int_wlast_ctrl);
+	wstrb_hold_ctrl: assume property(!w_hs_ctrl |-> $stable(s_axi_int_wstrb_ctrl));
+	wlast_hold_ctrl: assume property(!w_hs_ctrl |-> !s_axi_int_wlast_ctrl);
 
-	// wvalid_gen_ctrl: assume property(awvalid_ack_ctrl |=> s_axi_int_wvalid_ctrl);
+	// wvalid_gen_ctrl: assume property(aw_hs_ctrl |=> s_axi_int_wvalid_ctrl);
 
 	// Write response channel
-	bready_hold_ctrl: assume property(wvalid_ack_ctrl |=> s_axi_int_bready_ctrl); 
+	bready_hold_ctrl: assume property(w_hs_ctrl |=> s_axi_int_bready_ctrl); 
+
 	// Assume that read is not possible 
 	arvalid_shut_ctrl: assume property(!s_axi_int_arvalid_ctrl)
 	rvalid_shut_ctrl: assume property(!s_axi_int_rvalid_ctrl)
 
 
-	//TODO Slave side properties
+	//SECTION Slave side properties
 	awready_gen_inmem : assume property (m_axi_int_awvalid_inmem |=> m_axi_int_awready_inmem); 
 	wready_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
 	// bvalid_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
 
-	//TODO Other properties
+	//SECTION Other properties
 	// assume that gnt is always 0001 -> only ctrl - inmem communication
 	
 	//OPTIMIZE COVER
