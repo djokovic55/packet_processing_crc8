@@ -535,10 +535,10 @@ begin
 	req(3) <= pp_req;
 
 	-- Connect grant signals to Master's ready
-	s_axi_int_awready_ctrl <= gnt(0);
-	s_axi_int_awready_pb0 <= gnt(1);
-	s_axi_int_awready_pb1 <= gnt(2);
-	s_axi_int_awready_pp <= gnt(3);
+	-- s_axi_int_awready_ctrl <= gnt(0);
+	-- s_axi_int_awready_pb0 <= gnt(1);
+	-- s_axi_int_awready_pb1 <= gnt(2);
+	-- s_axi_int_awready_pp <= gnt(3);
 
 
 	--------------------------------------------------------------------------------
@@ -591,7 +591,8 @@ begin
 					 s_axi_int_awlen_ctrl, s_axi_int_awlen_pb0, s_axi_int_awlen_pb1, s_axi_int_awlen_pp,
 					 s_axi_int_awsize_ctrl, s_axi_int_awsize_pb0, s_axi_int_awsize_pb1, s_axi_int_awsize_pp,
 					 s_axi_int_awburst_ctrl, s_axi_int_awburst_pb0, s_axi_int_awburst_pb1, s_axi_int_awburst_pp,
-					 s_axi_int_awvalid_ctrl, s_axi_int_awvalid_pb0, s_axi_int_awvalid_pb1, s_axi_int_awvalid_pp
+					 s_axi_int_awvalid_ctrl, s_axi_int_awvalid_pb0, s_axi_int_awvalid_pb1, s_axi_int_awvalid_pp,
+					 gnt
 	)
 	begin
 		case(gnt) is 
@@ -719,7 +720,8 @@ begin
 					s_axi_int_wdata_ctrl, s_axi_int_wdata_pb0, s_axi_int_wdata_pb1, s_axi_int_wdata_pp,
 					s_axi_int_wstrb_ctrl, s_axi_int_wstrb_pb0, s_axi_int_wstrb_pb1, s_axi_int_wstrb_pp,
 					s_axi_int_wlast_ctrl, s_axi_int_wlast_pb0, s_axi_int_wlast_pb1, s_axi_int_wlast_pp,
-					s_axi_int_wvalid_ctrl, s_axi_int_wvalid_pb0, s_axi_int_wvalid_pb1, s_axi_int_wvalid_pp
+					s_axi_int_wvalid_ctrl, s_axi_int_wvalid_pb0, s_axi_int_wvalid_pb1, s_axi_int_wvalid_pp,
+					gnt
 					)
 	begin 
 		case(gnt) is 
@@ -941,7 +943,8 @@ begin
 					 s_axi_int_arlen_ctrl, s_axi_int_arlen_pb0, s_axi_int_arlen_pb1, s_axi_int_arlen_pp,
 					 s_axi_int_arsize_ctrl, s_axi_int_arsize_pb0, s_axi_int_arsize_pb1, s_axi_int_arsize_pp,
 					 s_axi_int_arburst_ctrl, s_axi_int_arburst_pb0, s_axi_int_arburst_pb1, s_axi_int_arburst_pp,
-					 s_axi_int_arvalid_ctrl, s_axi_int_arvalid_pb0, s_axi_int_arvalid_pb1, s_axi_int_arvalid_pp
+					 s_axi_int_arvalid_ctrl, s_axi_int_arvalid_pb0, s_axi_int_arvalid_pb1, s_axi_int_arvalid_pp,
+					 gnt
 	)
 	begin
 		case(gnt) is 
@@ -1066,9 +1069,9 @@ begin
 
 	r_mux : process(
 					m_axi_int_rdata_inmem, m_axi_int_rdata_outmem, m_axi_int_rdata_reg, m_axi_int_rdata_exreg,
-					m_axi_int_rresp_inmem, m_axi_int_rdata_outmem, m_axi_int_rdata_reg, m_axi_int_rdata_exreg,
-					m_axi_int_rlast_inmem, m_axi_int_rdata_outmem, m_axi_int_rdata_reg, m_axi_int_rdata_exreg,
-					m_axi_int_rvalid_inmem, m_axi_int_rdata_outmem, m_axi_int_rdata_reg, m_axi_int_rdata_exreg,
+					m_axi_int_rresp_inmem, m_axi_int_rresp_outmem, m_axi_int_rresp_reg, m_axi_int_rresp_exreg,
+					m_axi_int_rlast_inmem, m_axi_int_rlast_outmem, m_axi_int_rlast_reg, m_axi_int_rlast_exreg,
+					m_axi_int_rvalid_inmem, m_axi_int_rvalid_outmem, m_axi_int_rvalid_reg, m_axi_int_rvalid_exreg,
 					ar_valid_dec
 					)
 	begin 

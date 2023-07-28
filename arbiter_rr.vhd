@@ -35,7 +35,8 @@ begin
 	arbiter_pr: process (clk) 
 		begin 
 		if (rising_edge(clk)) then
-		if (rstn = '0') then 
+		-- BUG Reset is not on 0 
+		if (rstn = '1') then 
 			priority(req'left downto 1) <= (others => '0');
 			priority(0)	<= '1';
 			last_req <= (others => '0');

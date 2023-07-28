@@ -45,8 +45,10 @@ begin
         if awvalid = '1' or arvalid = '1' then
             if arvalid = '1' then
               state_next <= BUSY_READ;  -- Transition to BUSY_READ state_next for read request
+							busy_internal <= '1';
             elsif awvalid = '1' then
               state_next <= BUSY_WRITE;  -- Transition to BUSY_WRITE state_next for write request
+							busy_internal <= '1';
             end if;
         end if;
           
@@ -55,6 +57,7 @@ begin
         
         if rlast = '1' then
           state_next <= AVAILABLE;  -- Transition back to AVAILABLE after read completion
+					busy_internal <= '0';
         end if;
           
       when BUSY_WRITE =>
@@ -62,6 +65,7 @@ begin
         
         if bvalid = '1' and bready = '1' then
           state_next <= AVAILABLE;  -- Transition back to AVAILABLE after write completion
+					busy_internal <= '0';
         end if;
             
     end case;

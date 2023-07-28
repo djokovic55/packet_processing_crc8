@@ -341,10 +341,12 @@ checker  checker_int(
 
 	reg aw_hs_ctrl;
 	reg w_hs_ctrl;
+	reg [7:0] w_hs_cnt_ctrl;
 
 	//SECTION Aux code
 	// Count the number of valid ready pairs, which represent the number of successful transaction
 	// Based on that info generate last signal
+
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
 			aw_hs_ctrl <= 1'b0;
@@ -374,6 +376,20 @@ checker  checker_int(
 		end
 	end
 
+	always @(posedge clk or posedge reset) begin
+		if(reset) begin
+			w_hs_cnt_ctrl <= 1'b0;
+		end
+		else begin
+			if(s_axi_int_wvalid_ctrl && s_axi_int_wready_ctrl) begin
+				w_hs_cnt_ctrl <= w_hs_cnt_ctrl + 1'b1;
+			end
+			else if(s_axi_int_bvalid_ctrl && s_axi_int_bready_ctrl) begin
+				w_hs_cnt_ctrl <= 1'b0;
+			end
+		end
+	end
+
 
 	//SECTION Master side properties
 	//####################################### Stability ######################################### 
@@ -382,42 +398,53 @@ checker  checker_int(
 	awvalid_drop_ctrl : assume property (aw_hs_ctrl |=> !s_axi_int_awvalid_ctrl);
 
 	awaddr_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awaddr_ctrl) );
-	awaddr_value_ctrl : assume property ( s_axi_int_awaddr_ctrl[23:16] == 8'h00);
+	awaddr_value1_ctrl : assume property ( s_axi_int_awaddr_ctrl[31:16] == 16'h0000);
 
-	awlen_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awlen_ctrl) );
+	// awlen_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awlen_ctrl) );
+	awlen_value_ctrl: assume property( s_axi_int_awlen_ctrl == 8'd3);
+
 	awsize_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awsize_ctrl) );
 	awburst_hold_ctrl : assume property ( (s_axi_int_awvalid_ctrl && !s_axi_int_awready_ctrl) |=> $stable(s_axi_int_awburst_ctrl) );
 
 	// Write channel signals get value only after successful handshake on write address channel  
-	wvalid_write_phase_hold_ctrl: assume property(!aw_hs_ctrl |-> !s_axi_int_wvalid_ctrl);
+
 	wvalid_hold_ctrl : assume property (s_axi_int_wvalid_ctrl  && !s_axi_int_wready_ctrl |=> s_axi_int_wvalid_ctrl);
-
 	wstrb_hold_ctrl: assume property(!w_hs_ctrl |-> $stable(s_axi_int_wstrb_ctrl));
-	wlast_hold_ctrl: assume property(!w_hs_ctrl |-> !s_axi_int_wlast_ctrl);
-
-	// wvalid_gen_ctrl: assume property(aw_hs_ctrl |=> s_axi_int_wvalid_ctrl);
+	wlast_gen1_ctrl: assume property(w_hs_cnt_ctrl == 3 |-> s_axi_int_wlast_ctrl);
+	wlast_gen2_ctrl: assume property(w_hs_cnt_ctrl != 3 |-> !s_axi_int_wlast_ctrl);
 
 	// Write response channel
-	bready_hold_ctrl: assume property(w_hs_ctrl |=> s_axi_int_bready_ctrl); 
+	bready_hold_ctrl: assume property(w_hs_cnt_ctrl == 3 |=> s_axi_int_bready_ctrl); 
 
 	// Assume that read is not possible 
-	arvalid_shut_ctrl: assume property(!s_axi_int_arvalid_ctrl)
-	rvalid_shut_ctrl: assume property(!s_axi_int_rvalid_ctrl)
+	arvalid_shut_ctrl: assume property(!s_axi_int_arvalid_ctrl);
+	rvalid_shut_ctrl: assume property(!s_axi_int_rvalid_ctrl);
 
 
 	//SECTION Slave side properties
-	awready_gen_inmem : assume property (m_axi_int_awvalid_inmem |=> m_axi_int_awready_inmem); 
-	wready_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
-	// bvalid_gen_inmem : assume property (m_axi_int_wvalid_inmem |=> m_axi_int_wready_inmem); 
+	awready_gen_inmem : assume property (m_axi_int_awvalid_inmem && !m_axi_int_awready_inmem |=> m_axi_int_awready_inmem); 
+
+	wready_gen_inmem : assume property (m_axi_int_wvalid_inmem && !m_axi_int_wready_inmem |=> m_axi_int_wready_inmem); 
+
+	bvalid_gen_inmem : assume property (m_axi_int_wlast_inmem |=> m_axi_int_bvalid_inmem); 
 
 	//SECTION Other properties
 	// assume that gnt is always 0001 -> only ctrl - inmem communication
 	
-	//OPTIMIZE COVER
+	//SECTION COVER
 
-	awready_ctrl_c: cover property(!s_axi_int_awready_ctrl ##1 !s_axi_int_awready_ctrl);
-	awvalid_inmem_c: cover property(m_axi_int_awvalid_inmem);
-	ctrl_inmem_com: cover property(m_axi_int_awvalid_inmem && s_axi_int_awready_ctrl);
+	//BUG illegal property
+	awvalid_ctrl_c1: cover property(s_axi_int_awvalid_ctrl[*5]);
+
+	awvalid_inmem_c: cover property(m_axi_int_awvalid_inmem[*5]);
+	ctrl_inmem_com_c: cover property(m_axi_int_awvalid_inmem ##5 s_axi_int_awready_ctrl);
+	ctrl_handshake_c: cover property(s_axi_int_awvalid_ctrl ##5 s_axi_int_awready_ctrl);
+	awvalid_ctrl_to_inmem: cover property(s_axi_int_awvalid_ctrl ##[0:2] m_axi_int_awvalid_inmem);
+	
+	wlast: cover property(w_hs_cnt_ctrl == 3 &&  m_axi_int_wlast_inmem ##[1:$] m_axi_int_bvalid_inmem && m_axi_int_bready_inmem);
+
+	handshake_cnt: cover property(w_hs_cnt_ctrl == 3);
+
 
 endchecker
 
