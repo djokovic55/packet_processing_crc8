@@ -42,14 +42,12 @@ begin
       when AVAILABLE =>
         busy_internal <= '0';
         
-        if awvalid = '1' or arvalid = '1' then
-            if arvalid = '1' then
-              state_next <= BUSY_READ;  -- Transition to BUSY_READ state_next for read request
-							busy_internal <= '1';
-            elsif awvalid = '1' then
-              state_next <= BUSY_WRITE;  -- Transition to BUSY_WRITE state_next for write request
-							busy_internal <= '1';
-            end if;
+        if arvalid = '1' then
+          state_next <= BUSY_READ;  -- Transition to BUSY_READ state_next for read request
+          busy_internal <= '1';
+        elsif awvalid = '1' then
+          state_next <= BUSY_WRITE;  -- Transition to BUSY_WRITE state_next for write request
+          busy_internal <= '1';
         end if;
           
       when BUSY_READ =>

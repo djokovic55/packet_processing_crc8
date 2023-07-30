@@ -210,7 +210,7 @@ architecture implementation of master_axi_cont is
 
 	signal init_write_txn_ff	: std_logic;
 	signal init_write_txn_ff2	: std_logic;
-	signal init_txn_pulse_write	: std_logic;
+	signal init_write_txn_pulse	: std_logic;
 
 	signal init_read_txn_ff : std_logic;
 	signal init_read_txn_ff2 : std_logic;
@@ -220,12 +220,18 @@ begin
 	-----------------------------------------------------------------------------------------
 	-- //SECTION I/O CONNECTIONS ASSIGNMENTS
 	-----------------------------------------------------------------------------------------
+	AXI_READ_DATA_O <= M_AXI_RDATA;
+  AXI_READ_LAST_O  <= M_AXI_RLAST;
+  AXI_WRITE_RDY_O  <= wnext;
+  AXI_WRITE_DONE_O <= axi_bready and M_AXI_BVALID;
+  AXI_READ_VLD_O   <= rnext;
+
 
 	-----------------------------------------------------------------------------------------
 	--I/O CONNECTIONS. WRITE ADDRESS (AW)
 	-----------------------------------------------------------------------------------------
 	--The AXI address is a concatenation of the target base address + active offset range
-	M_AXI_AWADDR	<= std_logic_vector( unsigned(C_M_TARGET_SLAVE_BASE_ADDR) + unsigned(axi_awaddr) );
+	M_AXI_AWADDR	<= std_logic_vector( unsigned(AXI_BASE_ADDRESS_I) + unsigned(axi_awaddr) );
 	--Burst LENgth is number of transaction beats, minus 1
 	M_AXI_AWLEN	<= std_logic_vector( to_unsigned(C_M_AXI_BURST_LEN - 1, 8) );
 	--Size should be C_M_AXI_DATA_WIDTH, in 2^SIZE bytes, otherwise narrow bursts are used
@@ -250,8 +256,7 @@ begin
 	-----------------------------------------------------------------------------------------
 	--READ ADDRESS (AR)
 	-----------------------------------------------------------------------------------------
-	M_AXI_ARID	<= (others => '0');
-	M_AXI_ARADDR	<= std_logic_vector( unsigned( C_M_TARGET_SLAVE_BASE_ADDR ) + unsigned( axi_araddr ) );
+	M_AXI_ARADDR	<= std_logic_vector( unsigned( AXI_BASE_ADDRESS_I ) + unsigned( axi_araddr ) );
 	--Burst length is number of transaction beats, minus 1
 	M_AXI_ARLEN	<= std_logic_vector( to_unsigned(C_M_AXI_BURST_LEN - 1, 8) );
 	--Size should be C_M_AXI_DATA_WIDTH, in 2^n bytes, otherwise narrow bursts are used
@@ -274,8 +279,8 @@ begin
 	-----------------------------------------------------------------------------------------
 
 	-- //IMPORTANT When transaction starts it resets the whole logic for the start of the new transaction 
-	init_txn_pulse_write <= ( not init_write_txn_ff2)  and  init_write_txn_ff;
-	init_txn_pulse_read <= ( not init_read_txn_ff2 )  and  init_read_txn_ff ;
+	init_write_txn_pulse <= ( not init_write_txn_ff2)  and  init_write_txn_ff;
+	init_read_txn_pulse <= ( not init_read_txn_ff2 )  and  init_read_txn_ff ;
 
   --Generate a pulse to initiate AXI transaction.
   process(M_AXI_ACLK)
@@ -323,7 +328,7 @@ begin
 	  process(M_AXI_ACLK)                                            
 	  begin                                                                
 	    if (rising_edge (M_AXI_ACLK)) then                                 
-	      if (M_AXI_ARESETN = '0' or init_txn_pulse_write = '1') then                                   
+	      if (M_AXI_ARESETN = '0' or init_write_txn_pulse = '1') then                                   
 	        axi_awvalid <= '0';                                            
 	      else                                                             
 	        -- // NOTE If previously not valid , start next transaction            
@@ -375,7 +380,7 @@ begin
 	  process(M_AXI_ACLK)                                                               
 	  begin                                                                             
 	    if (rising_edge (M_AXI_ACLK)) then                                              
-	      if (M_AXI_ARESETN = '0' or init_txn_pulse_write = '1') then                                                
+	      if (M_AXI_ARESETN = '0' or init_write_txn_pulse = '1') then                                                
 	        axi_wlast <= '0';                                                           
 	        -- axi_wlast is asserted when the write index                               
 	        -- count reaches the penultimate count to synchronize                       
@@ -401,7 +406,7 @@ begin
 	  process(M_AXI_ACLK)                                                               
 	  begin                                                                             
 	    if (rising_edge (M_AXI_ACLK)) then                                              
-	      if (M_AXI_ARESETN = '0' or start_single_burst_write = '1' or init_txn_pulse_write = '1') then               
+	      if (M_AXI_ARESETN = '0' or start_single_burst_write = '1' or init_write_txn_pulse = '1') then               
 	        write_index <= (others => '0');                                             
 	      else                                                                          
 	        if (wnext = '1' and (write_index /= std_logic_vector(to_unsigned(C_M_AXI_BURST_LEN-1,C_TRANSACTIONS_NUM+1)))) then                
@@ -434,7 +439,7 @@ begin
 	  process(M_AXI_ACLK)                                             
 	  begin                                                                 
 	    if (rising_edge (M_AXI_ACLK)) then                                  
-	      if (M_AXI_ARESETN = '0' or init_txn_pulse_write = '1') then                                    
+	      if (M_AXI_ARESETN = '0' or init_write_txn_pulse = '1') then                                    
 	        axi_bready <= '0';                                              
 	        -- accept/acknowledge bresp with axi_bready by the master       
 	        -- when M_AXI_BVALID is asserted by slave                       
@@ -468,7 +473,7 @@ begin
 	  process(M_AXI_ACLK)										  
 	  begin                                                              
 	    if (rising_edge (M_AXI_ACLK)) then                               
-	      if (M_AXI_ARESETN = '0' or init_txn_pulse_read = '1') then                                 
+	      if (M_AXI_ARESETN = '0' or init_read_txn_pulse = '1') then                                 
 	        axi_arvalid <= '0';                                          
 	     -- If previously not valid , start next transaction             
 	      else                                                           
@@ -496,7 +501,7 @@ begin
 	  process(M_AXI_ACLK)                                                   
 	  begin                                                                 
 	    if (rising_edge (M_AXI_ACLK)) then                                  
-	      if (M_AXI_ARESETN = '0' or start_single_burst_read = '1' or init_txn_pulse_read = '1') then    
+	      if (M_AXI_ARESETN = '0' or start_single_burst_read = '1' or init_read_txn_pulse = '1') then    
 	        read_index <= (others => '0');                                  
 	      else                                                              
 	        if (rnext = '1' and (read_index <= std_logic_vector(to_unsigned(C_M_AXI_BURST_LEN-1,C_TRANSACTIONS_NUM+1)))) then   

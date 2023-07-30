@@ -33,23 +33,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity interconnect is
 	generic (
-		-- Users to add parameters here
-
-		-- User parameters ends
-		-- Do not modify the parameters beyond this line
-
-
-		-- Parameters of Axi Slave Bus Interface S_AXI_INT
-		-- C_S_AXI_INT_ID_WIDTH	: integer	:= 1;
-		C_S_AXI_INT_DATA_WIDTH	: integer	:= 32;
-		C_S_AXI_INT_ADDR_WIDTH	: integer	:= 32;
-
-		-- Parameters of Axi Master Bus Interface M_AXI_INT
-		-- C_M_AXI_INT_TARGET_SLAVE_BASE_ADDR	: std_logic_vector	:= x"40000000";
-		-- C_M_AXI_INT_BURST_LEN	: integer	:= 16;
-		-- C_M_AXI_INT_ID_WIDTH	: integer	:= 1;
-		C_M_AXI_INT_ADDR_WIDTH	: integer	:= 32;
-		C_M_AXI_INT_DATA_WIDTH	: integer	:= 32
+		C_M_AXI_DATA_WIDTH	: integer	:= 32;
+		C_M_AXI_ADDR_WIDTH	: integer	:= 32
 	);
 	port (
         --------------------------------------------------------------------------------
@@ -63,7 +48,7 @@ entity interconnect is
 		--------------------------------------------------------------------------------
 			
 		-- WRITE ADDRESS CHANNEL
-		s_axi_int_awaddr_ctrl: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
+		s_axi_int_awaddr_ctrl: in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		s_axi_int_awlen_ctrl: in std_logic_vector(7 downto 0);
 		s_axi_int_awsize_ctrl: in std_logic_vector(2 downto 0);
 		s_axi_int_awburst_ctrl: in std_logic_vector(1 downto 0);
@@ -72,8 +57,8 @@ entity interconnect is
 		s_axi_int_awready_ctrl: out std_logic;
 
 		-- WRITE DATA CHANNEL
-		s_axi_int_wdata_ctrl: in std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
-		s_axi_int_wstrb_ctrl: in std_logic_vector((C_S_AXI_INT_DATA_WIDTH/8)-1 downto 0);
+		s_axi_int_wdata_ctrl: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		s_axi_int_wstrb_ctrl: in std_logic_vector((C_M_AXI_DATA_WIDTH/8)-1 downto 0);
 		s_axi_int_wlast_ctrl: in std_logic;
 
 		s_axi_int_wvalid_ctrl: in std_logic;
@@ -86,7 +71,7 @@ entity interconnect is
 		s_axi_int_bready_ctrl: in std_logic;
 
 		-- READ ADDRESS CHANNEL
-		s_axi_int_araddr_ctrl: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
+		s_axi_int_araddr_ctrl: in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		s_axi_int_arlen_ctrl: in std_logic_vector(7 downto 0);
 		s_axi_int_arsize_ctrl: in std_logic_vector(2 downto 0);
 		s_axi_int_arburst_ctrl: in std_logic_vector(1 downto 0);
@@ -95,7 +80,7 @@ entity interconnect is
 		s_axi_int_arready_ctrl: out std_logic;
 
 		-- READ DATA CHANNEL
-		s_axi_int_rdata_ctrl: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
+		s_axi_int_rdata_ctrl: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_ctrl: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_ctrl: out std_logic;
 
@@ -108,7 +93,7 @@ entity interconnect is
 		--------------------------------------------------------------------------------
         
 		-- WRITE ADDRESS CHANNEL
-		s_axi_int_awaddr_pb0: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
+		s_axi_int_awaddr_pb0: in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		s_axi_int_awlen_pb0: in std_logic_vector(7 downto 0);
 		s_axi_int_awsize_pb0: in std_logic_vector(2 downto 0);
 		s_axi_int_awburst_pb0: in std_logic_vector(1 downto 0);
@@ -117,8 +102,8 @@ entity interconnect is
 		s_axi_int_awready_pb0: out std_logic;
 
 		-- WRITE DATA CHANNEL
-		s_axi_int_wdata_pb0: in std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
-		s_axi_int_wstrb_pb0: in std_logic_vector((C_S_AXI_INT_DATA_WIDTH/8)-1 downto 0);
+		s_axi_int_wdata_pb0: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		s_axi_int_wstrb_pb0: in std_logic_vector((C_M_AXI_DATA_WIDTH/8)-1 downto 0);
 		s_axi_int_wlast_pb0: in std_logic;
 
 		s_axi_int_wvalid_pb0: in std_logic;
@@ -131,7 +116,7 @@ entity interconnect is
 		s_axi_int_bready_pb0: in std_logic;
 
 		-- READ ADDRESS CHANNEL
-		s_axi_int_araddr_pb0: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
+		s_axi_int_araddr_pb0: in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		s_axi_int_arlen_pb0: in std_logic_vector(7 downto 0);
 		s_axi_int_arsize_pb0: in std_logic_vector(2 downto 0);
 		s_axi_int_arburst_pb0: in std_logic_vector(1 downto 0);
@@ -140,7 +125,7 @@ entity interconnect is
 		s_axi_int_arready_pb0: out std_logic;
 
         -- READ DATA CHANNEL
-		s_axi_int_rdata_pb0: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
+		s_axi_int_rdata_pb0: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pb0: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pb0: out std_logic;
 
@@ -153,7 +138,7 @@ entity interconnect is
 		--------------------------------------------------------------------------------
 		
 		-- WRITE ADDRESS CHANNEL
-		s_axi_int_awaddr_pb1: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
+		s_axi_int_awaddr_pb1: in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		s_axi_int_awlen_pb1: in std_logic_vector(7 downto 0);
 		s_axi_int_awsize_pb1: in std_logic_vector(2 downto 0);
 		s_axi_int_awburst_pb1: in std_logic_vector(1 downto 0);
@@ -162,8 +147,8 @@ entity interconnect is
 		s_axi_int_awready_pb1: out std_logic;
 
         -- WRITE DATA CHANNEL
-		s_axi_int_wdata_pb1: in std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
-		s_axi_int_wstrb_pb1: in std_logic_vector((C_S_AXI_INT_DATA_WIDTH/8)-1 downto 0);
+		s_axi_int_wdata_pb1: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		s_axi_int_wstrb_pb1: in std_logic_vector((C_M_AXI_DATA_WIDTH/8)-1 downto 0);
 		s_axi_int_wlast_pb1: in std_logic;
 
 		s_axi_int_wvalid_pb1: in std_logic;
@@ -176,7 +161,7 @@ entity interconnect is
 		s_axi_int_bready_pb1: in std_logic;
 
         -- READ ADDRESS CHANNEL
-		s_axi_int_araddr_pb1: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
+		s_axi_int_araddr_pb1: in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		s_axi_int_arlen_pb1: in std_logic_vector(7 downto 0);
 		s_axi_int_arsize_pb1: in std_logic_vector(2 downto 0);
 		s_axi_int_arburst_pb1: in std_logic_vector(1 downto 0);
@@ -185,7 +170,7 @@ entity interconnect is
 		s_axi_int_arready_pb1: out std_logic;
 
         -- READ DATA CHANNEL
-		s_axi_int_rdata_pb1: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
+		s_axi_int_rdata_pb1: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pb1: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pb1: out std_logic;
 
@@ -198,7 +183,7 @@ entity interconnect is
 		--------------------------------------------------------------------------------
 		
 		-- WRITE ADDRESS CHANNEL
-		s_axi_int_awaddr_pp: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
+		s_axi_int_awaddr_pp: in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		s_axi_int_awlen_pp: in std_logic_vector(7 downto 0);
 		s_axi_int_awsize_pp: in std_logic_vector(2 downto 0);
 		s_axi_int_awburst_pp: in std_logic_vector(1 downto 0);
@@ -207,8 +192,8 @@ entity interconnect is
 		s_axi_int_awready_pp: out std_logic;
 
         -- WRITE DATA CHANNEL
-		s_axi_int_wdata_pp: in std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
-		s_axi_int_wstrb_pp: in std_logic_vector((C_S_AXI_INT_DATA_WIDTH/8)-1 downto 0);
+		s_axi_int_wdata_pp: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		s_axi_int_wstrb_pp: in std_logic_vector((C_M_AXI_DATA_WIDTH/8)-1 downto 0);
 		s_axi_int_wlast_pp: in std_logic;
 
 		s_axi_int_wvalid_pp: in std_logic;
@@ -221,7 +206,7 @@ entity interconnect is
 		s_axi_int_bready_pp: in std_logic;
 
         -- READ ADDRESS CHANNEL
-		s_axi_int_araddr_pp: in std_logic_vector(C_S_AXI_INT_ADDR_WIDTH-1 downto 0);
+		s_axi_int_araddr_pp: in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		s_axi_int_arlen_pp: in std_logic_vector(7 downto 0);
 		s_axi_int_arsize_pp: in std_logic_vector(2 downto 0);
 		s_axi_int_arburst_pp: in std_logic_vector(1 downto 0);
@@ -230,7 +215,7 @@ entity interconnect is
 		s_axi_int_arready_pp: out std_logic;
 
         -- READ DATA CHANNEL
-		s_axi_int_rdata_pp: out std_logic_vector(C_S_AXI_INT_DATA_WIDTH-1 downto 0);
+		s_axi_int_rdata_pp: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		s_axi_int_rresp_pp: out std_logic_vector(1 downto 0);
 		s_axi_int_rlast_pp: out std_logic;
 
@@ -245,7 +230,7 @@ entity interconnect is
 		--------------------------------------------------------------------------------
 
         -- ADDRESS WRITE CHANNEL
-		m_axi_int_awaddr_inmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+		m_axi_int_awaddr_inmem: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		m_axi_int_awlen_inmem: out std_logic_vector(7 downto 0);
 		m_axi_int_awsize_inmem: out std_logic_vector(2 downto 0);
 		m_axi_int_awburst_inmem: out std_logic_vector(1 downto 0);
@@ -254,8 +239,8 @@ entity interconnect is
 		m_axi_int_awready_inmem: in std_logic;
 
         -- WRITE DATA CHANNEL
-		m_axi_int_wdata_inmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
-		m_axi_int_wstrb_inmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
+		m_axi_int_wdata_inmem: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		m_axi_int_wstrb_inmem: out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
 		m_axi_int_wlast_inmem: out std_logic;
 
 		m_axi_int_wvalid_inmem: out std_logic;
@@ -267,7 +252,7 @@ entity interconnect is
 		m_axi_int_bready_inmem: out std_logic;
 
         -- READ ADDRESS CHANNEL
-		m_axi_int_araddr_inmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+		m_axi_int_araddr_inmem: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		m_axi_int_arlen_inmem: out std_logic_vector(7 downto 0);
 		m_axi_int_arsize_inmem: out std_logic_vector(2 downto 0);
 		m_axi_int_arburst_inmem: out std_logic_vector(1 downto 0);
@@ -276,7 +261,7 @@ entity interconnect is
 		m_axi_int_arready_inmem: in std_logic;
 
         -- READ DATA CHANNEL
-		m_axi_int_rdata_inmem: in std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
+		m_axi_int_rdata_inmem: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_inmem: in std_logic_vector(1 downto 0);
 		m_axi_int_rlast_inmem: in std_logic;
 
@@ -289,7 +274,7 @@ entity interconnect is
 		--------------------------------------------------------------------------------
 
 		-- ADDRESS WRITE CHANNEL
-		m_axi_int_awaddr_outmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+		m_axi_int_awaddr_outmem: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		m_axi_int_awlen_outmem: out std_logic_vector(7 downto 0);
 		m_axi_int_awsize_outmem: out std_logic_vector(2 downto 0);
 		m_axi_int_awburst_outmem: out std_logic_vector(1 downto 0);
@@ -298,8 +283,8 @@ entity interconnect is
 		m_axi_int_awready_outmem: in std_logic;
 
         -- WRITE DATA CHANNEL
-		m_axi_int_wdata_outmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
-		m_axi_int_wstrb_outmem: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
+		m_axi_int_wdata_outmem: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		m_axi_int_wstrb_outmem: out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
 		m_axi_int_wlast_outmem: out std_logic;
 
 		m_axi_int_wvalid_outmem: out std_logic;
@@ -311,7 +296,7 @@ entity interconnect is
 		m_axi_int_bready_outmem: out std_logic;
 
         -- READ ADDRESS CHANNEL
-		m_axi_int_araddr_outmem: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+		m_axi_int_araddr_outmem: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		m_axi_int_arlen_outmem: out std_logic_vector(7 downto 0);
 		m_axi_int_arsize_outmem: out std_logic_vector(2 downto 0);
 		m_axi_int_arburst_outmem: out std_logic_vector(1 downto 0);
@@ -320,7 +305,7 @@ entity interconnect is
 		m_axi_int_arready_outmem: in std_logic;
 
         -- READ DATA CHANNEL
-		m_axi_int_rdata_outmem: in std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
+		m_axi_int_rdata_outmem: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_outmem: in std_logic_vector(1 downto 0);
 		m_axi_int_rlast_outmem: in std_logic;
 
@@ -332,7 +317,7 @@ entity interconnect is
 		--------------------------------------------------------------------------------
 
         -- ADDRESS WRITE CHANNEL
-		m_axi_int_awaddr_reg: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+		m_axi_int_awaddr_reg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		m_axi_int_awlen_reg: out std_logic_vector(7 downto 0);
 		m_axi_int_awsize_reg: out std_logic_vector(2 downto 0);
 		m_axi_int_awburst_reg: out std_logic_vector(1 downto 0);
@@ -341,8 +326,8 @@ entity interconnect is
 		m_axi_int_awready_reg: in std_logic;
 
         -- WRITE DATA CHANNEL
-		m_axi_int_wdata_reg: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
-		m_axi_int_wstrb_reg: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
+		m_axi_int_wdata_reg: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		m_axi_int_wstrb_reg: out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
 		m_axi_int_wlast_reg: out std_logic;
 
 		m_axi_int_wvalid_reg: out std_logic;
@@ -354,7 +339,7 @@ entity interconnect is
 		m_axi_int_bready_reg: out std_logic;
 
         -- READ ADDRESS CHANNEL
-		m_axi_int_araddr_reg: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+		m_axi_int_araddr_reg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		m_axi_int_arlen_reg: out std_logic_vector(7 downto 0);
 		m_axi_int_arsize_reg: out std_logic_vector(2 downto 0);
 		m_axi_int_arburst_reg: out std_logic_vector(1 downto 0);
@@ -363,7 +348,7 @@ entity interconnect is
 		m_axi_int_arready_reg: in std_logic;
 
         -- READ DATA CHANNEL
-		m_axi_int_rdata_reg: in std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
+		m_axi_int_rdata_reg: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_reg: in std_logic_vector(1 downto 0);
 		m_axi_int_rlast_reg: in std_logic;
 
@@ -375,7 +360,7 @@ entity interconnect is
 		--------------------------------------------------------------------------------
 
 		-- ADDRESS WRITE CHANNEL
-		m_axi_int_awaddr_exreg: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+		m_axi_int_awaddr_exreg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		m_axi_int_awlen_exreg: out std_logic_vector(7 downto 0);
 		m_axi_int_awsize_exreg: out std_logic_vector(2 downto 0);
 		m_axi_int_awburst_exreg: out std_logic_vector(1 downto 0);
@@ -384,8 +369,8 @@ entity interconnect is
 		m_axi_int_awready_exreg: in std_logic;
 
         -- WRITE DATA CHANNEL
-		m_axi_int_wdata_exreg: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
-		m_axi_int_wstrb_exreg: out std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
+		m_axi_int_wdata_exreg: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		m_axi_int_wstrb_exreg: out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
 		m_axi_int_wlast_exreg: out std_logic;
 
 		m_axi_int_wvalid_exreg: out std_logic;
@@ -397,7 +382,7 @@ entity interconnect is
 		m_axi_int_bready_exreg: out std_logic;
 
         -- READ ADDRESS CHANNEL
-		m_axi_int_araddr_exreg: out std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+		m_axi_int_araddr_exreg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 		m_axi_int_arlen_exreg: out std_logic_vector(7 downto 0);
 		m_axi_int_arsize_exreg: out std_logic_vector(2 downto 0);
 		m_axi_int_arburst_exreg: out std_logic_vector(1 downto 0);
@@ -406,7 +391,7 @@ entity interconnect is
 		m_axi_int_arready_exreg: in std_logic;
 
         -- READ DATA CHANNEL
-		m_axi_int_rdata_exreg: in std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
+		m_axi_int_rdata_exreg: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_exreg: in std_logic_vector(1 downto 0);
 		m_axi_int_rlast_exreg: in std_logic;
 
@@ -461,7 +446,7 @@ architecture Behavioral of interconnect is
 
 	-- AXI4 interconnect internal signals
 	-- ADDRESS WRITE CHANNEL
-	signal int_awaddr: std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+	signal int_awaddr: std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 	signal int_awlen: std_logic_vector(7 downto 0);
 	signal int_awsize: std_logic_vector(2 downto 0);
 	signal int_awburst: std_logic_vector(1 downto 0);
@@ -470,8 +455,8 @@ architecture Behavioral of interconnect is
 	signal int_awready: std_logic;
 
 	-- WRITE DATA CHANNEL
-	signal int_wdata: std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
-	signal int_wstrb: std_logic_vector(C_M_AXI_INT_DATA_WIDTH/8-1 downto 0);
+	signal int_wdata: std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+	signal int_wstrb: std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
 	signal int_wlast: std_logic;
 
 	signal int_wvalid: std_logic;
@@ -483,7 +468,7 @@ architecture Behavioral of interconnect is
 	signal int_bready: std_logic;
 
 	-- READ ADDRESS CHANNEL
-	signal int_araddr: std_logic_vector(C_M_AXI_INT_ADDR_WIDTH-1 downto 0);
+	signal int_araddr: std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 	signal int_arlen: std_logic_vector(7 downto 0);
 	signal int_arsize: std_logic_vector(2 downto 0);
 	signal int_arburst: std_logic_vector(1 downto 0);
@@ -492,7 +477,7 @@ architecture Behavioral of interconnect is
 	signal int_arready: std_logic;
 
 	-- READ DATA CHANNEL
-	signal int_rdata: std_logic_vector(C_M_AXI_INT_DATA_WIDTH-1 downto 0);
+	signal int_rdata: std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 	signal int_rresp: std_logic_vector(1 downto 0);
 	signal int_rlast: std_logic;
 
@@ -546,7 +531,7 @@ begin
 	--------------------------------------------------------------------------------
 	aw_dec: process(int_awaddr) 
 	begin
-		case(int_awaddr((C_S_AXI_INT_ADDR_WIDTH-1) - 8 downto C_S_AXI_INT_ADDR_WIDTH - 16)) is 
+		case(int_awaddr((C_M_AXI_ADDR_WIDTH-1) - 8 downto C_M_AXI_ADDR_WIDTH - 16)) is 
 			when x"00" =>
 				aw_valid_dec <= "00";
 			when x"01" =>
@@ -567,7 +552,7 @@ begin
 	--------------------------------------------------------------------------------
 	ar_dec: process(int_araddr) 
 	begin
-		case(int_araddr((C_S_AXI_INT_ADDR_WIDTH-1) - 8 downto C_S_AXI_INT_ADDR_WIDTH - 16)) is 
+		case(int_araddr((C_M_AXI_ADDR_WIDTH-1) - 8 downto C_M_AXI_ADDR_WIDTH - 16)) is 
 			when x"00" =>
 				ar_valid_dec <= "00";
 			when x"01" =>
