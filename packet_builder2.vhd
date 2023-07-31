@@ -10,16 +10,10 @@ entity packet_builder2 is
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
     port (
-        clk : in std_logic;
-        reset : in std_logic;
 
         -- INTERRUPT PORTS
         ext_irq : in std_logic_vector(1 downto 0);
         int_irq : in std_logic_vector(2 downto 0);
-
-        read_tr_start : out std_logic;
-        write_tr_start : out std_logic;
-
 
         -- FIXME Delete Users ports 
 
@@ -28,7 +22,7 @@ entity packet_builder2 is
         AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -160,7 +154,7 @@ architecture Behavioral of packet_builder2 is
     --  WRITE CHANNEL
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-    AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+    AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished

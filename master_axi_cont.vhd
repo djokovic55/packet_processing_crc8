@@ -28,7 +28,7 @@ entity master_axi_cont is
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
                                         -- to base address
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-    AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+    AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished

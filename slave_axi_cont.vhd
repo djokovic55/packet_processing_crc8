@@ -21,7 +21,7 @@ entity slave_axi_cont is
 		DATA_O : out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 		WR_O : out std_logic;
 
-		DATA_I : in std_logic_vector(C_S_AXI_DATA_WIDTH downto 0);
+		DATA_I : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 
 		-- SECTION User ports ends
 
@@ -175,7 +175,7 @@ architecture arch_imp of slave_axi_cont is
 	constant ADDR_LSB  : integer := (C_S_AXI_DATA_WIDTH/32)+ 1;
 	constant OPT_MEM_ADDR_BITS : integer := 7;
 	constant USER_NUM_MEM: integer := 1;
-	constant low : std_logic_vector (C_S_AXI_ADDR_WIDTH - 1 downto 0) := "0000000000";
+	constant low : std_logic_vector (C_S_AXI_ADDR_WIDTH - 1 downto 0) := x"00000000";
 	------------------------------------------------
 	---- Signals for user logic memory space example
 	--------------------------------------------------

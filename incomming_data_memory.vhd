@@ -130,7 +130,7 @@ architecture implementation of incomming_data_memory is
 		DATA_O : out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 		WR_O : out std_logic;
 
-		DATA_I : in std_logic_vector(C_S_AXI_DATA_WIDTH downto 0);
+		DATA_I : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 
 		-- SECTION User ports ends
 

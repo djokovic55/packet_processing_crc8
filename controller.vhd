@@ -23,7 +23,7 @@ entity controller is
         AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -155,7 +155,7 @@ architecture Behavioral of controller is
     --  WRITE CHANNEL
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-    AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+    AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -270,11 +270,11 @@ begin
   -- [x] master AXI cont added
   
 
-  state: process(clk, reset)
+  state: process(M_AXI_ACLK, M_AXI_ARESETN)
   begin
-      if reset = '1' then
+      if M_AXI_ARESETN = '1' then
           state_reg <= IDLE;
-      elsif(clk'event and clk = '1') then
+      elsif(M_AXI_ACLK'event and M_AXI_ACLK = '1') then
           state_reg <= state_next;
       end if;
   end process; 

@@ -4,9 +4,9 @@ library ieee;
 
 entity top is
   generic (
-    C_M_AXI_DATA_WIDTH : integer := 32;
-    C_M_AXI_ADDR_WIDTH : integer := 32;
-    C_M_AXI_BURST_LEN : integer := 16
+    DATA_WIDTH : integer := 32;
+    ADDR_WIDTH : integer := 32;
+    BURST_LEN : integer := 16
   );
   port (
         clk : in std_logic;
@@ -14,95 +14,96 @@ entity top is
         --------------------------------------------------------------------------------
         -- CONTROLLER
         --------------------------------------------------------------------------------
-        AXI_BASE_ADDRESS_I_CTRL  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+	AXI_BASE_ADDRESS_I_CTRL  : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- base address    
         --  WRITE CHANNEL
-        AXI_WRITE_ADDRESS_I_CTRL : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
+        AXI_WRITE_ADDRESS_I_CTRL : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I_CTRL    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I_CTRL    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I_CTRL    : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I_CTRL     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O_CTRL     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O_CTRL    : out std_logic;  -- indicates that burst has finished
         -- READ CHANNEL
 
-        AXI_READ_ADDRESS_I_CTRL : in std_logic_vector(31 downto 0);  -- address added
+        AXI_READ_ADDRESS_I_CTRL : in std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
                                                                 -- to base address
 
         AXI_READ_INIT_I_CTRL : in  std_logic;    --starts read transaction
-        AXI_READ_DATA_O_CTRL : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
+        AXI_READ_DATA_O_CTRL : out std_logic_vector(DATA_WIDTH-1 downto 0);  -- data read from                                                             -- ddr
         AXI_READ_VLD_O_CTRL  : out std_logic;    -- axi_read_data_o is valid
         AXI_READ_RDY_I_CTRL  : in std_logic;    -- axi_read_data_o is valid
         AXI_READ_LAST_O_CTRL : out std_logic;    -- axi_read_data_o is valid
         --------------------------------------------------------------------------------
         -- PB1
         --------------------------------------------------------------------------------
-        AXI_BASE_ADDRESS_I_PB1  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+        AXI_BASE_ADDRESS_I_PB0  : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- base address    
         --  WRITE CHANNEL
-        AXI_WRITE_ADDRESS_I_PB1 : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
+        AXI_WRITE_ADDRESS_I_PB0 : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
+                                            -- to base address
+        AXI_WRITE_INIT_I_PB0    : in  std_logic;  -- start write transactions    
+        AXI_WRITE_DATA_I_PB0    : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+        AXI_WRITE_VLD_I_PB0     : in  std_logic;  --  indicates that write data is valid
+        AXI_WRITE_RDY_O_PB0     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
+        AXI_WRITE_DONE_O_PB0    : out std_logic;  -- indicates that burst has finished
+        -- READ CHANNEL
+
+        AXI_READ_ADDRESS_I_PB0 : in std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
+                                                                -- to base address
+
+        AXI_READ_INIT_I_PB0 : in  std_logic;    --starts read transaction
+        AXI_READ_DATA_O_PB0 : out std_logic_vector(DATA_WIDTH-1 downto 0);  -- data read from                                                             -- ddr
+        AXI_READ_VLD_O_PB0  : out std_logic;    -- axi_read_data_o is valid
+        AXI_READ_RDY_I_PB0  : in std_logic;    -- axi_read_data_o is valid
+        AXI_READ_LAST_O_PB0 : out std_logic;    -- axi_read_data_o is valid
+
+        --------------------------------------------------------------------------------
+        -- PB2
+        --------------------------------------------------------------------------------
+        AXI_BASE_ADDRESS_I_PB1  : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- base address    
+        --  WRITE CHANNEL
+        AXI_WRITE_ADDRESS_I_PB1 : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I_PB1    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I_PB1    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I_PB1    : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I_PB1     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O_PB1     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O_PB1    : out std_logic;  -- indicates that burst has finished
         -- READ CHANNEL
 
-        AXI_READ_ADDRESS_I_PB1 : in std_logic_vector(31 downto 0);  -- address added
+        AXI_READ_ADDRESS_I_PB1 : in std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
                                                                 -- to base address
 
         AXI_READ_INIT_I_PB1 : in  std_logic;    --starts read transaction
-        AXI_READ_DATA_O_PB1 : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
+        AXI_READ_DATA_O_PB1 : out std_logic_vector(DATA_WIDTH-1 downto 0);  -- data read from                                                             -- ddr
         AXI_READ_VLD_O_PB1  : out std_logic;    -- axi_read_data_o is valid
         AXI_READ_RDY_I_PB1  : in std_logic;    -- axi_read_data_o is valid
         AXI_READ_LAST_O_PB1 : out std_logic;    -- axi_read_data_o is valid
 
         --------------------------------------------------------------------------------
-        -- PB2
-        --------------------------------------------------------------------------------
-        AXI_BASE_ADDRESS_I_PB2  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
-        --  WRITE CHANNEL
-        AXI_WRITE_ADDRESS_I_PB2 : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
-                                            -- to base address
-        AXI_WRITE_INIT_I_PB2    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I_PB2    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
-        AXI_WRITE_VLD_I_PB2     : in  std_logic;  --  indicates that write data is valid
-        AXI_WRITE_RDY_O_PB2     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
-        AXI_WRITE_DONE_O_PB2    : out std_logic;  -- indicates that burst has finished
-        -- READ CHANNEL
-
-        AXI_READ_ADDRESS_I_PB2 : in std_logic_vector(31 downto 0);  -- address added
-                                                                -- to base address
-
-        AXI_READ_INIT_I_PB2 : in  std_logic;    --starts read transaction
-        AXI_READ_DATA_O_PB2 : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
-        AXI_READ_VLD_O_PB2  : out std_logic;    -- axi_read_data_o is valid
-        AXI_READ_RDY_I_PB2  : in std_logic;    -- axi_read_data_o is valid
-        AXI_READ_LAST_O_PB2 : out std_logic;    -- axi_read_data_o is valid
-
-        --------------------------------------------------------------------------------
         -- PP
         --------------------------------------------------------------------------------
-        AXI_BASE_ADDRESS_I_PP  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+        AXI_BASE_ADDRESS_I_PP  : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- base address    
         --  WRITE CHANNEL
-        AXI_WRITE_ADDRESS_I_PP : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
+        AXI_WRITE_ADDRESS_I_PP : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I_PP    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I_PP    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I_PP    : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I_PP     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O_PP     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O_PP    : out std_logic;  -- indicates that burst has finished
         -- READ CHANNEL
 
-        AXI_READ_ADDRESS_I_PP : in std_logic_vector(31 downto 0);  -- address added
+        AXI_READ_ADDRESS_I_PP : in std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
                                                                 -- to base address
 
         AXI_READ_INIT_I_PP : in  std_logic;    --starts read transaction
-        AXI_READ_DATA_O_PP : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
+        AXI_READ_DATA_O_PP : out std_logic_vector(DATA_WIDTH-1 downto 0);  -- data read from                                                             -- ddr
         AXI_READ_VLD_O_PP  : out std_logic;    -- axi_read_data_o is valid
         AXI_READ_RDY_I_PP  : in std_logic;    -- axi_read_data_o is valid
         AXI_READ_LAST_O_PP : out std_logic    -- axi_read_data_o is valid
   );
 end entity;
+-- some test
 
 architecture rtl of top is
 
@@ -112,10 +113,9 @@ architecture rtl of top is
 		C_M_AXI_ADDR_WIDTH	: integer	:= 32
 	);
 	port (
-        --------------------------------------------------------------------------------
+
 		clk	: in std_logic;
 		reset	: in std_logic;
-
 		--------------------------------------------------------------------------------
 		-- MASTERS
 		--------------------------------------------------------------------------------
@@ -488,8 +488,6 @@ architecture rtl of top is
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
     port (
-        -- clk : in std_logic;
-        -- reset : in std_logic;
 
         -- INTERRUPT PORTS
         ext_irq : in std_logic_vector(1 downto 0);
@@ -502,7 +500,7 @@ architecture rtl of top is
         AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -620,15 +618,10 @@ architecture rtl of top is
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
     port (
-        clk : in std_logic;
-        reset : in std_logic;
 
         -- INTERRUPT PORTS
         ext_irq : in std_logic_vector(1 downto 0);
         int_irq : in std_logic_vector(2 downto 0);
-
-        read_tr_start : out std_logic;
-        write_tr_start : out std_logic;
 
 
         -- FIXME Delete Users ports 
@@ -638,7 +631,7 @@ architecture rtl of top is
         AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -756,15 +749,10 @@ architecture rtl of top is
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
     port (
-        clk : in std_logic;
-        reset : in std_logic;
 
         -- INTERRUPT PORTS
         ext_irq : in std_logic_vector(1 downto 0);
         int_irq : in std_logic_vector(2 downto 0);
-
-        read_tr_start : out std_logic;
-        write_tr_start : out std_logic;
 
 
         -- FIXME Delete Users ports 
@@ -774,7 +762,7 @@ architecture rtl of top is
         AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -892,15 +880,10 @@ architecture rtl of top is
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
     port (
-        clk : in std_logic;
-        reset : in std_logic;
 
         -- INTERRUPT PORTS
         ext_irq : in std_logic_vector(1 downto 0);
         int_irq : in std_logic_vector(2 downto 0);
-
-        read_tr_start : out std_logic;
-        write_tr_start : out std_logic;
 
 
         -- FIXME Delete Users ports 
@@ -910,7 +893,7 @@ architecture rtl of top is
         AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
                                             -- to base address
         AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH downto 0);
+        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
         AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
         AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
         AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -1463,108 +1446,108 @@ architecture rtl of top is
   --------------------------------------------------------------------------------
   -- MASTERS signals connections
   --------------------------------------------------------------------------------
-  signal s_axi_int_awaddr_ctrl : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal s_axi_int_awaddr_ctrl : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal s_axi_int_awlen_ctrl : std_logic_vector(7 downto 0);
   signal s_axi_int_awsize_ctrl : std_logic_vector(2 downto 0);
   signal s_axi_int_awburst_ctrl : std_logic_vector(1 downto 0);
   signal s_axi_int_awvalid_ctrl : std_logic;
   signal s_axi_int_awready_ctrl : std_logic;
-  signal s_axi_int_wdata_ctrl : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-  signal s_axi_int_wstrb_ctrl : std_logic_vector((C_M_AXI_DATA_WIDTH/8)-1 downto 0);
+  signal s_axi_int_wdata_ctrl : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal s_axi_int_wstrb_ctrl : std_logic_vector((DATA_WIDTH/8)-1 downto 0);
   signal s_axi_int_wlast_ctrl : std_logic;
   signal s_axi_int_wvalid_ctrl : std_logic;
   signal s_axi_int_wready_ctrl : std_logic;
   signal s_axi_int_bresp_ctrl : std_logic_vector(1 downto 0);
   signal s_axi_int_bvalid_ctrl : std_logic;
   signal s_axi_int_bready_ctrl : std_logic;
-  signal s_axi_int_araddr_ctrl : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal s_axi_int_araddr_ctrl : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal s_axi_int_arlen_ctrl : std_logic_vector(7 downto 0);
   signal s_axi_int_arsize_ctrl : std_logic_vector(2 downto 0);
   signal s_axi_int_arburst_ctrl : std_logic_vector(1 downto 0);
   signal s_axi_int_arvalid_ctrl : std_logic;
   signal s_axi_int_arready_ctrl : std_logic;
-  signal s_axi_int_rdata_ctrl : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal s_axi_int_rdata_ctrl : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal s_axi_int_rresp_ctrl : std_logic_vector(1 downto 0);
   signal s_axi_int_rlast_ctrl : std_logic;
   signal s_axi_int_rvalid_ctrl : std_logic;
   signal s_axi_int_rready_ctrl : std_logic;
   --------------------------------------------------------------------------------
 
-  signal s_axi_int_awaddr_pb0 : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal s_axi_int_awaddr_pb0 : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal s_axi_int_awlen_pb0 : std_logic_vector(7 downto 0);
   signal s_axi_int_awsize_pb0 : std_logic_vector(2 downto 0);
   signal s_axi_int_awburst_pb0 : std_logic_vector(1 downto 0);
   signal s_axi_int_awvalid_pb0 : std_logic;
   signal s_axi_int_awready_pb0 : std_logic;
-  signal s_axi_int_wdata_pb0 : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-  signal s_axi_int_wstrb_pb0 : std_logic_vector((C_M_AXI_DATA_WIDTH/8)-1 downto 0);
+  signal s_axi_int_wdata_pb0 : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal s_axi_int_wstrb_pb0 : std_logic_vector((DATA_WIDTH/8)-1 downto 0);
   signal s_axi_int_wlast_pb0 : std_logic;
   signal s_axi_int_wvalid_pb0 : std_logic;
   signal s_axi_int_wready_pb0 : std_logic;
   signal s_axi_int_bresp_pb0 : std_logic_vector(1 downto 0);
   signal s_axi_int_bvalid_pb0 : std_logic;
   signal s_axi_int_bready_pb0 : std_logic;
-  signal s_axi_int_araddr_pb0 : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal s_axi_int_araddr_pb0 : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal s_axi_int_arlen_pb0 : std_logic_vector(7 downto 0);
   signal s_axi_int_arsize_pb0 : std_logic_vector(2 downto 0);
   signal s_axi_int_arburst_pb0 : std_logic_vector(1 downto 0);
   signal s_axi_int_arvalid_pb0 : std_logic;
   signal s_axi_int_arready_pb0 : std_logic;
-  signal s_axi_int_rdata_pb0 : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal s_axi_int_rdata_pb0 : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal s_axi_int_rresp_pb0 : std_logic_vector(1 downto 0);
   signal s_axi_int_rlast_pb0 : std_logic;
   signal s_axi_int_rvalid_pb0 : std_logic;
   signal s_axi_int_rready_pb0 : std_logic;
   --------------------------------------------------------------------------------
   
-  signal s_axi_int_awaddr_pb1 : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal s_axi_int_awaddr_pb1 : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal s_axi_int_awlen_pb1 : std_logic_vector(7 downto 0);
   signal s_axi_int_awsize_pb1 : std_logic_vector(2 downto 0);
   signal s_axi_int_awburst_pb1 : std_logic_vector(1 downto 0);
   signal s_axi_int_awvalid_pb1 : std_logic;
   signal s_axi_int_awready_pb1 : std_logic;
-  signal s_axi_int_wdata_pb1 : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-  signal s_axi_int_wstrb_pb1 : std_logic_vector((C_M_AXI_DATA_WIDTH/8)-1 downto 0);
+  signal s_axi_int_wdata_pb1 : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal s_axi_int_wstrb_pb1 : std_logic_vector((DATA_WIDTH/8)-1 downto 0);
   signal s_axi_int_wlast_pb1 : std_logic;
   signal s_axi_int_wvalid_pb1 : std_logic;
   signal s_axi_int_wready_pb1 : std_logic;
   signal s_axi_int_bresp_pb1 : std_logic_vector(1 downto 0);
   signal s_axi_int_bvalid_pb1 : std_logic;
   signal s_axi_int_bready_pb1 : std_logic;
-  signal s_axi_int_araddr_pb1 : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal s_axi_int_araddr_pb1 : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal s_axi_int_arlen_pb1 : std_logic_vector(7 downto 0);
   signal s_axi_int_arsize_pb1 : std_logic_vector(2 downto 0);
   signal s_axi_int_arburst_pb1 : std_logic_vector(1 downto 0);
   signal s_axi_int_arvalid_pb1 : std_logic;
   signal s_axi_int_arready_pb1 : std_logic;
-  signal s_axi_int_rdata_pb1 : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal s_axi_int_rdata_pb1 : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal s_axi_int_rresp_pb1 : std_logic_vector(1 downto 0);
   signal s_axi_int_rlast_pb1 : std_logic;
   signal s_axi_int_rvalid_pb1 : std_logic;
   signal s_axi_int_rready_pb1 : std_logic;
   --------------------------------------------------------------------------------
 
-  signal s_axi_int_awaddr_pp : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal s_axi_int_awaddr_pp : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal s_axi_int_awlen_pp : std_logic_vector(7 downto 0);
   signal s_axi_int_awsize_pp : std_logic_vector(2 downto 0);
   signal s_axi_int_awburst_pp : std_logic_vector(1 downto 0);
   signal s_axi_int_awvalid_pp : std_logic;
   signal s_axi_int_awready_pp : std_logic;
-  signal s_axi_int_wdata_pp : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-  signal s_axi_int_wstrb_pp : std_logic_vector((C_M_AXI_DATA_WIDTH/8)-1 downto 0);
+  signal s_axi_int_wdata_pp : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal s_axi_int_wstrb_pp : std_logic_vector((DATA_WIDTH/8)-1 downto 0);
   signal s_axi_int_wlast_pp : std_logic;
   signal s_axi_int_wvalid_pp : std_logic;
   signal s_axi_int_wready_pp : std_logic;
   signal s_axi_int_bresp_pp : std_logic_vector(1 downto 0);
   signal s_axi_int_bvalid_pp : std_logic;
   signal s_axi_int_bready_pp : std_logic;
-  signal s_axi_int_araddr_pp : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal s_axi_int_araddr_pp : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal s_axi_int_arlen_pp : std_logic_vector(7 downto 0);
   signal s_axi_int_arsize_pp : std_logic_vector(2 downto 0);
   signal s_axi_int_arburst_pp : std_logic_vector(1 downto 0);
   signal s_axi_int_arvalid_pp : std_logic;
   signal s_axi_int_arready_pp : std_logic;
-  signal s_axi_int_rdata_pp : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal s_axi_int_rdata_pp : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal s_axi_int_rresp_pp : std_logic_vector(1 downto 0);
   signal s_axi_int_rlast_pp : std_logic;
   signal s_axi_int_rvalid_pp : std_logic;
@@ -1574,108 +1557,108 @@ architecture rtl of top is
   --------------------------------------------------------------------------------
   -- SLAVES
   --------------------------------------------------------------------------------
-  signal m_axi_int_awaddr_inmem : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal m_axi_int_awaddr_inmem : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal m_axi_int_awlen_inmem : std_logic_vector(7 downto 0);
   signal m_axi_int_awsize_inmem : std_logic_vector(2 downto 0);
   signal m_axi_int_awburst_inmem : std_logic_vector(1 downto 0);
   signal m_axi_int_awvalid_inmem : std_logic;
   signal m_axi_int_awready_inmem : std_logic;
-  signal m_axi_int_wdata_inmem : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-  signal m_axi_int_wstrb_inmem : std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
+  signal m_axi_int_wdata_inmem : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal m_axi_int_wstrb_inmem : std_logic_vector(DATA_WIDTH/8-1 downto 0);
   signal m_axi_int_wlast_inmem : std_logic;
   signal m_axi_int_wvalid_inmem : std_logic;
   signal m_axi_int_wready_inmem : std_logic;
   signal m_axi_int_bresp_inmem : std_logic_vector(1 downto 0);
   signal m_axi_int_bvalid_inmem : std_logic;
   signal m_axi_int_bready_inmem : std_logic;
-  signal m_axi_int_araddr_inmem : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal m_axi_int_araddr_inmem : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal m_axi_int_arlen_inmem : std_logic_vector(7 downto 0);
   signal m_axi_int_arsize_inmem : std_logic_vector(2 downto 0);
   signal m_axi_int_arburst_inmem : std_logic_vector(1 downto 0);
   signal m_axi_int_arvalid_inmem : std_logic;
   signal m_axi_int_arready_inmem : std_logic;
-  signal m_axi_int_rdata_inmem : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal m_axi_int_rdata_inmem : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal m_axi_int_rresp_inmem : std_logic_vector(1 downto 0);
   signal m_axi_int_rlast_inmem : std_logic;
   signal m_axi_int_rvalid_inmem : std_logic;
   signal m_axi_int_rready_inmem : std_logic;
   --------------------------------------------------------------------------------
 
-  signal m_axi_int_awaddr_outmem : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal m_axi_int_awaddr_outmem : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal m_axi_int_awlen_outmem : std_logic_vector(7 downto 0);
   signal m_axi_int_awsize_outmem : std_logic_vector(2 downto 0);
   signal m_axi_int_awburst_outmem : std_logic_vector(1 downto 0);
   signal m_axi_int_awvalid_outmem : std_logic;
   signal m_axi_int_awready_outmem : std_logic;
-  signal m_axi_int_wdata_outmem : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-  signal m_axi_int_wstrb_outmem : std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
+  signal m_axi_int_wdata_outmem : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal m_axi_int_wstrb_outmem : std_logic_vector(DATA_WIDTH/8-1 downto 0);
   signal m_axi_int_wlast_outmem : std_logic;
   signal m_axi_int_wvalid_outmem : std_logic;
   signal m_axi_int_wready_outmem : std_logic;
   signal m_axi_int_bresp_outmem : std_logic_vector(1 downto 0);
   signal m_axi_int_bvalid_outmem : std_logic;
   signal m_axi_int_bready_outmem : std_logic;
-  signal m_axi_int_araddr_outmem : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal m_axi_int_araddr_outmem : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal m_axi_int_arlen_outmem : std_logic_vector(7 downto 0);
   signal m_axi_int_arsize_outmem : std_logic_vector(2 downto 0);
   signal m_axi_int_arburst_outmem : std_logic_vector(1 downto 0);
   signal m_axi_int_arvalid_outmem : std_logic;
   signal m_axi_int_arready_outmem : std_logic;
-  signal m_axi_int_rdata_outmem : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal m_axi_int_rdata_outmem : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal m_axi_int_rresp_outmem : std_logic_vector(1 downto 0);
   signal m_axi_int_rlast_outmem : std_logic;
   signal m_axi_int_rvalid_outmem : std_logic;
   signal m_axi_int_rready_outmem : std_logic;
   --------------------------------------------------------------------------------
 
-  signal m_axi_int_awaddr_reg : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal m_axi_int_awaddr_reg : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal m_axi_int_awlen_reg : std_logic_vector(7 downto 0);
   signal m_axi_int_awsize_reg : std_logic_vector(2 downto 0);
   signal m_axi_int_awburst_reg : std_logic_vector(1 downto 0);
   signal m_axi_int_awvalid_reg : std_logic;
   signal m_axi_int_awready_reg : std_logic;
-  signal m_axi_int_wdata_reg : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-  signal m_axi_int_wstrb_reg : std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
+  signal m_axi_int_wdata_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal m_axi_int_wstrb_reg : std_logic_vector(DATA_WIDTH/8-1 downto 0);
   signal m_axi_int_wlast_reg : std_logic;
   signal m_axi_int_wvalid_reg : std_logic;
   signal m_axi_int_wready_reg : std_logic;
   signal m_axi_int_bresp_reg : std_logic_vector(1 downto 0);
   signal m_axi_int_bvalid_reg : std_logic;
   signal m_axi_int_bready_reg : std_logic;
-  signal m_axi_int_araddr_reg : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal m_axi_int_araddr_reg : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal m_axi_int_arlen_reg : std_logic_vector(7 downto 0);
   signal m_axi_int_arsize_reg : std_logic_vector(2 downto 0);
   signal m_axi_int_arburst_reg : std_logic_vector(1 downto 0);
   signal m_axi_int_arvalid_reg : std_logic;
   signal m_axi_int_arready_reg : std_logic;
-  signal m_axi_int_rdata_reg : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal m_axi_int_rdata_reg : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal m_axi_int_rresp_reg : std_logic_vector(1 downto 0);
   signal m_axi_int_rlast_reg : std_logic;
   signal m_axi_int_rvalid_reg : std_logic;
   signal m_axi_int_rready_reg : std_logic;
   --------------------------------------------------------------------------------
 
-  signal m_axi_int_awaddr_exreg : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal m_axi_int_awaddr_exreg : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal m_axi_int_awlen_exreg : std_logic_vector(7 downto 0);
   signal m_axi_int_awsize_exreg : std_logic_vector(2 downto 0);
   signal m_axi_int_awburst_exreg : std_logic_vector(1 downto 0);
   signal m_axi_int_awvalid_exreg : std_logic;
   signal m_axi_int_awready_exreg : std_logic;
-  signal m_axi_int_wdata_exreg : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-  signal m_axi_int_wstrb_exreg : std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
+  signal m_axi_int_wdata_exreg : std_logic_vector(DATA_WIDTH-1 downto 0);
+  signal m_axi_int_wstrb_exreg : std_logic_vector(DATA_WIDTH/8-1 downto 0);
   signal m_axi_int_wlast_exreg : std_logic;
   signal m_axi_int_wvalid_exreg : std_logic;
   signal m_axi_int_wready_exreg : std_logic;
   signal m_axi_int_bresp_exreg : std_logic_vector(1 downto 0);
   signal m_axi_int_bvalid_exreg : std_logic;
   signal m_axi_int_bready_exreg : std_logic;
-  signal m_axi_int_araddr_exreg : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+  signal m_axi_int_araddr_exreg : std_logic_vector(ADDR_WIDTH-1 downto 0);
   signal m_axi_int_arlen_exreg : std_logic_vector(7 downto 0);
   signal m_axi_int_arsize_exreg : std_logic_vector(2 downto 0);
   signal m_axi_int_arburst_exreg : std_logic_vector(1 downto 0);
   signal m_axi_int_arvalid_exreg : std_logic;
   signal m_axi_int_arready_exreg : std_logic;
-  signal m_axi_int_rdata_exreg : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal m_axi_int_rdata_exreg : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal m_axi_int_rresp_exreg : std_logic_vector(1 downto 0);
   signal m_axi_int_rlast_exreg : std_logic;
   signal m_axi_int_rvalid_exreg : std_logic;
@@ -1686,8 +1669,8 @@ begin
 
   intcon: interconnect
   generic map(
-    C_M_AXI_ADDR_WIDTH => C_M_AXI_ADDR_WIDTH,
-    C_M_AXI_DATA_WIDTH => C_M_AXI_DATA_WIDTH
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
+    C_M_AXI_DATA_WIDTH => DATA_WIDTH
 
   )
   port map(
@@ -1918,5 +1901,387 @@ begin
 
   );
 
+  main_controller: controller
+  generic map (
 
+    C_M_AXI_DATA_WIDTH => DATA_WIDTH,
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
+    C_M_AXI_BURST_LEN => BURST_LEN
+  ) 
+  port map(
+        ext_irq => (others => '0'),
+        int_irq => (others => '0'),
+
+        -- FIXME Delete Users ports 
+
+        AXI_BASE_ADDRESS_I => AXI_BASE_ADDRESS_I_CTRL,  
+        AXI_WRITE_ADDRESS_I => AXI_WRITE_ADDRESS_I_CTRL,
+        AXI_WRITE_INIT_I => AXI_WRITE_INIT_I_CTRL,    
+        AXI_WRITE_DATA_I => AXI_WRITE_DATA_I_CTRL,
+        AXI_WRITE_VLD_I => AXI_WRITE_VLD_I_CTRL,
+        AXI_WRITE_RDY_O => AXI_WRITE_RDY_O_CTRL,
+        AXI_WRITE_DONE_O => AXI_WRITE_DONE_O_CTRL,
+        AXI_READ_ADDRESS_I => AXI_READ_ADDRESS_I_CTRL,
+        AXI_READ_INIT_I => AXI_READ_INIT_I_CTRL,
+        AXI_READ_DATA_O => AXI_READ_DATA_O_CTRL,
+        AXI_READ_VLD_O => AXI_READ_VLD_O_CTRL,
+        AXI_READ_RDY_I => AXI_READ_RDY_I_CTRL,
+        AXI_READ_LAST_O => AXI_READ_LAST_O_CTRL,
+
+        M_AXI_ACLK => clk,
+        M_AXI_ARESETN => reset,
+
+        M_AXI_AWADDR => s_axi_int_awaddr_ctrl,
+        M_AXI_AWLEN => s_axi_int_awlen_ctrl,
+        M_AXI_AWSIZE => s_axi_int_awsize_ctrl,
+        M_AXI_AWBURST => s_axi_int_awburst_ctrl,
+        M_AXI_AWVALID => s_axi_int_awvalid_ctrl,
+        M_AXI_AWREADY => s_axi_int_awready_ctrl,
+        M_AXI_WDATA => s_axi_int_wdata_ctrl,
+        M_AXI_WSTRB => s_axi_int_wstrb_ctrl,
+        M_AXI_WLAST => s_axi_int_wlast_ctrl,
+        M_AXI_WVALID => s_axi_int_wvalid_ctrl,
+        M_AXI_WREADY => s_axi_int_wready_ctrl,
+        M_AXI_BRESP => s_axi_int_bresp_ctrl,
+        M_AXI_BVALID => s_axi_int_bvalid_ctrl,
+        M_AXI_BREADY => s_axi_int_bready_ctrl,
+        M_AXI_ARADDR => s_axi_int_araddr_ctrl,
+        M_AXI_ARLEN => s_axi_int_arlen_ctrl,
+        M_AXI_ARSIZE => s_axi_int_arsize_ctrl,
+        M_AXI_ARBURST => s_axi_int_arburst_ctrl,
+        M_AXI_ARVALID => s_axi_int_arvalid_ctrl,
+        M_AXI_ARREADY => s_axi_int_arready_ctrl,
+        M_AXI_RDATA => s_axi_int_rdata_ctrl,
+        M_AXI_RRESP => s_axi_int_rresp_ctrl,
+        M_AXI_RLAST => s_axi_int_rlast_ctrl,
+        M_AXI_RVALID => s_axi_int_rvalid_ctrl,
+        M_AXI_RREADY => s_axi_int_rready_ctrl
+
+  );
+
+  builder1: packet_builder1
+  generic map (
+
+    C_M_AXI_DATA_WIDTH => DATA_WIDTH,
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
+    C_M_AXI_BURST_LEN => BURST_LEN
+  ) 
+  port map(
+        ext_irq => (others => '0'),
+        int_irq => (others => '0'),
+
+        -- FIXME Delete Users ports 
+
+        AXI_BASE_ADDRESS_I => AXI_BASE_ADDRESS_I_PB0,  
+        AXI_WRITE_ADDRESS_I => AXI_WRITE_ADDRESS_I_PB0,
+        AXI_WRITE_INIT_I => AXI_WRITE_INIT_I_PB0,    
+        AXI_WRITE_DATA_I => AXI_WRITE_DATA_I_PB0,
+        AXI_WRITE_VLD_I => AXI_WRITE_VLD_I_PB0,
+        AXI_WRITE_RDY_O => AXI_WRITE_RDY_O_PB0,
+        AXI_WRITE_DONE_O => AXI_WRITE_DONE_O_PB0,
+        AXI_READ_ADDRESS_I => AXI_READ_ADDRESS_I_PB0,
+        AXI_READ_INIT_I => AXI_READ_INIT_I_PB0,
+        AXI_READ_DATA_O => AXI_READ_DATA_O_PB0,
+        AXI_READ_VLD_O => AXI_READ_VLD_O_PB0,
+        AXI_READ_RDY_I => AXI_READ_RDY_I_PB0,
+        AXI_READ_LAST_O => AXI_READ_LAST_O_PB0,
+
+        M_AXI_ACLK => clk,
+        M_AXI_ARESETN => reset,
+
+        M_AXI_AWADDR => s_axi_int_awaddr_pb0,
+        M_AXI_AWLEN => s_axi_int_awlen_pb0,
+        M_AXI_AWSIZE => s_axi_int_awsize_pb0,
+        M_AXI_AWBURST => s_axi_int_awburst_pb0,
+        M_AXI_AWVALID => s_axi_int_awvalid_pb0,
+        M_AXI_AWREADY => s_axi_int_awready_pb0,
+        M_AXI_WDATA => s_axi_int_wdata_pb0,
+        M_AXI_WSTRB => s_axi_int_wstrb_pb0,
+        M_AXI_WLAST => s_axi_int_wlast_pb0,
+        M_AXI_WVALID => s_axi_int_wvalid_pb0,
+        M_AXI_WREADY => s_axi_int_wready_pb0,
+        M_AXI_BRESP => s_axi_int_bresp_pb0,
+        M_AXI_BVALID => s_axi_int_bvalid_pb0,
+        M_AXI_BREADY => s_axi_int_bready_pb0,
+        M_AXI_ARADDR => s_axi_int_araddr_pb0,
+        M_AXI_ARLEN => s_axi_int_arlen_pb0,
+        M_AXI_ARSIZE => s_axi_int_arsize_pb0,
+        M_AXI_ARBURST => s_axi_int_arburst_pb0,
+        M_AXI_ARVALID => s_axi_int_arvalid_pb0,
+        M_AXI_ARREADY => s_axi_int_arready_pb0,
+        M_AXI_RDATA => s_axi_int_rdata_pb0,
+        M_AXI_RRESP => s_axi_int_rresp_pb0,
+        M_AXI_RLAST => s_axi_int_rlast_pb0,
+        M_AXI_RVALID => s_axi_int_rvalid_pb0,
+        M_AXI_RREADY => s_axi_int_rready_pb0
+
+  );
+
+  builder2: packet_builder2
+  generic map (
+
+    C_M_AXI_DATA_WIDTH => DATA_WIDTH,
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
+    C_M_AXI_BURST_LEN => BURST_LEN
+  ) 
+  port map(
+        ext_irq => (others => '0'),
+        int_irq => (others => '0'),
+
+        -- FIXME Delete Users ports 
+
+        AXI_BASE_ADDRESS_I => AXI_BASE_ADDRESS_I_PB1,  
+        AXI_WRITE_ADDRESS_I => AXI_WRITE_ADDRESS_I_PB1,
+        AXI_WRITE_INIT_I => AXI_WRITE_INIT_I_PB1,    
+        AXI_WRITE_DATA_I => AXI_WRITE_DATA_I_PB1,
+        AXI_WRITE_VLD_I => AXI_WRITE_VLD_I_PB1,
+        AXI_WRITE_RDY_O => AXI_WRITE_RDY_O_PB1,
+        AXI_WRITE_DONE_O => AXI_WRITE_DONE_O_PB1,
+        AXI_READ_ADDRESS_I => AXI_READ_ADDRESS_I_PB1,
+        AXI_READ_INIT_I => AXI_READ_INIT_I_PB1,
+        AXI_READ_DATA_O => AXI_READ_DATA_O_PB1,
+        AXI_READ_VLD_O => AXI_READ_VLD_O_PB1,
+        AXI_READ_RDY_I => AXI_READ_RDY_I_PB1,
+        AXI_READ_LAST_O => AXI_READ_LAST_O_PB1,
+
+        M_AXI_ACLK => clk,
+        M_AXI_ARESETN => reset,
+
+        M_AXI_AWADDR => s_axi_int_awaddr_pb1,
+        M_AXI_AWLEN => s_axi_int_awlen_pb1,
+        M_AXI_AWSIZE => s_axi_int_awsize_pb1,
+        M_AXI_AWBURST => s_axi_int_awburst_pb1,
+        M_AXI_AWVALID => s_axi_int_awvalid_pb1,
+        M_AXI_AWREADY => s_axi_int_awready_pb1,
+        M_AXI_WDATA => s_axi_int_wdata_pb1,
+        M_AXI_WSTRB => s_axi_int_wstrb_pb1,
+        M_AXI_WLAST => s_axi_int_wlast_pb1,
+        M_AXI_WVALID => s_axi_int_wvalid_pb1,
+        M_AXI_WREADY => s_axi_int_wready_pb1,
+        M_AXI_BRESP => s_axi_int_bresp_pb1,
+        M_AXI_BVALID => s_axi_int_bvalid_pb1,
+        M_AXI_BREADY => s_axi_int_bready_pb1,
+        M_AXI_ARADDR => s_axi_int_araddr_pb1,
+        M_AXI_ARLEN => s_axi_int_arlen_pb1,
+        M_AXI_ARSIZE => s_axi_int_arsize_pb1,
+        M_AXI_ARBURST => s_axi_int_arburst_pb1,
+        M_AXI_ARVALID => s_axi_int_arvalid_pb1,
+        M_AXI_ARREADY => s_axi_int_arready_pb1,
+        M_AXI_RDATA => s_axi_int_rdata_pb1,
+        M_AXI_RRESP => s_axi_int_rresp_pb1,
+        M_AXI_RLAST => s_axi_int_rlast_pb1,
+        M_AXI_RVALID => s_axi_int_rvalid_pb1,
+        M_AXI_RREADY => s_axi_int_rready_pb1
+
+  );
+
+  parser: packet_parser
+  generic map (
+
+    C_M_AXI_DATA_WIDTH => DATA_WIDTH,
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
+    C_M_AXI_BURST_LEN => BURST_LEN
+  ) 
+  port map(
+        ext_irq => (others => '0'),
+        int_irq => (others => '0'),
+
+        -- FIXME Delete Users ports 
+
+        AXI_BASE_ADDRESS_I => AXI_BASE_ADDRESS_I_PP,  
+        AXI_WRITE_ADDRESS_I => AXI_WRITE_ADDRESS_I_PP,
+        AXI_WRITE_INIT_I => AXI_WRITE_INIT_I_PP,    
+        AXI_WRITE_DATA_I => AXI_WRITE_DATA_I_PP,
+        AXI_WRITE_VLD_I => AXI_WRITE_VLD_I_PP,
+        AXI_WRITE_RDY_O => AXI_WRITE_RDY_O_PP,
+        AXI_WRITE_DONE_O => AXI_WRITE_DONE_O_PP,
+        AXI_READ_ADDRESS_I => AXI_READ_ADDRESS_I_PP,
+        AXI_READ_INIT_I => AXI_READ_INIT_I_PP,
+        AXI_READ_DATA_O => AXI_READ_DATA_O_PP,
+        AXI_READ_VLD_O => AXI_READ_VLD_O_PP,
+        AXI_READ_RDY_I => AXI_READ_RDY_I_PP,
+        AXI_READ_LAST_O => AXI_READ_LAST_O_PP,
+
+        M_AXI_ACLK => clk,
+        M_AXI_ARESETN => reset,
+
+        M_AXI_AWADDR => s_axi_int_awaddr_pp,
+        M_AXI_AWLEN => s_axi_int_awlen_pp,
+        M_AXI_AWSIZE => s_axi_int_awsize_pp,
+        M_AXI_AWBURST => s_axi_int_awburst_pp,
+        M_AXI_AWVALID => s_axi_int_awvalid_pp,
+        M_AXI_AWREADY => s_axi_int_awready_pp,
+        M_AXI_WDATA => s_axi_int_wdata_pp,
+        M_AXI_WSTRB => s_axi_int_wstrb_pp,
+        M_AXI_WLAST => s_axi_int_wlast_pp,
+        M_AXI_WVALID => s_axi_int_wvalid_pp,
+        M_AXI_WREADY => s_axi_int_wready_pp,
+        M_AXI_BRESP => s_axi_int_bresp_pp,
+        M_AXI_BVALID => s_axi_int_bvalid_pp,
+        M_AXI_BREADY => s_axi_int_bready_pp,
+        M_AXI_ARADDR => s_axi_int_araddr_pp,
+        M_AXI_ARLEN => s_axi_int_arlen_pp,
+        M_AXI_ARSIZE => s_axi_int_arsize_pp,
+        M_AXI_ARBURST => s_axi_int_arburst_pp,
+        M_AXI_ARVALID => s_axi_int_arvalid_pp,
+        M_AXI_ARREADY => s_axi_int_arready_pp,
+        M_AXI_RDATA => s_axi_int_rdata_pp,
+        M_AXI_RRESP => s_axi_int_rresp_pp,
+        M_AXI_RLAST => s_axi_int_rlast_pp,
+        M_AXI_RVALID => s_axi_int_rvalid_pp,
+        M_AXI_RREADY => s_axi_int_rready_pp
+
+  );
+
+  inmem: incomming_data_memory
+  generic map(
+    C_S_AXI_DATA_WIDTH => DATA_WIDTH,
+    C_S_AXI_ADDR_WIDTH => ADDR_WIDTH
+  ) 
+
+  port map(
+		S_AXI_ACLK => clk,
+		S_AXI_ARESETN => reset,
+
+		S_AXI_AWADDR => m_axi_int_awaddr_inmem,
+		S_AXI_AWLEN => m_axi_int_awlen_inmem,
+		S_AXI_AWSIZE => m_axi_int_awsize_inmem,
+		S_AXI_AWBURST => m_axi_int_awburst_inmem,
+		S_AXI_AWVALID => m_axi_int_awvalid_inmem,
+		S_AXI_AWREADY => m_axi_int_awready_inmem,
+		S_AXI_WDATA => m_axi_int_wdata_inmem,
+		S_AXI_WSTRB => m_axi_int_wstrb_inmem,
+		S_AXI_WLAST => m_axi_int_wlast_inmem,
+		S_AXI_WVALID => m_axi_int_wvalid_inmem,
+		S_AXI_WREADY => m_axi_int_wready_inmem,
+		S_AXI_BRESP => m_axi_int_bresp_inmem,
+		S_AXI_BVALID => m_axi_int_bvalid_inmem,
+		S_AXI_BREADY => m_axi_int_bready_inmem,
+		S_AXI_ARADDR => m_axi_int_araddr_inmem,
+		S_AXI_ARLEN => m_axi_int_arlen_inmem,
+		S_AXI_ARSIZE => m_axi_int_arsize_inmem,
+		S_AXI_ARBURST => m_axi_int_arburst_inmem,
+		S_AXI_ARVALID => m_axi_int_arvalid_inmem,
+		S_AXI_ARREADY => m_axi_int_arready_inmem,
+		S_AXI_RDATA => m_axi_int_rdata_inmem,
+		S_AXI_RRESP => m_axi_int_rresp_inmem,
+		S_AXI_RLAST => m_axi_int_rlast_inmem,
+		S_AXI_RVALID => m_axi_int_rvalid_inmem,
+		S_AXI_RREADY => m_axi_int_rready_inmem
+
+  );
+
+  outmem: outgoing_data_memory
+  generic map(
+    C_S_AXI_DATA_WIDTH => DATA_WIDTH,
+    C_S_AXI_ADDR_WIDTH => ADDR_WIDTH
+  ) 
+
+  port map(
+		S_AXI_ACLK => clk,
+		S_AXI_ARESETN => reset,
+
+		S_AXI_AWADDR => m_axi_int_awaddr_outmem,
+		S_AXI_AWLEN => m_axi_int_awlen_outmem,
+		S_AXI_AWSIZE => m_axi_int_awsize_outmem,
+		S_AXI_AWBURST => m_axi_int_awburst_outmem,
+		S_AXI_AWVALID => m_axi_int_awvalid_outmem,
+		S_AXI_AWREADY => m_axi_int_awready_outmem,
+		S_AXI_WDATA => m_axi_int_wdata_outmem,
+		S_AXI_WSTRB => m_axi_int_wstrb_outmem,
+		S_AXI_WLAST => m_axi_int_wlast_outmem,
+		S_AXI_WVALID => m_axi_int_wvalid_outmem,
+		S_AXI_WREADY => m_axi_int_wready_outmem,
+		S_AXI_BRESP => m_axi_int_bresp_outmem,
+		S_AXI_BVALID => m_axi_int_bvalid_outmem,
+		S_AXI_BREADY => m_axi_int_bready_outmem,
+		S_AXI_ARADDR => m_axi_int_araddr_outmem,
+		S_AXI_ARLEN => m_axi_int_arlen_outmem,
+		S_AXI_ARSIZE => m_axi_int_arsize_outmem,
+		S_AXI_ARBURST => m_axi_int_arburst_outmem,
+		S_AXI_ARVALID => m_axi_int_arvalid_outmem,
+		S_AXI_ARREADY => m_axi_int_arready_outmem,
+		S_AXI_RDATA => m_axi_int_rdata_outmem,
+		S_AXI_RRESP => m_axi_int_rresp_outmem,
+		S_AXI_RLAST => m_axi_int_rlast_outmem,
+		S_AXI_RVALID => m_axi_int_rvalid_outmem,
+		S_AXI_RREADY => m_axi_int_rready_outmem
+
+  );
+
+  system_regs: regs
+  generic map(
+    C_S_AXI_DATA_WIDTH => DATA_WIDTH,
+    C_S_AXI_ADDR_WIDTH => ADDR_WIDTH
+  ) 
+
+  port map(
+		S_AXI_ACLK => clk,
+		S_AXI_ARESETN => reset,
+
+		S_AXI_AWADDR => m_axi_int_awaddr_reg,
+		S_AXI_AWLEN => m_axi_int_awlen_reg,
+		S_AXI_AWSIZE => m_axi_int_awsize_reg,
+		S_AXI_AWBURST => m_axi_int_awburst_reg,
+		S_AXI_AWVALID => m_axi_int_awvalid_reg,
+		S_AXI_AWREADY => m_axi_int_awready_reg,
+		S_AXI_WDATA => m_axi_int_wdata_reg,
+		S_AXI_WSTRB => m_axi_int_wstrb_reg,
+		S_AXI_WLAST => m_axi_int_wlast_reg,
+		S_AXI_WVALID => m_axi_int_wvalid_reg,
+		S_AXI_WREADY => m_axi_int_wready_reg,
+		S_AXI_BRESP => m_axi_int_bresp_reg,
+		S_AXI_BVALID => m_axi_int_bvalid_reg,
+		S_AXI_BREADY => m_axi_int_bready_reg,
+		S_AXI_ARADDR => m_axi_int_araddr_reg,
+		S_AXI_ARLEN => m_axi_int_arlen_reg,
+		S_AXI_ARSIZE => m_axi_int_arsize_reg,
+		S_AXI_ARBURST => m_axi_int_arburst_reg,
+		S_AXI_ARVALID => m_axi_int_arvalid_reg,
+		S_AXI_ARREADY => m_axi_int_arready_reg,
+		S_AXI_RDATA => m_axi_int_rdata_reg,
+		S_AXI_RRESP => m_axi_int_rresp_reg,
+		S_AXI_RLAST => m_axi_int_rlast_reg,
+		S_AXI_RVALID => m_axi_int_rvalid_reg,
+		S_AXI_RREADY => m_axi_int_rready_reg
+
+  );
+
+  exreg: external_regs
+  generic map(
+    C_S_AXI_DATA_WIDTH => DATA_WIDTH,
+    C_S_AXI_ADDR_WIDTH => ADDR_WIDTH
+  ) 
+
+  port map(
+		S_AXI_ACLK => clk,
+		S_AXI_ARESETN => reset,
+
+		S_AXI_AWADDR => m_axi_int_awaddr_exreg,
+		S_AXI_AWLEN => m_axi_int_awlen_exreg,
+		S_AXI_AWSIZE => m_axi_int_awsize_exreg,
+		S_AXI_AWBURST => m_axi_int_awburst_exreg,
+		S_AXI_AWVALID => m_axi_int_awvalid_exreg,
+		S_AXI_AWREADY => m_axi_int_awready_exreg,
+		S_AXI_WDATA => m_axi_int_wdata_exreg,
+		S_AXI_WSTRB => m_axi_int_wstrb_exreg,
+		S_AXI_WLAST => m_axi_int_wlast_exreg,
+		S_AXI_WVALID => m_axi_int_wvalid_exreg,
+		S_AXI_WREADY => m_axi_int_wready_exreg,
+		S_AXI_BRESP => m_axi_int_bresp_exreg,
+		S_AXI_BVALID => m_axi_int_bvalid_exreg,
+		S_AXI_BREADY => m_axi_int_bready_exreg,
+		S_AXI_ARADDR => m_axi_int_araddr_exreg,
+		S_AXI_ARLEN => m_axi_int_arlen_exreg,
+		S_AXI_ARSIZE => m_axi_int_arsize_exreg,
+		S_AXI_ARBURST => m_axi_int_arburst_exreg,
+		S_AXI_ARVALID => m_axi_int_arvalid_exreg,
+		S_AXI_ARREADY => m_axi_int_arready_exreg,
+		S_AXI_RDATA => m_axi_int_rdata_exreg,
+		S_AXI_RRESP => m_axi_int_rresp_exreg,
+		S_AXI_RLAST => m_axi_int_rlast_exreg,
+		S_AXI_RVALID => m_axi_int_rvalid_exreg,
+		S_AXI_RREADY => m_axi_int_rready_exreg
+
+  );
 end architecture;
