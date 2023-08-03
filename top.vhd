@@ -14,7 +14,7 @@ entity top is
         --------------------------------------------------------------------------------
         -- CONTROLLER
         --------------------------------------------------------------------------------
-	AXI_BASE_ADDRESS_I_CTRL  : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- base address    
+        AXI_BASE_ADDRESS_I_CTRL  : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- base address    
         --  WRITE CHANNEL
         AXI_WRITE_ADDRESS_I_CTRL : in  std_logic_vector(ADDR_WIDTH-1 downto 0);  -- address added
                                             -- to base address
