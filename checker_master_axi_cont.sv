@@ -1,4 +1,4 @@
-checker  checker_axi(
+checker  checker_master_axi_cont(
 
         clk,
         reset,
@@ -16,7 +16,7 @@ checker  checker_axi(
         axi_read_data_o,
         axi_read_vld_o,
         axi_read_rdy_i,
-        axi_read_last_o,
+        axi_read_last_o
 	////////////////////////////////////////////////////////////////////////////////
 
 );
@@ -27,8 +27,9 @@ checker  checker_axi(
 
   reg write_init, read_init;
   reg write_vld;
-  wire read_rdy;
+  logic read_rdy = 1'b1;
   // SECTION Aux code
+	
 
   // NOTE write, read transaction initiation
 	always @(posedge clk or posedge reset) begin
@@ -61,7 +62,6 @@ checker  checker_axi(
   end
 	default disable iff reset;
 
-  assign read_rdy <= 1'b1;
 
   //SECTION Properties
 
@@ -69,9 +69,9 @@ checker  checker_axi(
     sig == sig_aux;
   endproperty
 
-  write_init_gen: assume property equal_as_aux_signal(write_init, axi_write_init_i);
-  read_init_gen: assume property equal_as_aux_signal(read_init, axi_read_init_i);
+  write_init_gen: assume property (equal_as_aux_signal(write_init, axi_write_init_i));
+  read_init_gen: assume property (equal_as_aux_signal(read_init, axi_read_init_i));
 
-  write_vld_gen: assume property equal_as_aux_signal(write_vld, axi_write_vld_i);
-  read_rdy_gen: assume property equal_as_aux_signal(read_rdy, axi_read_rdy_i);
+  write_vld_gen: assume property (equal_as_aux_signal(write_vld, axi_write_vld_i));
+  read_rdy_gen: assume property (equal_as_aux_signal(read_rdy, axi_read_rdy_i));
   endchecker

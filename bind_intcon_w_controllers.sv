@@ -17,7 +17,7 @@ bind top checker_master_axi_cont chk_cont_ctrl(
   .axi_read_data_o_ctrl(axi_read_data_o),
   .axi_read_vld_o_ctrl(axi_read_vld_o),
   .axi_read_rdy_i_ctrl(axi_read_rdy_i),
-  .axi_read_last_o_ctrl(axi_read_last_o),
+  .axi_read_last_o_ctrl(axi_read_last_o)
 );
 
 
@@ -38,7 +38,7 @@ bind top checker_master_axi_cont chk_cont_pb1(
   .axi_read_data_o_pb1(axi_read_data_o),
   .axi_read_vld_o_pb1(axi_read_vld_o),
   .axi_read_rdy_i_pb1(axi_read_rdy_i),
-  .axi_read_last_o_pb1(axi_read_last_o),
+  .axi_read_last_o_pb1(axi_read_last_o)
 );
 
 bind top checker_master_axi_cont chk_cont_pb0(
@@ -58,7 +58,7 @@ bind top checker_master_axi_cont chk_cont_pb0(
   .axi_read_data_o_pb0(axi_read_data_o),
   .axi_read_vld_o_pb0(axi_read_vld_o),
   .axi_read_rdy_i_pb0(axi_read_rdy_i),
-  .axi_read_last_o_pb0(axi_read_last_o),
+  .axi_read_last_o_pb0(axi_read_last_o)
 );
 
 bind top checker_master_axi_cont chk_cont_pp(
@@ -78,8 +78,9 @@ bind top checker_master_axi_cont chk_cont_pp(
   .axi_read_data_o_pp(axi_read_data_o),
   .axi_read_vld_o_pp(axi_read_vld_o),
   .axi_read_rdy_i_pp(axi_read_rdy_i),
-  .axi_read_last_o_pp(axi_read_last_o),
+  .axi_read_last_o_pp(axi_read_last_o)
 );
+
 
 bind top.interconnect checker_axi chk_axi_ctrl(
 	.clk(clk),
@@ -122,7 +123,7 @@ bind top.interconnect checker_axi chk_axi_ctrl(
 	.s_axi_int_rresp_ctrl(rresp),
 	.s_axi_int_rlast_ctrl(rlast),
 	.s_axi_int_rvalid_ctrl(rvalid),
-	.s_axi_int_rready_ctrl(rready),
+	.s_axi_int_rready_ctrl(rready)
 	////////////////////////////////////////////////////////////////////////////////
 );
 
@@ -167,7 +168,7 @@ bind top.interconnect checker_axi chk_axi_pb0(
 	.s_axi_int_rresp_pb0(rresp),
 	.s_axi_int_rlast_pb0(rlast),
 	.s_axi_int_rvalid_pb0(rvalid),
-	.s_axi_int_rready_pb0(rready),
+	.s_axi_int_rready_pb0(rready)
 	////////////////////////////////////////////////////////////////////////////////
 );
 
@@ -211,7 +212,7 @@ bind top.interconnect checker_axi chk_axi_pb1(
 	.s_axi_int_rresp_pb1(rresp),
 	.s_axi_int_rlast_pb1(rlast),
 	.s_axi_int_rvalid_pb1(rvalid),
-	.s_axi_int_rready_pb1(rready),
+	.s_axi_int_rready_pb1(rready)
 	////////////////////////////////////////////////////////////////////////////////
 );
 
@@ -254,6 +255,7 @@ bind top.interconnect checker_axi chk_axi_pp(
 	.s_axi_int_rresp_pp(rresp),
 	.s_axi_int_rlast_pp(rlast),
 	.s_axi_int_rvalid_pp(rvalid),
-	.s_axi_int_rready_pp(rready),
+	.s_axi_int_rready_pp(rready)
 	////////////////////////////////////////////////////////////////////////////////
 );
+
