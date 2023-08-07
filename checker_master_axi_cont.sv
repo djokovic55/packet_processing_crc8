@@ -65,9 +65,19 @@ checker  checker_master_axi_cont(
 
   //SECTION Properties
 
+  property stable_before_handshake(valid, ready, control);
+    valid && !ready |=> $stable(control);
+  endproperty
+
   property equal_as_aux_signal(sig_aux, sig);
     sig == sig_aux;
   endproperty
+
+  stable_write_base_addr: assume property(stable_before_handshake(write_init, axi_write_done_o, axi_base_address_i));
+  stable_write_addr: assume property(stable_before_handshake(write_init, axi_write_done_o, axi_write_address_i));
+
+  stable_read_base_addr: assume property(stable_before_handshake(read_init, axi_read_last_o, axi_base_address_i));
+  stable_read_addr: assume property(stable_before_handshake(read_init, axi_read_last_o, axi_read_address_i));
 
   write_init_gen: assume property (equal_as_aux_signal(write_init, axi_write_init_i));
   read_init_gen: assume property (equal_as_aux_signal(read_init, axi_read_init_i));
