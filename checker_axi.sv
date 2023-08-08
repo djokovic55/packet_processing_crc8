@@ -35,7 +35,7 @@ checker  checker_axi(
 	rresp,
 	rlast,
 	rvalid,
-	rreadr
+	rready
 	////////////////////////////////////////////////////////////////////////////////
 
 );
@@ -73,7 +73,7 @@ checker  checker_axi(
   endproperty
 
   property exit_from_reset(areset, valid);
-    !areset || $rose(aresetn) |-> !valid;
+    !areset || $rose(areset) |-> !valid;
   endproperty
 
   property valid_before_handshake(valid, ready);
@@ -151,7 +151,7 @@ checker  checker_axi(
   //SECTION R channel prop
 
   r_stable_rdata: assert property (stable_before_handshake(rvalid, rready, rdata));
-  r_stable_rstrb: assert property (stable_before_handshake(rvalid, rready, rstrb));
+  //r_stable_rstrb: assert property (stable_before_handshake(rvalid, rready, rstrb));
   r_data_rlast: assert property (last_data(rlast, arlen));
 
   r_exit_reset: assert property (exit_from_reset(reset, rvalid));

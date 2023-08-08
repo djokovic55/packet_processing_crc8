@@ -218,7 +218,7 @@ begin
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
-	    if S_AXI_ARESETN = '0' then
+	    if S_AXI_ARESETN = '1' then
 	      axi_awready <= '0';
 	      axi_awv_awr_flag <= '0';
 	    else
@@ -244,7 +244,7 @@ begin
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
-	    if S_AXI_ARESETN = '0' then
+	    if S_AXI_ARESETN = '1' then
 	      axi_awaddr <= (others => '0');
 	      axi_awburst <= (others => '0'); 
 	      axi_awlen <= (others => '0'); 
@@ -292,7 +292,7 @@ begin
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
-	    if S_AXI_ARESETN = '0' then
+	    if S_AXI_ARESETN = '1' then
 	      axi_wready <= '0';
 	    else
 	      if (axi_wready = '0' and S_AXI_WVALID = '1' and axi_awv_awr_flag = '1') then
@@ -315,7 +315,7 @@ begin
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
-	    if S_AXI_ARESETN = '0' then
+	    if S_AXI_ARESETN = '1' then
 	      axi_bvalid  <= '0';
 	      axi_bresp  <= "00"; --need to work more on the responses
 	      -- axi_buser <= (others => '0');
@@ -341,7 +341,7 @@ begin
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
-	    if S_AXI_ARESETN = '0' then
+	    if S_AXI_ARESETN = '1' then
 	      axi_arready <= '0';
 	      axi_arv_arr_flag <= '0';
 	    else
@@ -364,7 +364,7 @@ begin
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
-	    if S_AXI_ARESETN = '0' then
+	    if S_AXI_ARESETN = '1' then
 	      axi_araddr <= (others => '0');
 	      axi_arburst <= (others => '0');
 	      axi_arlen <= (others => '0'); 
@@ -424,7 +424,7 @@ begin
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then
-	    if S_AXI_ARESETN = '0' then
+	    if S_AXI_ARESETN = '1' then
 	      axi_rvalid <= '0';
 	      axi_rresp  <= "00";
 	    else

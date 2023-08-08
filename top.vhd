@@ -32,7 +32,7 @@ entity top is
         AXI_READ_DATA_O_CTRL : out std_logic_vector(DATA_WIDTH-1 downto 0);  -- data read from                                                             -- ddr
         AXI_READ_VLD_O_CTRL  : out std_logic;    -- axi_read_data_o is valid
         AXI_READ_RDY_I_CTRL  : in std_logic;    -- axi_read_data_o is valid
-        AXI_READ_LAST_O_CTRL : out std_logic;    -- axi_read_data_o is valid
+        axi_read_last_o_ctrl : out std_logic;    -- axi_read_data_o is valid
         --------------------------------------------------------------------------------
         -- PB1
         --------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ entity top is
         AXI_READ_DATA_O_PP : out std_logic_vector(DATA_WIDTH-1 downto 0);  -- data read from                                                             -- ddr
         AXI_READ_VLD_O_PP  : out std_logic;    -- axi_read_data_o is valid
         AXI_READ_RDY_I_PP  : in std_logic;    -- axi_read_data_o is valid
-        AXI_READ_LAST_O_PP : out std_logic    -- axi_read_data_o is valid
+	AXI_READ_LAST_O_PP : out std_logic    -- axi_read_data_o is valid
   );
 end entity;
 -- some test

@@ -287,7 +287,7 @@ begin
   begin
     if (rising_edge (M_AXI_ACLK)) then
       -- Initiates AXI transaction delay        
-      if (M_AXI_ARESETN = '0') then
+      if (M_AXI_ARESETN = '1') then
         init_write_txn_ff  <= '0';
         init_write_txn_ff2 <= '0';
       else
@@ -303,7 +303,7 @@ begin
   begin
     if (rising_edge (M_AXI_ACLK)) then
       -- Initiates AXI transaction delay        
-      if (M_AXI_ARESETN = '0') then
+      if (M_AXI_ARESETN = '1') then
         init_read_txn_ff  <= '0';
         init_read_txn_ff2 <= '0';
       else
@@ -328,7 +328,7 @@ begin
 	  process(M_AXI_ACLK)                                            
 	  begin                                                                
 	    if (rising_edge (M_AXI_ACLK)) then                                 
-	      if (M_AXI_ARESETN = '0' or init_write_txn_pulse = '1') then                                   
+	      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then                                   
 	        axi_awvalid <= '0';                                            
 	      else                                                             
 	        -- // NOTE If previously not valid , start next transaction            
@@ -380,7 +380,7 @@ begin
 	  process(M_AXI_ACLK)                                                               
 	  begin                                                                             
 	    if (rising_edge (M_AXI_ACLK)) then                                              
-	      if (M_AXI_ARESETN = '0' or init_write_txn_pulse = '1') then                                                
+	      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then                                                
 	        axi_wlast <= '0';                                                           
 	        -- axi_wlast is asserted when the write index                               
 	        -- count reaches the penultimate count to synchronize                       
@@ -406,7 +406,7 @@ begin
 	  process(M_AXI_ACLK)                                                               
 	  begin                                                                             
 	    if (rising_edge (M_AXI_ACLK)) then                                              
-	      if (M_AXI_ARESETN = '0' or start_single_burst_write = '1' or init_write_txn_pulse = '1') then               
+	      if (M_AXI_ARESETN = '1' or start_single_burst_write = '1' or init_write_txn_pulse = '1') then               
 	        write_index <= (others => '0');                                             
 	      else                                                                          
 	        if (wnext = '1' and (write_index /= std_logic_vector(to_unsigned(C_M_AXI_BURST_LEN-1,C_TRANSACTIONS_NUM+1)))) then                
@@ -439,7 +439,7 @@ begin
 	  process(M_AXI_ACLK)                                             
 	  begin                                                                 
 	    if (rising_edge (M_AXI_ACLK)) then                                  
-	      if (M_AXI_ARESETN = '0' or init_write_txn_pulse = '1') then                                    
+	      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then                                    
 	        axi_bready <= '0';                                              
 	        -- accept/acknowledge bresp with axi_bready by the master       
 	        -- when M_AXI_BVALID is asserted by slave                       
@@ -473,7 +473,7 @@ begin
 	  process(M_AXI_ACLK)										  
 	  begin                                                              
 	    if (rising_edge (M_AXI_ACLK)) then                               
-	      if (M_AXI_ARESETN = '0' or init_read_txn_pulse = '1') then                                 
+	      if (M_AXI_ARESETN = '1' or init_read_txn_pulse = '1') then                                 
 	        axi_arvalid <= '0';                                          
 	     -- If previously not valid , start next transaction             
 	      else                                                           
@@ -501,7 +501,7 @@ begin
 	  process(M_AXI_ACLK)                                                   
 	  begin                                                                 
 	    if (rising_edge (M_AXI_ACLK)) then                                  
-	      if (M_AXI_ARESETN = '0' or start_single_burst_read = '1' or init_read_txn_pulse = '1') then    
+	      if (M_AXI_ARESETN = '1' or start_single_burst_read = '1' or init_read_txn_pulse = '1') then    
 	        read_index <= (others => '0');                                  
 	      else                                                              
 	        if (rnext = '1' and (read_index <= std_logic_vector(to_unsigned(C_M_AXI_BURST_LEN-1,C_TRANSACTIONS_NUM+1)))) then   
@@ -516,7 +516,7 @@ begin
   start_burst_logic : process(M_AXI_ACLK)
   begin
     if (rising_edge (M_AXI_ACLK)) then
-      if (M_AXI_ARESETN = '0') then
+      if (M_AXI_ARESETN = '1') then
         -- reset condition                                                                                   
         -- All the signals are ed default values under reset condition                                       
         start_single_burst_write <= '0';
@@ -545,7 +545,7 @@ begin
   process(M_AXI_ACLK)
   begin
     if (rising_edge (M_AXI_ACLK)) then
-      if (M_AXI_ARESETN = '0' or init_write_txn_pulse = '1') then
+      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then
         burst_write_active <= '0';
 
       --The burst_write_active is asserted when a write burst transaction is initiated                      
@@ -566,7 +566,7 @@ begin
   process(M_AXI_ACLK)
   begin
     if (rising_edge (M_AXI_ACLK)) then
-      if (M_AXI_ARESETN = '0' or init_write_txn_pulse = '1') then
+      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then
         burst_read_active <= '0';
 
       --The burst_write_active is asserted when a write burst transaction is initiated                      
