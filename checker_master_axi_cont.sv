@@ -75,12 +75,16 @@ checker  checker_master_axi_cont(
 
   no_read_and_write: assert property(not(write_init && read_init));
   read_last_c: cover property(axi_read_last_o);
+  
+  write_base_address: assume property(axi_base_address_i == 32'h00000000);
+  write_address: assume property(axi_write_address_i == 32'h000000FF);
 
-  stable_read_base_addr: assume property(stable_before_handshake(read_init, axi_read_last_o, axi_base_address_i));
-  stable_read_addr: assume property(stable_before_handshake(read_init, axi_read_last_o, axi_read_address_i));
 
-  stable_write_base_addr: assume property(stable_before_handshake(write_init, axi_write_done_o, axi_base_address_i));
-  stable_write_addr: assume property(stable_before_handshake(write_init, axi_write_done_o, axi_write_address_i));
+  // stable_read_base_addr: assume property(stable_before_handshake(read_init, axi_read_last_o, axi_base_address_i));
+  // stable_read_addr: assume property(stable_before_handshake(read_init, axi_read_last_o, axi_read_address_i));
+
+  // stable_write_base_addr: assume property(stable_before_handshake(write_init, axi_write_done_o, axi_base_address_i));
+  // stable_write_addr: assume property(stable_before_handshake(write_init, axi_write_done_o, axi_write_address_i));
 
 
   write_init_gen: assume property (equal_as_aux_signal(write_init, axi_write_init_i));

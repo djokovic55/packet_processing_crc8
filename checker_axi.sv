@@ -73,7 +73,7 @@ checker  checker_axi(
   endproperty
 
   property exit_from_reset(areset, valid);
-    !areset || $rose(areset) |-> !valid;
+    areset || $rose(areset) |-> !valid;
   endproperty
 
   property valid_before_handshake(valid, ready);
@@ -85,7 +85,7 @@ checker  checker_axi(
   endproperty
 
   property last_data(xlast, axlen);
-    axlen == handshake_cnt |-> xlast;
+    (axlen-1) == handshake_cnt |=> xlast;
   endproperty
 
   //FIXME awready prop are not defined
@@ -126,6 +126,7 @@ checker  checker_axi(
   w_stable_wdata: assert property (stable_before_handshake(wvalid, wready, wdata));
   w_stable_wstrb: assert property (stable_before_handshake(wvalid, wready, wstrb));
   w_data_wlast: assert property (last_data(wlast, awlen));
+  w_data_wlast_c: cover property (wlast);
 
   w_exit_reset: assert property (exit_from_reset(reset, wvalid));
   w_wvalid_until_wready: assert property (valid_before_handshake(wvalid, wready));
@@ -152,7 +153,7 @@ checker  checker_axi(
 
   r_stable_rdata: assert property (stable_before_handshake(rvalid, rready, rdata));
   //r_stable_rstrb: assert property (stable_before_handshake(rvalid, rready, rstrb));
-  r_data_rlast: assert property (last_data(rlast, arlen));
+  r_data_rlast: assert property (last_data(rlast, arlen-1));
 
   r_exit_reset: assert property (exit_from_reset(reset, rvalid));
   r_rvalid_until_rready: assert property (valid_before_handshake(rvalid, rready));
