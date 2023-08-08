@@ -2,7 +2,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-
+-- testing git option
 entity master_axi_cont is
 	generic (
 		-- Users to add parameters here
