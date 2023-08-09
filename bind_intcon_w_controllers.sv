@@ -1,6 +1,10 @@
 
 
-bind top checker_master_axi_cont chk_cont_ctrl(
+////////////////////////////////////////////////////////////////////////////////
+// TOP MODULE CHECKERS
+////////////////////////////////////////////////////////////////////////////////
+
+bind top checker_top chk_ctrl(
   .clk(clk),
   .reset(reset),
 
@@ -21,7 +25,7 @@ bind top checker_master_axi_cont chk_cont_ctrl(
 );
 
 
-bind top checker_master_axi_cont chk_cont_pb1(
+bind top checker_top chk_pb1(
   .clk(clk),
   .reset(reset),
 
@@ -41,7 +45,7 @@ bind top checker_master_axi_cont chk_cont_pb1(
   .axi_read_last_o(axi_read_last_o_pb1)
 );
 
-bind top checker_master_axi_cont chk_cont_pb0(
+bind top checker_top chk_pb0(
   .clk(clk),
   .reset(reset),
 
@@ -61,7 +65,7 @@ bind top checker_master_axi_cont chk_cont_pb0(
   .axi_read_last_o(axi_read_last_o_pb0)
 );
 
-bind top checker_master_axi_cont chk_cont_pp(
+bind top checker_top chk_pp(
   .clk(clk),
   .reset(reset),
 
@@ -81,6 +85,9 @@ bind top checker_master_axi_cont chk_cont_pp(
   .axi_read_last_o(axi_read_last_o_pp)
 );
 
+////////////////////////////////////////////////////////////////////////////////
+// MASTER SIDE INTERCONNECT CHECKERS
+////////////////////////////////////////////////////////////////////////////////
 
 bind top.intcon checker_axi chk_axi_ctrl(
 	.clk(clk),
@@ -256,6 +263,113 @@ bind top.intcon checker_axi chk_axi_pp(
 	.rlast(s_axi_int_rlast_pp),
 	.rvalid(s_axi_int_rvalid_pp),
 	.rready(s_axi_int_rready_pp)
+	////////////////////////////////////////////////////////////////////////////////
+);
+
+////////////////////////////////////////////////////////////////////////////////
+// SLAVE SIDE INTERCONNECT CHECKERS
+////////////////////////////////////////////////////////////////////////////////
+
+bind top.intcon checker_axi_slave chk_axi_slave_ctrl(
+	.clk(clk),
+	.reset(reset), 
+
+	////////////////////////////////////////////////////////////////////////////////
+	// SLAVES
+	////////////////////////////////////////////////////////////////////////////////
+	// INTCON PORTS OF INMEM MODULE S1
+	////////////////////////////////////////////////////////////////////////////////
+	.awaddr(m_axi_int_awaddr_inmem),
+	.awlen(m_axi_int_awlen_inmem),
+	.awsize(m_axi_int_awsize_inmem),
+	.awburst(m_axi_int_awburst_inmem),
+	.awvalid(m_axi_int_awvalid_inmem),
+	.awready(m_axi_int_awready_inmem),
+
+	// WRITE DATA CHANNEL
+	.wdata(m_axi_int_wdata_inmem),
+	.wstrb(m_axi_int_wstrb_inmem),
+	.wlast(m_axi_int_wlast_inmem),
+	.wvalid(m_axi_int_wvalid_inmem),
+	.wready(m_axi_int_wready_inmem),
+
+	// WRITE RESPONSE CHANNEL
+	.bresp(m_axi_int_bresp_inmem),
+	.bvalid(m_axi_int_bvalid_inmem),
+	.bready(m_axi_int_bready_inmem),
+
+	// READ ADDRESS CHANNEL
+	.araddr(m_axi_int_araddr_inmem),
+	.arlen(m_axi_int_arlen_inmem),
+	.arsize(m_axi_int_arsize_inmem),
+	.arburst(m_axi_int_arburst_inmem),
+	.arvalid(m_axi_int_arvalid_inmem),
+	.arready(m_axi_int_arready_inmem),
+
+	// READ DATA CHANNEL
+	.rdata(m_axi_int_rdata_inmem),
+	.rresp(m_axi_int_rresp_inmem),
+	.rlast(m_axi_int_rlast_inmem),
+	.rvalid(m_axi_int_rvalid_inmem),
+	.rready(m_axi_int_rready_inmem)
+	////////////////////////////////////////////////////////////////////////////////
+);
+
+////////////////////////////////////////////////////////////////////////////////
+// MASTER AXI CHECKER INSIDE MAIN CONTROLLER 
+////////////////////////////////////////////////////////////////////////////////
+bind top.main_controller.master_axi_cont_ctrl checker_master_axi_cont chk_maxi_cont_ctrl(
+	.clk(m_axi_aclk),
+	.reset(m_axi_aresetn), 
+
+  .axi_base_address_i(axi_base_address_i),
+  .axi_write_address_i(axi_write_address_i),
+  .axi_write_init_i(axi_write_init_i),
+  .axi_write_data_i(axi_write_data_i),
+  .axi_write_vld_i(axi_write_vld_i),
+  .axi_write_rdy_o(axi_write_rdy_o),
+  .axi_write_done_o(axi_write_done_o),
+  .axi_read_address_i(axi_read_address_i),
+
+  .axi_read_init_i(axi_read_init_i),
+  .axi_read_data_o(axi_read_data_o),
+  .axi_read_vld_o(axi_read_vld_o),
+  .axi_read_rdy_i(axi_read_rdy_i),
+  .axi_read_last_o(axi_read_last_o),
+
+	.awaddr(m_axi_awaddr),
+	.awlen(m_axi_awlen),
+	.awsize(m_axi_awsize),
+	.awburst(m_axi_awburst),
+	.awvalid(m_axi_awvalid),
+	.awready(m_axi_awready),
+
+	// WRITE DATA CHANNEL
+	.wdata(m_axi_wdata),
+	.wstrb(m_axi_wstrb),
+	.wlast(m_axi_wlast),
+	.wvalid(m_axi_wvalid),
+	.wready(m_axi_wready),
+
+	// WRITE RESPONSE CHANNEL
+	.bresp(m_axi_bresp),
+	.bvalid(m_axi_bvalid),
+	.bready(m_axi_bready),
+
+	// READ ADDRESS CHANNEL
+	.araddr(m_axi_araddr),
+	.arlen(m_axi_arlen),
+	.arsize(m_axi_arsize),
+	.arburst(m_axi_arburst),
+	.arvalid(m_axi_arvalid),
+	.arready(m_axi_arready),
+
+	// READ DATA CHANNEL
+	.rdata(m_axi_rdata),
+	.rresp(m_axi_rresp),
+	.rlast(m_axi_rlast),
+	.rvalid(m_axi_rvalid),
+	.rready(m_axi_rready)
 	////////////////////////////////////////////////////////////////////////////////
 );
 

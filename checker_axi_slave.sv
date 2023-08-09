@@ -1,5 +1,5 @@
 
-checker  checker_axi(
+checker  checker_axi_slave(
 	clk	,
 	reset	,
 
@@ -45,11 +45,26 @@ checker  checker_axi(
 	endclocking
 
 	default disable iff reset;
+	
+	slave_gen_rlast_c: cover property(rlast);
+	// axi_arlen_cntr_c: cover property();
+	arvalid_c: cover property(arvalid);
+	arready_c: cover property(arready);
+	arvalid_and_not_arready_c: cover property(arvalid && !arready);
+
+	rvalid_c: cover property(rvalid);
+	rready_c: cover property(rready);
+	rvalid_and_rready_c: cover property(rvalid && rready);
+
+
+
+
+
+/*
+	//SECTION Aux code
 
 	reg [7 : 0] handshake_cnt;
   int max_wait = 4;
-
-	//SECTION Aux code
 
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
@@ -73,7 +88,7 @@ checker  checker_axi(
   endproperty
 
   property exit_from_reset(areset, valid);
-    ##1 (areset || $rose(areset)) |-> !valid;
+    areset || $rose(areset) |-> !valid;
   endproperty
 
   property valid_before_handshake(valid, ready);
@@ -116,7 +131,6 @@ checker  checker_axi(
 
   // awready_max_wait: assert property handshake_max_wait(awvalid, awready, max_wait);
 
-
   awvalid_before_awready: cover property (valid_before_ready(awvalid, awready));
   awready_before_awvalid: cover property (ready_before_valid(awvalid, awready));
   awready_with_awvalid: cover property (valid_with_ready(awvalid, awready));
@@ -148,12 +162,9 @@ checker  checker_axi(
 
   // arready_max_wait: assert property handshake_max_wait(arvalid, arready, max_wait);
 
-  arvalid_c: cover property (arvalid);
-
   arvalid_before_arready: cover property (valid_before_ready(arvalid, arready));
   arready_before_arvalid: cover property (ready_before_valid(arvalid, arready));
   arready_with_arvalid: cover property (valid_with_ready(arvalid, arready));
-
 
   //SECTION R channel prop
 
@@ -163,6 +174,7 @@ checker  checker_axi(
 
   r_exit_reset: assert property (exit_from_reset(reset, rvalid));
   r_rvalid_until_rready: assert property (valid_before_handshake(rvalid, rready));
+*/
 
 
 
