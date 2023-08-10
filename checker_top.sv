@@ -37,18 +37,19 @@ checker  checker_top(
   // BUG Design overconstrained
 
   // NOTE write, read transaction initiation
-	always @(posedge clk or posedge reset) begin
-		if(reset) begin
+	always @(posedge clk) begin
+
+		if(reset == 1'b1) begin
 			write_init <= 1'b1;
 		end
-    else if(axi_read_last_o == 1'b1 && write_init == 1'b0 && !read_init) begin
+    else if(axi_read_last_o == 1'b1 && write_init == 1'b0) begin
       write_init <= 1'b1;
     end
     else begin
       write_init <= 1'b0;
     end
 
-    if(axi_write_done_o == 1'b1 && !write_init) begin
+    if(reset == 1'b1 || axi_write_done_o == 1'b1) begin
       read_init <= 1'b1;
     end
     else if(read_init == 1'b1) begin
@@ -59,8 +60,8 @@ checker  checker_top(
 
 
 
-	always @(posedge clk or posedge reset) begin
-		if(reset || axi_write_done_o) begin
+	always @(posedge clk) begin
+		if(reset == 1'b1 || axi_write_done_o == 1'b1) begin
       write_vld <= 1'b0;
     end
     else if(write_init == 1'b1) begin 
