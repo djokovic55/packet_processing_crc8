@@ -6,10 +6,12 @@ checker  checker_top(
 
         axi_base_address_i,
         axi_write_address_i,
+        // init write
         axi_write_init_i,
         axi_write_data_i,
         axi_write_vld_i,
         axi_write_rdy_o,
+        // finish write
         axi_write_done_o,
 
         axi_read_address_i,
@@ -28,14 +30,62 @@ checker  checker_top(
 
 	default disable iff reset;
 
-  reg write_init, read_init;
-  reg write_vld;
+  logic write_init, read_init;
+  logic write_vld;
   logic read_rdy;
-  // SECTION Aux code
-	
 
+  enum int unsigned { IDLE = 0, INIT_WRITE = 2, INIT_READ = 4} state, next_state;
+
+  always_ff@(posedge clk or posedge reset) begin
+      if(reset)
+      state <= IDLE;
+      else
+      state <= next_state;
+  end
+
+  always_comb begin : next_state_logic
+      next_state = state;
+      case(state)
+      IDLE: begin 
+          next_state = INIT_WRITE;
+
+      end
+      INIT_WRITE: begin
+        if(axi_write_done_o)
+          next_state = INIT_WRITE;
+
+      end
+      INIT_READ: begin
+        if(axi_read_last_o)
+          next_state = IDLE;
+      end
+      endcase
+  end
+
+  always_comb begin
+      case(state)
+      IDLE: begin 
+        write_vld = 1'b0;
+        read_rdy = 1'b0;
+
+        write_init = 1'b0;
+        read_init = 1'b0;
+      end
+      INIT_WRITE: begin
+        write_init = 1'b1;
+        write_vld = 1'b1;
+      end
+      INIT_READ: begin
+        read_init = 1'b1;
+        read_rdy = 1'b1;
+      end
+      endcase
+  end
+
+  // SECTION Aux code
   // BUG Design overconstrained
 
+/*
   // NOTE write, read transaction initiation
 	always @(posedge clk) begin
 
@@ -68,7 +118,7 @@ checker  checker_top(
       write_vld <= 1'b1;
     end
   end
-
+*/
   //SECTION Properties
 
   property stable_before_handshake(valid, ready, control);
@@ -100,7 +150,6 @@ checker  checker_top(
 
 	//Section cover
   read_last_c: cover property(axi_read_last_o);
-
 	write_done: cover property(axi_write_done_o);
 	read_init_gen_c: cover property(axi_read_init_i);
 	
