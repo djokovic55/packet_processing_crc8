@@ -36,14 +36,14 @@ checker  checker_top(
 
   enum int unsigned { IDLE = 0, INIT_WRITE = 2, INIT_READ = 4} state, next_state;
 
-  always_ff@(posedge clk or posedge reset) begin
+  always @(posedge clk or posedge reset) begin
       if(reset)
       state <= IDLE;
       else
       state <= next_state;
   end
 
-  always_comb begin : next_state_logic
+  always @(state, axi_write_done_o, axi_read_last_o) begin : next_state_logic
       next_state = state;
       case(state)
       IDLE: begin 
@@ -52,7 +52,7 @@ checker  checker_top(
       end
       INIT_WRITE: begin
         if(axi_write_done_o)
-          next_state = INIT_WRITE;
+          next_state = INIT_READ;
 
       end
       INIT_READ: begin
@@ -62,7 +62,14 @@ checker  checker_top(
       endcase
   end
 
-  always_comb begin
+  always @(state) begin
+
+			// default outputs
+			write_init = 1'b0;
+			read_init = 1'b0;
+			write_vld = 1'b0;
+			read_rdy = 1'b0;
+
       case(state)
       IDLE: begin 
         write_vld = 1'b0;
@@ -119,6 +126,7 @@ checker  checker_top(
     end
   end
 */
+
   //SECTION Properties
 
   property stable_before_handshake(valid, ready, control);
@@ -152,6 +160,7 @@ checker  checker_top(
   read_last_c: cover property(axi_read_last_o);
 	write_done: cover property(axi_write_done_o);
 	read_init_gen_c: cover property(axi_read_init_i);
+	read_init_aux_gen_c: cover property(read_init);
 	
 
   endchecker
