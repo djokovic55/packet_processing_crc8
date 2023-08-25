@@ -253,7 +253,7 @@ begin
     ADDR_O => open, 
     DATA_O => open, 
     WR_O => open, 
-    DATA_I => (others => '0'), 
+    DATA_I => (others => '1'), 
 
 		S_AXI_ACLK => S_AXI_ACLK,	
 		S_AXI_ARESETN => S_AXI_ARESETN,	

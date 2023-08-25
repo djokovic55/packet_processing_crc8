@@ -508,10 +508,11 @@ begin
 	----------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
 	-- meybe should be or with wvalid signals?
-	ctrl_req <= s_axi_int_awvalid_ctrl;
-	pb0_req <= s_axi_int_awvalid_pb0;
-	pb1_req <= s_axi_int_awvalid_pb1;
-	pp_req <= s_axi_int_awvalid_pp;
+  -- BUG only write transaction were eligeble to make reqests
+	ctrl_req <= s_axi_int_awvalid_ctrl or s_axi_int_arvalid_ctrl;
+	pb0_req <= s_axi_int_awvalid_pb0 or s_axi_int_arvalid_pb0;
+	pb1_req <= s_axi_int_awvalid_pb1 or s_axi_int_arvalid_pb1;
+	pp_req <= s_axi_int_awvalid_pp or s_axi_int_arvalid_pp;
 
 	-- Round robbin arbiter input req signal
 	req(0) <= ctrl_req;
@@ -678,6 +679,11 @@ begin
 
 	awready_demux_gnt : process (int_awready, gnt)
 	begin 
+		s_axi_int_awready_ctrl <= '0';
+		s_axi_int_awready_pb0 <= '0';
+		s_axi_int_awready_pb1 <= '0';
+		s_axi_int_awready_pp <= '0';
+
 		case(gnt) is 
 		-- // [x] Fix gnt 0000 value
 			when "0001" =>
@@ -795,6 +801,10 @@ begin
 
 	wready_demux_gnt : process (int_wready, gnt)
 	begin 
+		s_axi_int_wready_ctrl <= '0';
+		s_axi_int_wready_pb0 <= '0';
+  s_axi_int_wready_pb1 <= '0';
+  s_axi_int_wready_pp <= '0';
 
 		case(gnt) is 
 		-- // [x] Fix gnt 0000 value
@@ -855,6 +865,10 @@ begin
 
 	bvalid_demux_gnt : process (int_bvalid, gnt)
 	begin 
+		s_axi_int_bvalid_ctrl <= '0';
+		s_axi_int_bvalid_pb0 <= '0';
+		s_axi_int_bvalid_pb1 <= '0';
+		s_axi_int_bvalid_pp <= '0';
 
 		case(gnt) is 
 		-- // [x] Fix gnt 0000 value
@@ -1028,6 +1042,10 @@ begin
 	arready_demux_gnt : process (int_arready, gnt)
 	begin 
 
+		s_axi_int_arready_ctrl <= '0';
+		s_axi_int_arready_pb0 <= '0';
+		s_axi_int_arready_pb1 <= '0';
+		s_axi_int_arready_pp <= '0';
 		case(gnt) is 
 		-- // [x] Fix gnt 0000 value
 			when "0001" =>
@@ -1105,6 +1123,10 @@ begin
 
 	rvalid_demux_gnt : process (int_rvalid, gnt)
 	begin 
+		s_axi_int_rvalid_ctrl <= '0';
+		s_axi_int_rvalid_pb0 <= '0';
+		s_axi_int_rvalid_pb1 <= '0';
+	 s_axi_int_rvalid_pp <= '0';
 
 		case(gnt) is 
 		-- // [x] Fix gnt 0000 value

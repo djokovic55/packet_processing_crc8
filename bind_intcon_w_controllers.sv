@@ -270,7 +270,7 @@ bind top.intcon checker_axi chk_axi_pp(
 // SLAVE SIDE INTERCONNECT CHECKERS
 ////////////////////////////////////////////////////////////////////////////////
 
-bind top.intcon checker_axi_slave chk_axi_slave_ctrl(
+bind top.intcon checker_axi_slave chk_axi_slave_inmem(
 	.clk(clk),
 	.reset(reset), 
 
@@ -315,6 +315,50 @@ bind top.intcon checker_axi_slave chk_axi_slave_ctrl(
 	////////////////////////////////////////////////////////////////////////////////
 );
 
+bind top.intcon checker_axi_slave chk_axi_slave_outmem(
+	.clk(clk),
+	.reset(reset), 
+
+	////////////////////////////////////////////////////////////////////////////////
+	// SLAVES
+	////////////////////////////////////////////////////////////////////////////////
+	// INTCON PORTS OF INMEM MODULE S1
+	////////////////////////////////////////////////////////////////////////////////
+	.awaddr(m_axi_int_awaddr_outmem),
+	.awlen(m_axi_int_awlen_outmem),
+	.awsize(m_axi_int_awsize_outmem),
+	.awburst(m_axi_int_awburst_outmem),
+	.awvalid(m_axi_int_awvalid_outmem),
+	.awready(m_axi_int_awready_outmem),
+
+	// WRITE DATA CHANNEL
+	.wdata(m_axi_int_wdata_outmem),
+	.wstrb(m_axi_int_wstrb_outmem),
+	.wlast(m_axi_int_wlast_outmem),
+	.wvalid(m_axi_int_wvalid_outmem),
+	.wready(m_axi_int_wready_outmem),
+
+	// WRITE RESPONSE CHANNEL
+	.bresp(m_axi_int_bresp_outmem),
+	.bvalid(m_axi_int_bvalid_outmem),
+	.bready(m_axi_int_bready_outmem),
+
+	// READ ADDRESS CHANNEL
+	.araddr(m_axi_int_araddr_outmem),
+	.arlen(m_axi_int_arlen_outmem),
+	.arsize(m_axi_int_arsize_outmem),
+	.arburst(m_axi_int_arburst_outmem),
+	.arvalid(m_axi_int_arvalid_outmem),
+	.arready(m_axi_int_arready_outmem),
+
+	// READ DATA CHANNEL
+	.rdata(m_axi_int_rdata_outmem),
+	.rresp(m_axi_int_rresp_outmem),
+	.rlast(m_axi_int_rlast_outmem),
+	.rvalid(m_axi_int_rvalid_outmem),
+	.rready(m_axi_int_rready_outmem)
+	////////////////////////////////////////////////////////////////////////////////
+);
 ////////////////////////////////////////////////////////////////////////////////
 // MASTER AXI CHECKER INSIDE MAIN CONTROLLER 
 ////////////////////////////////////////////////////////////////////////////////
