@@ -36,6 +36,8 @@ checker  checker_top(
 
   enum int unsigned { IDLE = 0, INIT_WRITE = 2, INIT_READ = 4} state, next_state;
 
+  // SECTION Aux code
+
   always @(posedge clk or posedge reset) begin
       if(reset)
       state <= IDLE;
@@ -89,43 +91,6 @@ checker  checker_top(
       endcase
   end
 
-  // SECTION Aux code
-  // BUG Design overconstrained
-
-/*
-  // NOTE write, read transaction initiation
-	always @(posedge clk) begin
-
-		if(reset == 1'b1) begin
-			write_init <= 1'b1;
-		end
-    else if(axi_read_last_o == 1'b1 && write_init == 1'b0) begin
-      write_init <= 1'b1;
-    end
-    else begin
-      write_init <= 1'b0;
-    end
-
-    if(reset == 1'b1 || axi_write_done_o == 1'b1) begin
-      read_init <= 1'b1;
-    end
-    else if(read_init == 1'b1) begin
-      read_init <= 1'b0;
-    end
-
-	end
-
-
-
-	always @(posedge clk) begin
-		if(reset == 1'b1 || axi_write_done_o == 1'b1) begin
-      write_vld <= 1'b0;
-    end
-    else if(write_init == 1'b1) begin 
-      write_vld <= 1'b1;
-    end
-  end
-*/
 
   //SECTION Properties
 
