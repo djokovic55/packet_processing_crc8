@@ -436,9 +436,9 @@ architecture rtl of top is
 
 		-- ADDRESS WRITE CHANNEL
 		m_axi_int_awaddr_exreg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
-		m_axi_int_awlen_exreg: out std_logic_vector(7 downto 0);
-		m_axi_int_awsize_exreg: out std_logic_vector(2 downto 0);
-		m_axi_int_awburst_exreg: out std_logic_vector(1 downto 0);
+		-- m_axi_int_awlen_exreg: out std_logic_vector(7 downto 0);
+		-- m_axi_int_awsize_exreg: out std_logic_vector(2 downto 0);
+		-- m_axi_int_awburst_exreg: out std_logic_vector(1 downto 0);
 
 		m_axi_int_awvalid_exreg: out std_logic;
 		m_axi_int_awready_exreg: in std_logic;
@@ -446,7 +446,7 @@ architecture rtl of top is
         -- WRITE DATA CHANNEL
 		m_axi_int_wdata_exreg: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_wstrb_exreg: out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
-		m_axi_int_wlast_exreg: out std_logic;
+		-- m_axi_int_wlast_exreg: out std_logic;
 
 		m_axi_int_wvalid_exreg: out std_logic;
 		m_axi_int_wready_exreg: in std_logic;
@@ -458,9 +458,9 @@ architecture rtl of top is
 
         -- READ ADDRESS CHANNEL
 		m_axi_int_araddr_exreg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
-		m_axi_int_arlen_exreg: out std_logic_vector(7 downto 0);
-		m_axi_int_arsize_exreg: out std_logic_vector(2 downto 0);
-		m_axi_int_arburst_exreg: out std_logic_vector(1 downto 0);
+		-- m_axi_int_arlen_exreg: out std_logic_vector(7 downto 0);
+		-- m_axi_int_arsize_exreg: out std_logic_vector(2 downto 0);
+		-- m_axi_int_arburst_exreg: out std_logic_vector(1 downto 0);
 
 		m_axi_int_arvalid_exreg: out std_logic;
 		m_axi_int_arready_exreg: in std_logic;
@@ -468,7 +468,7 @@ architecture rtl of top is
         -- READ DATA CHANNEL
 		m_axi_int_rdata_exreg: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_exreg: in std_logic_vector(1 downto 0);
-		m_axi_int_rlast_exreg: in std_logic;
+		-- m_axi_int_rlast_exreg: in std_logic;
 
 		m_axi_int_rvalid_exreg: in std_logic;
 		m_axi_int_rready_exreg: out std_logic
@@ -1353,12 +1353,12 @@ architecture rtl of top is
 		-- Write address
 		S_AXI_AWADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		-- Burst length. The burst length gives the exact number of transfers in a burst
-		S_AXI_AWLEN	: in std_logic_vector(7 downto 0);
+		-- S_AXI_AWLEN	: in std_logic_vector(7 downto 0);
 		-- Burst size. This signal indicates the size of each transfer in the burst
-		S_AXI_AWSIZE	: in std_logic_vector(2 downto 0);
+		-- S_AXI_AWSIZE	: in std_logic_vector(2 downto 0);
 		-- Burst type. The burst type and the size information, 
     -- determine how the address for each transfer within the burst is calculated.
-		S_AXI_AWBURST	: in std_logic_vector(1 downto 0);
+		-- S_AXI_AWBURST	: in std_logic_vector(1 downto 0);
 		-- Write address valid. This signal indicates that
     -- the channel is signaling valid write address and
     -- control information.
@@ -1379,7 +1379,7 @@ architecture rtl of top is
 		S_AXI_WSTRB	: in std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0);
 		-- Write last. This signal indicates the last transfer
     -- in a write burst.
-		S_AXI_WLAST	: in std_logic;
+		-- S_AXI_WLAST	: in std_logic;
 		-- Write valid. This signal indicates that valid write
     -- data and strobes are available.
 		S_AXI_WVALID	: in std_logic;
@@ -1407,12 +1407,12 @@ architecture rtl of top is
     -- address of a read burst transaction.
 		S_AXI_ARADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		-- Burst length. The burst length gives the exact number of transfers in a burst
-		S_AXI_ARLEN	: in std_logic_vector(7 downto 0);
+		-- S_AXI_ARLEN	: in std_logic_vector(7 downto 0);
 		-- Burst size. This signal indicates the size of each transfer in the burst
-		S_AXI_ARSIZE	: in std_logic_vector(2 downto 0);
+		-- S_AXI_ARSIZE	: in std_logic_vector(2 downto 0);
 		-- Burst type. The burst type and the size information, 
     -- determine how the address for each transfer within the burst is calculated.
-		S_AXI_ARBURST	: in std_logic_vector(1 downto 0);
+		-- S_AXI_ARBURST	: in std_logic_vector(1 downto 0);
 		-- Write address valid. This signal indicates that
     -- the channel is signaling valid read address and
     -- control information.
@@ -1432,7 +1432,7 @@ architecture rtl of top is
 		S_AXI_RRESP	: out std_logic_vector(1 downto 0);
 		-- Read last. This signal indicates the last transfer
     -- in a read burst.
-		S_AXI_RLAST	: out std_logic;
+		-- S_AXI_RLAST	: out std_logic;
 		-- Read valid. This signal indicates that the channel
     -- is signaling the required read data.
 		S_AXI_RVALID	: out std_logic;
@@ -2258,28 +2258,31 @@ begin
 		S_AXI_ARESETN => reset,
 
 		S_AXI_AWADDR => m_axi_int_awaddr_exreg,
-		S_AXI_AWLEN => m_axi_int_awlen_exreg,
-		S_AXI_AWSIZE => m_axi_int_awsize_exreg,
-		S_AXI_AWBURST => m_axi_int_awburst_exreg,
+		-- S_AXI_AWLEN => m_axi_int_awlen_exreg,
+		-- S_AXI_AWSIZE => m_axi_int_awsize_exreg,
+		-- S_AXI_AWBURST => m_axi_int_awburst_exreg,
 		S_AXI_AWVALID => m_axi_int_awvalid_exreg,
 		S_AXI_AWREADY => m_axi_int_awready_exreg,
+
 		S_AXI_WDATA => m_axi_int_wdata_exreg,
 		S_AXI_WSTRB => m_axi_int_wstrb_exreg,
-		S_AXI_WLAST => m_axi_int_wlast_exreg,
+		-- S_AXI_WLAST => m_axi_int_wlast_exreg,
 		S_AXI_WVALID => m_axi_int_wvalid_exreg,
 		S_AXI_WREADY => m_axi_int_wready_exreg,
+
 		S_AXI_BRESP => m_axi_int_bresp_exreg,
 		S_AXI_BVALID => m_axi_int_bvalid_exreg,
 		S_AXI_BREADY => m_axi_int_bready_exreg,
+
 		S_AXI_ARADDR => m_axi_int_araddr_exreg,
-		S_AXI_ARLEN => m_axi_int_arlen_exreg,
-		S_AXI_ARSIZE => m_axi_int_arsize_exreg,
-		S_AXI_ARBURST => m_axi_int_arburst_exreg,
+		-- S_AXI_ARLEN => m_axi_int_arlen_exreg,
+		-- S_AXI_ARSIZE => m_axi_int_arsize_exreg,
+		-- S_AXI_ARBURST => m_axi_int_arburst_exreg,
 		S_AXI_ARVALID => m_axi_int_arvalid_exreg,
 		S_AXI_ARREADY => m_axi_int_arready_exreg,
 		S_AXI_RDATA => m_axi_int_rdata_exreg,
 		S_AXI_RRESP => m_axi_int_rresp_exreg,
-		S_AXI_RLAST => m_axi_int_rlast_exreg,
+		-- S_AXI_RLAST => m_axi_int_rlast_exreg,
 		S_AXI_RVALID => m_axi_int_rvalid_exreg,
 		S_AXI_RREADY => m_axi_int_rready_exreg
 

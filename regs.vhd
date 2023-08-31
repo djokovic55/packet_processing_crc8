@@ -250,10 +250,22 @@ architecture implementation of regs is
 
   end component;
   
+	
+
+
+
 begin
 
   -- [ ] regs implementation
   -- [x] slave AXI cont added
+
+
+
+
+
+
+
+
 
   slave_axi_cont_inmem: slave_axi_cont
   generic map(

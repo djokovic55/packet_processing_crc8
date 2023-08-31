@@ -194,16 +194,27 @@ architecture implementation of external_regs is
 	signal ext_drop_cnt_wr_s : std_logic;
 
 	-- Output
-	signal ext_pb_ctrl1_s : std_logic; -- irq_line_0
-	signal ext_pb_ctrl2_s : std_logic_vector(31 downto 0); -- in_addr
-	signal ext_pb_ctrl3_s : std_logic_vector(31 downto 0);
-	signal ext_pb_ctrl4_s : std_logic_vector(31 downto 0);
 
-	signal ext_pp_ctrl1_s : std_logic;
-	signal ext_pp_ctrl2_s : std_logic_vector(31 downto 0);
-	signal ext_pp_ctrl3_s : std_logic;
+	signal ext_pb_ctrl1_s : std_logic; -- W1C
 
-	signal ext_drop_cnt_s : std_logic_vector(31 downto 0);
+	signal ext_pb_ctrl2_s : std_logic_vector(31 downto 0);  -- RO
+	signal ext_pb_ctrl2_conf : std_logic_vector(31 downto 0); 
+
+	signal ext_pb_ctrl3_s : std_logic_vector(31 downto 0); -- RO
+	signal ext_pb_ctrl3_conf : std_logic_vector(31 downto 0);
+
+	signal ext_pb_ctrl4_s : std_logic_vector(31 downto 0); -- RO
+	signal ext_pb_ctrl4_conf : std_logic_vector(31 downto 0);
+
+	signal ext_pp_ctrl1_s : std_logic; -- W1C
+
+	signal ext_pp_ctrl2_s : std_logic_vector(31 downto 0); -- RO
+	signal ext_pp_ctrl2_conf : std_logic_vector(31 downto 0); 
+
+	signal ext_pp_ctrl3_s : std_logic; -- RO
+	signal ext_pp_ctrl3_conf : std_logic;
+
+	signal ext_drop_cnt_s : std_logic_vector(31 downto 0); -- RW
 
 begin
 
@@ -224,7 +235,91 @@ begin
 			end if;
 		end if;
 	end process;
+	--------------------------------------------------------------------------------	
 	
+	ext_pb_ctrl2: process(S_AXI_ACLK)
+  begin
+		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
+			if S_AXI_ARESETN = '1' then
+				ext_pb_ctrl2_s <= (others => '0');
+			else
+				ext_pb_ctrl2_s <= ext_pb_ctrl2_conf ;
+			end if;
+		end if;
+	end process;
+	--------------------------------------------------------------------------------	
+
+	ext_pb_ctrl3: process(S_AXI_ACLK)
+  begin
+		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
+			if S_AXI_ARESETN = '1' then
+				ext_pb_ctrl3_s <= (others => '0');
+			else
+				ext_pb_ctrl3_s <= ext_pb_ctrl3_conf ;
+			end if;
+		end if;
+	end process;
+	--------------------------------------------------------------------------------	
+
+	ext_pb_ctrl4: process(S_AXI_ACLK)
+  begin
+		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
+			if S_AXI_ARESETN = '1' then
+				ext_pb_ctrl4_s <= (others => '0');
+			else
+				ext_pb_ctrl4_s <= ext_pb_ctrl4_conf ;
+			end if;
+		end if;
+	end process;
+	--------------------------------------------------------------------------------	
+	
+	ext_pp_ctrl1: process(S_AXI_ACLK)
+  begin
+		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
+			if S_AXI_ARESETN = '1' then
+				ext_pp_ctrl1_s <= '0';
+			elsif ext_pp_ctrl1_wr_s = '1' then
+				ext_pp_ctrl1_s <= reg_data_s(0);
+			end if;
+		end if;
+	end process;
+	--------------------------------------------------------------------------------	
+
+	ext_pp_ctrl2: process(S_AXI_ACLK)
+  begin
+		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
+			if S_AXI_ARESETN = '1' then
+				ext_pp_ctrl2_s <= (others => '0');
+			else
+				ext_pp_ctrl2_s <= ext_pp_ctrl2_conf ;
+			end if;
+		end if;
+	end process;
+	--------------------------------------------------------------------------------	
+
+	ext_pp_ctrl3: process(S_AXI_ACLK)
+  begin
+		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
+			if S_AXI_ARESETN = '1' then
+				ext_pp_ctrl3_s <= '0';
+			else
+				ext_pp_ctrl3_s <= ext_pp_ctrl3_conf ;
+			end if;
+		end if;
+	end process;
+	--------------------------------------------------------------------------------	
+
+	ext_drop_cnt: process(S_AXI_ACLK)
+  begin
+		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
+			if S_AXI_ARESETN = '1' then
+				ext_drop_cnt_s <= (others => '0');
+			elsif ext_drop_cnt_wr_s = '1' then
+				ext_drop_cnt_s <= reg_data_s;
+			end if;
+		end if;
+	end process;
+
   ex_regs_cont: slave_axi_lite_ex_regs_cont
   generic map(
 
