@@ -1,10 +1,11 @@
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 -- use work.utils_pkg.all;
 
-entity slave_axi_lite_ex_regs_cont is
+entity slave_axi_lite_regs_cont is
   generic (
   -- Users to add parameters here
   -- Width of S_AXI data bus
@@ -16,21 +17,76 @@ entity slave_axi_lite_ex_regs_cont is
   -- Users to add ports here
   -- RO registers
   reg_data_o : out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-	ext_pb_ctrl1_wr_o : out std_logic; -- irq_line_0
 
-	ext_pp_ctrl1_wr_o : out std_logic;
-	ext_drop_cnt_wr_o : out std_logic;
+	sys_cfg_wr_o : out std_logic; -- irq_line_0
+	sys_cfg_i : in std_logic_vector(2 downto 0); -- irq_line_0
 
-	ext_pb_ctrl1_i : in std_logic; -- irq_line_0
-	ext_pb_ctrl2_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); -- in_addr
-	ext_pb_ctrl3_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-	ext_pb_ctrl4_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+  ----------------------------------------------------------------------------------------- 
+  -- PB0 regs
+  ----------------------------------------------------------------------------------------- 
+	pb0_sts_i : in std_logic;
 
-	ext_pp_ctrl1_i : in std_logic;
-	ext_pp_ctrl2_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-	ext_pp_ctrl3_i : in std_logic;
+	pb0_ctrl0_wr_o : out std_logic; 
+	pb0_ctrl0_i : in std_logic; 
 
-	ext_drop_cnt_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+	pb0_ctrl1_wr_o : out std_logic; 
+	pb0_ctrl1_i : in std_logic; 
+
+  -- byte access
+	pb0_ctrl2_wr_o : out std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
+	pb0_ctrl2_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+  
+  -- byte access
+	pb0_ctrl3_wr_o : out std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
+	pb0_ctrl3_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+
+  -- byte access
+	pb0_ctrl4_wr_o : out std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
+	pb0_ctrl4_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+
+  ----------------------------------------------------------------------------------------- 
+  -- PB1 regs
+  ----------------------------------------------------------------------------------------- 
+	pb1_sts_i : in std_logic;
+
+	pb1_ctrl0_wr_o : out std_logic; 
+	pb1_ctrl0_i : in std_logic; 
+
+	pb1_ctrl1_wr_o : out std_logic; 
+	pb1_ctrl1_i : in std_logic; 
+
+  -- byte access
+	pb1_ctrl2_wr_o : out std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
+	pb1_ctrl2_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+  
+  -- byte access
+	pb1_ctrl3_wr_o : out std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
+	pb1_ctrl3_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+
+  -- byte access
+	pb1_ctrl4_wr_o : out std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
+	pb1_ctrl4_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+
+  ----------------------------------------------------------------------------------------- 
+  -- PP regs
+  ----------------------------------------------------------------------------------------- 
+
+	pp_sts_i : in std_logic_vector(11 downto 0);
+
+	pp_ctrl0_wr_o : out std_logic; 
+	pp_ctrl0_i : in std_logic; 
+
+	pp_ctrl1_wr_o : out std_logic; 
+	pp_ctrl1_i : in std_logic; 
+
+  -- byte access
+	pp_ctrl2_wr_o : out std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
+	pp_ctrl2_i : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+  
+	pp_ctrl3_wr_o : out std_logic; 
+	pp_ctrl3_i : in std_logic; 
+  ----------------------------------------------------------------------------------------- 
+
   -- User ports ends
   -- Do not modify the ports beyond this line
   S_AXI_ACLK : in std_logic;
@@ -59,8 +115,9 @@ entity slave_axi_lite_ex_regs_cont is
   S_AXI_RRESP : out std_logic_vector(1 downto 0);
   S_AXI_RVALID : out std_logic;
   S_AXI_RREADY : in std_logic);
-end slave_axi_lite_ex_regs_cont;
-architecture arch_imp of slave_axi_lite_ex_regs_cont is
+end slave_axi_lite_regs_cont;
+
+architecture arch_imp of slave_axi_lite_regs_cont is
  -- AXI4LITE signals
   signal axi_awaddr : std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
   signal axi_awready : std_logic;
@@ -78,7 +135,8 @@ architecture arch_imp of slave_axi_lite_ex_regs_cont is
   -- ADDR_LSB = 2 for 32 bits (n downto 2)
   -- ADDR_LSB = 3 for 64 bits (n downto 3)
   constant ADDR_LSB : integer := (C_S_AXI_DATA_WIDTH/32)+ 1;
-  constant OPT_MEM_ADDR_BITS : integer := 2;
+  -- for 17 regs
+  constant OPT_MEM_ADDR_BITS : integer := 4;
   ------------------------------------------------
   ---- Signals for user logic register space example
   --------------------------------------------------
@@ -167,24 +225,86 @@ architecture arch_imp of slave_axi_lite_ex_regs_cont is
     if rising_edge(S_AXI_ACLK) then
       if S_AXI_ARESETN = '1' then
 
-        ext_pb_ctrl1_wr_o <= '0';
-        ext_pp_ctrl1_wr_o <= '0';
-        ext_drop_cnt_wr_o <= '0';
+
+        sys_cfg_wr_o <= '0';
+
+        pb0_ctrl0_wr_o <= '0';
+        pb0_ctrl1_wr_o <= '0';
+        pb0_ctrl2_wr_o <= (others => '0');
+        pb0_ctrl3_wr_o <= (others => '0');
+        pb0_ctrl4_wr_o <= (others => '0');
+
+        pb1_ctrl0_wr_o <= '0';
+        pb1_ctrl1_wr_o <= '0';
+        pb1_ctrl2_wr_o <= (others => '0');
+        pb1_ctrl3_wr_o <= (others => '0');
+        pb1_ctrl4_wr_o <= (others => '0');
+        
+        pp_ctrl0_wr_o <= '0';
+        pp_ctrl1_wr_o <= '0';
+        pp_ctrl2_wr_o <= (others => '0');
+        pp_ctrl3_wr_o <= '0';
+
       else
         -- Default assignments
-        ext_pb_ctrl1_wr_o <= '0';
-        ext_pp_ctrl1_wr_o <= '0';
-        ext_drop_cnt_wr_o <= '0';
         
+        sys_cfg_wr_o <= '0';
+        pb0_ctrl0_wr_o <= '0';
+        pb0_ctrl1_wr_o <= '0';
+        pb0_ctrl2_wr_o <= (others => '0');
+        pb0_ctrl3_wr_o <= (others => '0');
+        pb0_ctrl4_wr_o <= (others => '0');
+
+        pb1_ctrl0_wr_o <= '0';
+        pb1_ctrl1_wr_o <= '0';
+        pb1_ctrl2_wr_o <= (others => '0');
+        pb1_ctrl3_wr_o <= (others => '0');
+        pb1_ctrl4_wr_o <= (others => '0');
+        
+        pp_ctrl0_wr_o <= '0';
+        pp_ctrl1_wr_o <= '0';
+        pp_ctrl2_wr_o <= (others => '0');
+        pp_ctrl3_wr_o <= '0';
+
         loc_addr := axi_awaddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
         if (slv_reg_wren = '1') then
           case loc_addr is
-          when b"000" =>
-            ext_pb_ctrl1_wr_o <= '1';
-          when b"100" =>
-            ext_pp_ctrl1_wr_o <= '1';
-          when b"111" =>
-            ext_drop_cnt_wr_o <= '1';
+          when x"00" =>
+            sys_cfg_wr_o <= '1';
+          --when x"01" => RO reg
+
+          when x"02" =>
+            pb0_ctrl0_wr_o <= '1';
+          when x"03" =>
+            pb0_ctrl1_wr_o <= '1';
+          when x"04" =>
+            pb0_ctrl2_wr_o <= S_AXI_WSTRB;
+          when x"05" =>
+            pb0_ctrl3_wr_o <= S_AXI_WSTRB;
+          when x"06" =>
+            pb0_ctrl4_wr_o <= S_AXI_WSTRB;
+          --when x"07" => RO reg
+          
+          when x"08" =>
+            pb1_ctrl0_wr_o <= '1';
+          when x"09" =>
+            pb1_ctrl1_wr_o <= '1';
+          when x"0a" =>
+            pb1_ctrl2_wr_o <= S_AXI_WSTRB;
+          when x"0b" =>
+            pb1_ctrl3_wr_o <= S_AXI_WSTRB;
+          when x"0c" =>
+            pb1_ctrl4_wr_o <= S_AXI_WSTRB;
+          --when x"0d" => RO reg
+
+          when x"0e" =>
+            pp_ctrl0_wr_o <= '1';
+          when x"0f" =>
+            pp_ctrl1_wr_o <= '1';
+          when x"10" =>
+            pp_ctrl2_wr_o <= S_AXI_WSTRB;
+          when x"11" =>
+            pp_ctrl3_wr_o <= '1';
           when others =>
           end case;
         end if;
@@ -270,33 +390,55 @@ architecture arch_imp of slave_axi_lite_ex_regs_cont is
   -- and the slave is ready to accept the read address.
   slv_reg_rden <= axi_arready and S_AXI_ARVALID and (not axi_rvalid) ;
 
-  process (ext_pb_ctrl1_i, ext_pb_ctrl2_i, ext_pb_ctrl3_i, ext_pb_ctrl4_i, 
-  ext_pp_ctrl1_i, ext_pp_ctrl2_i, ext_pp_ctrl3_i, ext_drop_cnt_i, 
-  axi_araddr, S_AXI_ARESETN, slv_reg_rden)
+  process (sys_cfg_i, pb0_sts_i, pb1_sts_i, pp_sts_i, 
+           pb0_ctrl0_i, pb0_ctrl1_i, pb0_ctrl2_i, pb0_ctrl3_i, pb0_ctrl4_i, 
+           pb1_ctrl0_i, pb1_ctrl1_i, pb1_ctrl2_i, pb1_ctrl3_i, pb1_ctrl4_i, 
+           pp_ctrl0_i, pp_ctrl1_i, pp_ctrl2_i, pp_ctrl3_i)
 
   variable loc_addr :std_logic_vector(OPT_MEM_ADDR_BITS downto 0);
   begin
     -- Address decoding for reading registers
     loc_addr := axi_araddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
     case loc_addr is
-    when b"000" =>
-      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&ext_pb_ctrl1_i;
-    when b"001" =>
-      reg_data_out <= ext_pb_ctrl2_i;
-    when b"010" =>
-      reg_data_out <= ext_pb_ctrl3_i;
-    when b"011" =>
-      reg_data_out <= ext_pb_ctrl4_i;
-    when b"100" =>
-      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&ext_pp_ctrl1_i;
-    when b"101" =>
-      reg_data_out <= ext_pp_ctrl2_i;
-    when b"110" =>
-      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&ext_pp_ctrl3_i;
-    when b"111" =>
-      reg_data_out <= ext_drop_cnt_i;
+    when x"00" =>
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-3))&sys_cfg_i;
+    when x"01" => 
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb0_sts_i;
+    when x"02" =>
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb0_ctrl0_i;
+    when x"03" =>
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb0_ctrl1_i;
+    when x"04" =>
+      reg_data_out <= pb0_ctrl2_i;
+    when x"05" =>
+      reg_data_out <= pb0_ctrl3_i;
+    when x"06" =>
+      reg_data_out <= pb0_ctrl4_i;
+
+    when x"07" => 
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb1_sts_i;
+    when x"08" =>
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb1_ctrl0_i;
+    when x"09" =>
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb1_ctrl1_i;
+    when x"0a" =>
+      reg_data_out <= pb1_ctrl2_i;
+    when x"0b" =>
+      reg_data_out <= pb1_ctrl3_i;
+    when x"0c" =>
+      reg_data_out <= pb1_ctrl4_i;
+
+    when x"0d" => 
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-12))&pp_sts_i;
+    when x"0e" =>
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pp_ctrl0_i;
+    when x"0f" =>
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pp_ctrl1_i;
+    when x"10" =>
+      reg_data_out <= pp_ctrl2_i;
+    when x"11" =>
+      reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pp_ctrl3_i;
     when others =>
-      reg_data_out <= (others => '0');
     end case;
   end process; 
 

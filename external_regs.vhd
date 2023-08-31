@@ -194,6 +194,7 @@ architecture implementation of external_regs is
 	signal ext_drop_cnt_wr_s : std_logic;
 
 	-- Output
+	-- IMPORTANT _conf signals will be used to set up RO registers
 
 	signal ext_pb_ctrl1_s : std_logic; -- W1C
 
@@ -219,8 +220,8 @@ architecture implementation of external_regs is
 begin
 
   -- [x] slave AXI cont added
-  -- [ ] external_regs implementation
-  -- [ ] AXI cont update to lite version
+  -- [x] external_regs implementation
+  -- [x] AXI cont update to lite version
 	--------------------------------------------------------------------------------	
 	-- Registers
 	--------------------------------------------------------------------------------	
