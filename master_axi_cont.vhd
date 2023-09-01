@@ -283,7 +283,7 @@ begin
 	init_read_txn_pulse <= ( not init_read_txn_ff2 )  and  init_read_txn_ff ;
 
   --Generate a pulse to initiate AXI transaction.
-  process(M_AXI_ACLK)
+  edge_detector_write:process(M_AXI_ACLK)
   begin
     if (rising_edge (M_AXI_ACLK)) then
       -- Initiates AXI transaction delay        
@@ -299,7 +299,7 @@ begin
   end process;
 
   --Generate a pulse to initiate AXI transaction.
-  process(M_AXI_ACLK)
+  edge_detector_read:process(M_AXI_ACLK)
   begin
     if (rising_edge (M_AXI_ACLK)) then
       -- Initiates AXI transaction delay        

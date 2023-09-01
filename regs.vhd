@@ -336,6 +336,7 @@ architecture implementation of regs is
 
 	signal pb0_ctrl1_wr_s : std_logic; 
 	signal pb0_ctrl1_s : std_logic; 
+	signal pb0_ctrl1_conf : std_logic; 
 
   -- byte access
 	signal pb0_ctrl2_wr_s : std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
@@ -360,6 +361,7 @@ architecture implementation of regs is
 
 	signal pb1_ctrl1_wr_s : std_logic; 
 	signal pb1_ctrl1_s : std_logic; 
+	signal pb1_ctrl1_conf : std_logic; 
 
   -- byte access
 	signal pb1_ctrl2_wr_s : std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
@@ -385,6 +387,7 @@ architecture implementation of regs is
 
 	signal pp_ctrl1_wr_s : std_logic; 
 	signal pp_ctrl1_s : std_logic; 
+	signal pp_ctrl1_conf : std_logic; 
 
   -- byte access
 	signal pp_ctrl2_wr_s : std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0); 
@@ -404,7 +407,7 @@ begin
 	--------------------------------------------------------------------------------	
 	-- Regs
 	--------------------------------------------------------------------------------	
-
+	-- RW
 	sys_cfg: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -417,6 +420,7 @@ begin
 	end process;
 
 
+	-- RO
 	pb0_sts: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -428,6 +432,7 @@ begin
 		end if;
 	end process;
 
+	-- RW
 	pb0_ctrl0: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -439,17 +444,23 @@ begin
 		end if;
 	end process;
 
+	-- W1C
 	pb0_ctrl1: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pb0_ctrl1_s <= '0';
 			elsif pb0_ctrl1_wr_s = '1' then
-				pb0_ctrl1_s <= reg_data_s(0);
+				if(reg_data_s(0) = '1') then
+					pb0_ctrl1_s <= '0';
+				end if;
+			else 
+				pb0_ctrl1_s <= pb0_ctrl1_conf;
 			end if;
 		end if;
 	end process;
 
+	-- RW 
 	pb0_ctrl2: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -468,6 +479,7 @@ begin
 	end process;
 
 
+	-- RW 
 	pb0_ctrl3: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -486,6 +498,7 @@ begin
 	end process;
 
 
+	-- RW 
 	pb0_ctrl4: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -504,6 +517,7 @@ begin
 	end process;
   ----------------------------------------------------------------------------------------- 
 
+	-- RO 
 	pb1_sts: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -515,6 +529,7 @@ begin
 		end if;
 	end process;
 
+	-- RW 
 	pb1_ctrl0: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -526,17 +541,23 @@ begin
 		end if;
 	end process;
 
+	-- W1C
 	pb1_ctrl1: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pb1_ctrl1_s <= '0';
 			elsif pb1_ctrl1_wr_s = '1' then
-				pb1_ctrl1_s <= reg_data_s(0);
+				if(reg_data_s(0) = '1') then
+					pb1_ctrl1_s <= '0';
+				end if;
+			else 
+				pb1_ctrl1_s <= pb1_ctrl1_conf;
 			end if;
 		end if;
 	end process;
 
+	-- RW 
 	pb1_ctrl2: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -555,6 +576,7 @@ begin
 	end process;
 
 
+	-- RW 
 	pb1_ctrl3: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -573,6 +595,7 @@ begin
 	end process;
 
 
+	-- RW 
 	pb1_ctrl4: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -591,6 +614,7 @@ begin
 	end process;
   ----------------------------------------------------------------------------------------- 
 
+	-- RO 
 	pp_sts: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -602,6 +626,7 @@ begin
 		end if;
 	end process;
 
+	-- RW 
 	pp_ctrl0: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -613,17 +638,23 @@ begin
 		end if;
 	end process;
 
+	-- W1C 
 	pp_ctrl1: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pp_ctrl1_s <= '0';
 			elsif pp_ctrl1_wr_s = '1' then
-				pp_ctrl1_s <= reg_data_s(0);
+				if(reg_data_s(0) = '1') then
+					pp_ctrl1_s <= '0';
+				end if;
+			else 
+				pp_ctrl1_s <= pp_ctrl1_conf;
 			end if;
 		end if;
 	end process;
 
+	-- RW 
 	pp_ctrl2: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -642,6 +673,7 @@ begin
 	end process;
 
 
+	-- RW 
 	pp_ctrl3: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then

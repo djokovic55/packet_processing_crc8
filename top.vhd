@@ -393,9 +393,9 @@ architecture rtl of top is
 
         -- ADDRESS WRITE CHANNEL
 		m_axi_int_awaddr_reg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
-		-- m_axi_int_awlen_reg: out std_logic_vector(7 downto 0);
-		-- m_axi_int_awsize_reg: out std_logic_vector(2 downto 0);
-		-- m_axi_int_awburst_reg: out std_logic_vector(1 downto 0);
+		m_axi_int_awlen_reg: out std_logic_vector(7 downto 0);
+		m_axi_int_awsize_reg: out std_logic_vector(2 downto 0);
+		m_axi_int_awburst_reg: out std_logic_vector(1 downto 0);
 
 		m_axi_int_awvalid_reg: out std_logic;
 		m_axi_int_awready_reg: in std_logic;
@@ -403,7 +403,7 @@ architecture rtl of top is
         -- WRITE DATA CHANNEL
 		m_axi_int_wdata_reg: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_wstrb_reg: out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
-		-- m_axi_int_wlast_reg: out std_logic;
+		m_axi_int_wlast_reg: out std_logic;
 
 		m_axi_int_wvalid_reg: out std_logic;
 		m_axi_int_wready_reg: in std_logic;
@@ -415,9 +415,9 @@ architecture rtl of top is
 
         -- READ ADDRESS CHANNEL
 		m_axi_int_araddr_reg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
-		-- m_axi_int_arlen_reg: out std_logic_vector(7 downto 0);
-		-- m_axi_int_arsize_reg: out std_logic_vector(2 downto 0);
-		-- m_axi_int_arburst_reg: out std_logic_vector(1 downto 0);
+		m_axi_int_arlen_reg: out std_logic_vector(7 downto 0);
+		m_axi_int_arsize_reg: out std_logic_vector(2 downto 0);
+		m_axi_int_arburst_reg: out std_logic_vector(1 downto 0);
 
 		m_axi_int_arvalid_reg: out std_logic;
 		m_axi_int_arready_reg: in std_logic;
@@ -425,7 +425,7 @@ architecture rtl of top is
         -- READ DATA CHANNEL
 		m_axi_int_rdata_reg: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_reg: in std_logic_vector(1 downto 0);
-		-- m_axi_int_rlast_reg: in std_logic;
+		m_axi_int_rlast_reg: in std_logic;
 
 		m_axi_int_rvalid_reg: in std_logic;
 		m_axi_int_rready_reg: out std_logic;
@@ -436,9 +436,9 @@ architecture rtl of top is
 
 		-- ADDRESS WRITE CHANNEL
 		m_axi_int_awaddr_exreg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
-		-- m_axi_int_awlen_exreg: out std_logic_vector(7 downto 0);
-		-- m_axi_int_awsize_exreg: out std_logic_vector(2 downto 0);
-		-- m_axi_int_awburst_exreg: out std_logic_vector(1 downto 0);
+		m_axi_int_awlen_exreg: out std_logic_vector(7 downto 0);
+		m_axi_int_awsize_exreg: out std_logic_vector(2 downto 0);
+		m_axi_int_awburst_exreg: out std_logic_vector(1 downto 0);
 
 		m_axi_int_awvalid_exreg: out std_logic;
 		m_axi_int_awready_exreg: in std_logic;
@@ -446,7 +446,7 @@ architecture rtl of top is
         -- WRITE DATA CHANNEL
 		m_axi_int_wdata_exreg: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_wstrb_exreg: out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
-		-- m_axi_int_wlast_exreg: out std_logic;
+		m_axi_int_wlast_exreg: out std_logic;
 
 		m_axi_int_wvalid_exreg: out std_logic;
 		m_axi_int_wready_exreg: in std_logic;
@@ -458,9 +458,9 @@ architecture rtl of top is
 
         -- READ ADDRESS CHANNEL
 		m_axi_int_araddr_exreg: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
-		-- m_axi_int_arlen_exreg: out std_logic_vector(7 downto 0);
-		-- m_axi_int_arsize_exreg: out std_logic_vector(2 downto 0);
-		-- m_axi_int_arburst_exreg: out std_logic_vector(1 downto 0);
+		m_axi_int_arlen_exreg: out std_logic_vector(7 downto 0);
+		m_axi_int_arsize_exreg: out std_logic_vector(2 downto 0);
+		m_axi_int_arburst_exreg: out std_logic_vector(1 downto 0);
 
 		m_axi_int_arvalid_exreg: out std_logic;
 		m_axi_int_arready_exreg: in std_logic;
@@ -468,7 +468,7 @@ architecture rtl of top is
         -- READ DATA CHANNEL
 		m_axi_int_rdata_exreg: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		m_axi_int_rresp_exreg: in std_logic_vector(1 downto 0);
-		-- m_axi_int_rlast_exreg: in std_logic;
+		m_axi_int_rlast_exreg: in std_logic;
 
 		m_axi_int_rvalid_exreg: in std_logic;
 		m_axi_int_rready_exreg: out std_logic
@@ -1845,55 +1845,55 @@ begin
     --------------------------------------------------------------------------------
 
     m_axi_int_awaddr_reg => m_axi_int_awaddr_reg,
-    m_axi_int_awlen_reg => m_axi_int_awlen_reg,
-    m_axi_int_awsize_reg => m_axi_int_awsize_reg,
-    m_axi_int_awburst_reg => m_axi_int_awburst_reg,
+    m_axi_int_awlen_reg => open,
+    m_axi_int_awsize_reg => open,
+    m_axi_int_awburst_reg => open,
     m_axi_int_awvalid_reg => m_axi_int_awvalid_reg,
     m_axi_int_awready_reg => m_axi_int_awready_reg,
     m_axi_int_wdata_reg => m_axi_int_wdata_reg,
     m_axi_int_wstrb_reg => m_axi_int_wstrb_reg,
-    m_axi_int_wlast_reg => m_axi_int_wlast_reg,
+    m_axi_int_wlast_reg => open,
     m_axi_int_wvalid_reg => m_axi_int_wvalid_reg,
     m_axi_int_wready_reg => m_axi_int_wready_reg,
     m_axi_int_bresp_reg => m_axi_int_bresp_reg,
     m_axi_int_bvalid_reg => m_axi_int_bvalid_reg,
     m_axi_int_bready_reg => m_axi_int_bready_reg,
     m_axi_int_araddr_reg => m_axi_int_araddr_reg,
-    m_axi_int_arlen_reg => m_axi_int_arlen_reg,
-    m_axi_int_arsize_reg => m_axi_int_arsize_reg,
-    m_axi_int_arburst_reg => m_axi_int_arburst_reg,
+    m_axi_int_arlen_reg => open,
+    m_axi_int_arsize_reg => open,
+    m_axi_int_arburst_reg => open,
     m_axi_int_arvalid_reg => m_axi_int_arvalid_reg,
     m_axi_int_arready_reg => m_axi_int_arready_reg,
     m_axi_int_rdata_reg => m_axi_int_rdata_reg,
     m_axi_int_rresp_reg => m_axi_int_rresp_reg,
-    m_axi_int_rlast_reg => m_axi_int_rlast_reg,
+    m_axi_int_rlast_reg => '1',
     m_axi_int_rvalid_reg => m_axi_int_rvalid_reg,
     m_axi_int_rready_reg => m_axi_int_rready_reg,
     --------------------------------------------------------------------------------
 
     m_axi_int_awaddr_exreg => m_axi_int_awaddr_exreg,
-    m_axi_int_awlen_exreg => m_axi_int_awlen_exreg,
-    m_axi_int_awsize_exreg => m_axi_int_awsize_exreg,
-    m_axi_int_awburst_exreg => m_axi_int_awburst_exreg,
+    m_axi_int_awlen_exreg => open,
+    m_axi_int_awsize_exreg => open,
+    m_axi_int_awburst_exreg => open,
     m_axi_int_awvalid_exreg => m_axi_int_awvalid_exreg,
     m_axi_int_awready_exreg => m_axi_int_awready_exreg,
     m_axi_int_wdata_exreg => m_axi_int_wdata_exreg,
     m_axi_int_wstrb_exreg => m_axi_int_wstrb_exreg,
-    m_axi_int_wlast_exreg => m_axi_int_wlast_exreg,
+    m_axi_int_wlast_exreg => open,
     m_axi_int_wvalid_exreg => m_axi_int_wvalid_exreg,
     m_axi_int_wready_exreg => m_axi_int_wready_exreg,
     m_axi_int_bresp_exreg => m_axi_int_bresp_exreg,
     m_axi_int_bvalid_exreg => m_axi_int_bvalid_exreg,
     m_axi_int_bready_exreg => m_axi_int_bready_exreg,
     m_axi_int_araddr_exreg => m_axi_int_araddr_exreg,
-    m_axi_int_arlen_exreg => m_axi_int_arlen_exreg,
-    m_axi_int_arsize_exreg => m_axi_int_arsize_exreg,
-    m_axi_int_arburst_exreg => m_axi_int_arburst_exreg,
+    m_axi_int_arlen_exreg => open,
+    m_axi_int_arsize_exreg => open,
+    m_axi_int_arburst_exreg => open,
     m_axi_int_arvalid_exreg => m_axi_int_arvalid_exreg,
     m_axi_int_arready_exreg => m_axi_int_arready_exreg,
     m_axi_int_rdata_exreg => m_axi_int_rdata_exreg,
     m_axi_int_rresp_exreg => m_axi_int_rresp_exreg,
-    m_axi_int_rlast_exreg => m_axi_int_rlast_exreg,
+    m_axi_int_rlast_exreg => '1',
     m_axi_int_rvalid_exreg => m_axi_int_rvalid_exreg,
     m_axi_int_rready_exreg => m_axi_int_rready_exreg
     --------------------------------------------------------------------------------

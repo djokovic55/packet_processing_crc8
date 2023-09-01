@@ -197,6 +197,7 @@ architecture implementation of external_regs is
 	-- IMPORTANT _conf signals will be used to set up RO registers
 
 	signal ext_pb_ctrl1_s : std_logic; -- W1C
+	signal ext_pb_ctrl1_conf : std_logic; -- W1C
 
 	signal ext_pb_ctrl2_s : std_logic_vector(31 downto 0);  -- RO
 	signal ext_pb_ctrl2_conf : std_logic_vector(31 downto 0); 
@@ -208,6 +209,7 @@ architecture implementation of external_regs is
 	signal ext_pb_ctrl4_conf : std_logic_vector(31 downto 0);
 
 	signal ext_pp_ctrl1_s : std_logic; -- W1C
+	signal ext_pp_ctrl1_conf : std_logic; -- W1C
 
 	signal ext_pp_ctrl2_s : std_logic_vector(31 downto 0); -- RO
 	signal ext_pp_ctrl2_conf : std_logic_vector(31 downto 0); 
@@ -225,14 +227,18 @@ begin
 	--------------------------------------------------------------------------------	
 	-- Registers
 	--------------------------------------------------------------------------------	
-
+	-- W1C
 	ext_pb_ctrl1: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				ext_pb_ctrl1_s <= '0';
 			elsif ext_pb_ctrl1_wr_s = '1' then
-				ext_pb_ctrl1_s <= reg_data_s(0);
+				if(reg_data_s(0) = '1') then
+					ext_pb_ctrl1_s <= '0';
+				end if;
+			else 
+				ext_pb_ctrl1_s <= ext_pb_ctrl1_conf;
 			end if;
 		end if;
 	end process;
@@ -274,13 +280,18 @@ begin
 	end process;
 	--------------------------------------------------------------------------------	
 	
+	-- W1C
 	ext_pp_ctrl1: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				ext_pp_ctrl1_s <= '0';
 			elsif ext_pp_ctrl1_wr_s = '1' then
-				ext_pp_ctrl1_s <= reg_data_s(0);
+				if(reg_data_s(0) = '1') then
+					ext_pp_ctrl1_s <= '0';
+				end if;
+			else 
+				ext_pp_ctrl1_s <= ext_pp_ctrl1_conf;
 			end if;
 		end if;
 	end process;
