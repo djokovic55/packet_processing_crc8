@@ -9,9 +9,6 @@ entity packet_builder1 is
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
     port (
-        -- INTERRUPT PORTS
-        ext_irq : in std_logic_vector(1 downto 0);
-        int_irq : in std_logic_vector(2 downto 0);
 
         -- FIXME Delete Users ports 
 
@@ -133,11 +130,6 @@ entity packet_builder1 is
 end entity packet_builder1;
 
 architecture Behavioral of packet_builder1 is
-
-    type state_t is (IDLE, PB_STATUS_READ, PP_STATUS_READ, INC_DROP_CNT, BLOCK_SETUP);
-
-    signal state_reg, state_next : state_t := IDLE;
-    -- signal busy_internal : std_logic;
 
   component master_axi_cont is
 	generic (

@@ -19,12 +19,18 @@ entity external_regs is
   port (
 
 		-- FIXME Delete users ports 
-		-- ADDR_O : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
-		-- DATA_O : out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-		-- WR_O : out std_logic;
+		EXT_IRQ : out std_logic_vector(1 downto 0);
 
-		-- DATA_I : in std_logic_vector(C_S_AXI_DATA_WIDTH downto 0);
+		EXT_PB_CTRL1_CONF : in std_logic; 
+		EXT_PB_CTRL2_CONF : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+		EXT_PB_CTRL3_CONF : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+		EXT_PB_CTRL4_CONF : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+
+		EXT_PP_CTRL1_CONF : in std_logic; 
+		EXT_PP_CTRL2_CONF : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0); 
+		EXT_PP_CTRL3_CONF : in std_logic; 
 		-- User ports ends
+
 
 		-- Global Clock Signal
 		S_AXI_ACLK	: in std_logic;
@@ -37,12 +43,12 @@ entity external_regs is
 		-- Write address
 		S_AXI_AWADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		-- Burst length. The burst length gives the exact number of transfers in a burst
-		S_AXI_AWLEN	: in std_logic_vector(7 downto 0);
+		-- S_AXI_AWLEN	: in std_logic_vector(7 downto 0);
 		-- Burst size. This signal indicates the size of each transfer in the burst
-		S_AXI_AWSIZE	: in std_logic_vector(2 downto 0);
+		-- S_AXI_AWSIZE	: in std_logic_vector(2 downto 0);
 		-- Burst type. The burst type and the size information, 
     -- determine how the address for each transfer within the burst is calculated.
-		S_AXI_AWBURST	: in std_logic_vector(1 downto 0);
+		-- S_AXI_AWBURST	: in std_logic_vector(1 downto 0);
 		-- Write address valid. This signal indicates that
     -- the channel is signaling valid write address and
     -- control information.
@@ -63,7 +69,7 @@ entity external_regs is
 		S_AXI_WSTRB	: in std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0);
 		-- Write last. This signal indicates the last transfer
     -- in a write burst.
-		S_AXI_WLAST	: in std_logic;
+		-- S_AXI_WLAST	: in std_logic;
 		-- Write valid. This signal indicates that valid write
     -- data and strobes are available.
 		S_AXI_WVALID	: in std_logic;
@@ -91,12 +97,12 @@ entity external_regs is
     -- address of a read burst transaction.
 		S_AXI_ARADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		-- Burst length. The burst length gives the exact number of transfers in a burst
-		S_AXI_ARLEN	: in std_logic_vector(7 downto 0);
+		-- S_AXI_ARLEN	: in std_logic_vector(7 downto 0);
 		-- Burst size. This signal indicates the size of each transfer in the burst
-		S_AXI_ARSIZE	: in std_logic_vector(2 downto 0);
+		-- S_AXI_ARSIZE	: in std_logic_vector(2 downto 0);
 		-- Burst type. The burst type and the size information, 
     -- determine how the address for each transfer within the burst is calculated.
-		S_AXI_ARBURST	: in std_logic_vector(1 downto 0);
+		-- S_AXI_ARBURST	: in std_logic_vector(1 downto 0);
 		-- Write address valid. This signal indicates that
     -- the channel is signaling valid read address and
     -- control information.
@@ -116,7 +122,7 @@ entity external_regs is
 		S_AXI_RRESP	: out std_logic_vector(1 downto 0);
 		-- Read last. This signal indicates the last transfer
     -- in a read burst.
-		S_AXI_RLAST	: out std_logic;
+		-- S_AXI_RLAST	: out std_logic;
 		-- Read valid. This signal indicates that the channel
     -- is signaling the required read data.
 		S_AXI_RVALID	: out std_logic;
@@ -197,25 +203,25 @@ architecture implementation of external_regs is
 	-- IMPORTANT _conf signals will be used to set up RO registers
 
 	signal ext_pb_ctrl1_s : std_logic; -- W1C
-	signal ext_pb_ctrl1_conf : std_logic; -- W1C
+	-- signal ext_pb_ctrl1_conf : std_logic; -- W1C
 
 	signal ext_pb_ctrl2_s : std_logic_vector(31 downto 0);  -- RO
-	signal ext_pb_ctrl2_conf : std_logic_vector(31 downto 0); 
+	-- signal ext_pb_ctrl2_conf : std_logic_vector(31 downto 0); 
 
 	signal ext_pb_ctrl3_s : std_logic_vector(31 downto 0); -- RO
-	signal ext_pb_ctrl3_conf : std_logic_vector(31 downto 0);
+	-- signal ext_pb_ctrl3_conf : std_logic_vector(31 downto 0);
 
 	signal ext_pb_ctrl4_s : std_logic_vector(31 downto 0); -- RO
-	signal ext_pb_ctrl4_conf : std_logic_vector(31 downto 0);
+	-- signal ext_pb_ctrl4_conf : std_logic_vector(31 downto 0);
 
 	signal ext_pp_ctrl1_s : std_logic; -- W1C
-	signal ext_pp_ctrl1_conf : std_logic; -- W1C
+	-- signal ext_pp_ctrl1_conf : std_logic; -- W1C
 
 	signal ext_pp_ctrl2_s : std_logic_vector(31 downto 0); -- RO
-	signal ext_pp_ctrl2_conf : std_logic_vector(31 downto 0); 
+	-- signal ext_pp_ctrl2_conf : std_logic_vector(31 downto 0); 
 
 	signal ext_pp_ctrl3_s : std_logic; -- RO
-	signal ext_pp_ctrl3_conf : std_logic;
+	-- signal ext_pp_ctrl3_conf : std_logic;
 
 	signal ext_drop_cnt_s : std_logic_vector(31 downto 0); -- RW
 
@@ -224,6 +230,11 @@ begin
   -- [x] slave AXI cont added
   -- [x] external_regs implementation
   -- [x] AXI cont update to lite version
+
+
+	EXT_IRQ(0) <= ext_pb_ctrl1_s;
+	EXT_IRQ(1) <= ext_pp_ctrl1_s;
+
 	--------------------------------------------------------------------------------	
 	-- Registers
 	--------------------------------------------------------------------------------	
@@ -238,7 +249,7 @@ begin
 					ext_pb_ctrl1_s <= '0';
 				end if;
 			else 
-				ext_pb_ctrl1_s <= ext_pb_ctrl1_conf;
+				ext_pb_ctrl1_s <= EXT_PB_CTRL1_CONF;
 			end if;
 		end if;
 	end process;
@@ -250,7 +261,7 @@ begin
 			if S_AXI_ARESETN = '1' then
 				ext_pb_ctrl2_s <= (others => '0');
 			else
-				ext_pb_ctrl2_s <= ext_pb_ctrl2_conf ;
+				ext_pb_ctrl2_s <= EXT_PB_CTRL2_CONF ;
 			end if;
 		end if;
 	end process;
@@ -262,7 +273,7 @@ begin
 			if S_AXI_ARESETN = '1' then
 				ext_pb_ctrl3_s <= (others => '0');
 			else
-				ext_pb_ctrl3_s <= ext_pb_ctrl3_conf ;
+				ext_pb_ctrl3_s <= EXT_PB_CTRL3_CONF ;
 			end if;
 		end if;
 	end process;
@@ -274,7 +285,7 @@ begin
 			if S_AXI_ARESETN = '1' then
 				ext_pb_ctrl4_s <= (others => '0');
 			else
-				ext_pb_ctrl4_s <= ext_pb_ctrl4_conf ;
+				ext_pb_ctrl4_s <= EXT_PB_CTRL4_CONF ;
 			end if;
 		end if;
 	end process;
@@ -291,7 +302,7 @@ begin
 					ext_pp_ctrl1_s <= '0';
 				end if;
 			else 
-				ext_pp_ctrl1_s <= ext_pp_ctrl1_conf;
+				ext_pp_ctrl1_s <= EXT_PP_CTRL1_CONF;
 			end if;
 		end if;
 	end process;
@@ -303,7 +314,7 @@ begin
 			if S_AXI_ARESETN = '1' then
 				ext_pp_ctrl2_s <= (others => '0');
 			else
-				ext_pp_ctrl2_s <= ext_pp_ctrl2_conf ;
+				ext_pp_ctrl2_s <= EXT_PP_CTRL2_CONF ;
 			end if;
 		end if;
 	end process;
@@ -315,7 +326,7 @@ begin
 			if S_AXI_ARESETN = '1' then
 				ext_pp_ctrl3_s <= '0';
 			else
-				ext_pp_ctrl3_s <= ext_pp_ctrl3_conf ;
+				ext_pp_ctrl3_s <= EXT_PP_CTRL3_CONF ;
 			end if;
 		end if;
 	end process;
@@ -327,7 +338,7 @@ begin
 			if S_AXI_ARESETN = '1' then
 				ext_drop_cnt_s <= (others => '0');
 			elsif ext_drop_cnt_wr_s = '1' then
-				ext_drop_cnt_s <= reg_data_s;
+				ext_drop_cnt_s <= std_logic_vector(unsigned(ext_drop_cnt_s) + 1);
 			end if;
 		end if;
 	end process;

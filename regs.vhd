@@ -36,12 +36,12 @@ entity regs is
 		-- Write address
 		S_AXI_AWADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		-- Burst length. The burst length gives the exact number of transfers in a burst
-		S_AXI_AWLEN	: in std_logic_vector(7 downto 0);
+		-- S_AXI_AWLEN	: in std_logic_vector(7 downto 0);
 		-- Burst size. This signal indicates the size of each transfer in the burst
-		S_AXI_AWSIZE	: in std_logic_vector(2 downto 0);
+		-- S_AXI_AWSIZE	: in std_logic_vector(2 downto 0);
 		-- Burst type. The burst type and the size information, 
     -- determine how the address for each transfer within the burst is calculated.
-		S_AXI_AWBURST	: in std_logic_vector(1 downto 0);
+		-- S_AXI_AWBURST	: in std_logic_vector(1 downto 0);
 		-- Write address valid. This signal indicates that
     -- the channel is signaling valid write address and
     -- control information.
@@ -62,7 +62,7 @@ entity regs is
 		S_AXI_WSTRB	: in std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0);
 		-- Write last. This signal indicates the last transfer
     -- in a write burst.
-		S_AXI_WLAST	: in std_logic;
+		-- S_AXI_WLAST	: in std_logic;
 		-- Write valid. This signal indicates that valid write
     -- data and strobes are available.
 		S_AXI_WVALID	: in std_logic;
@@ -90,12 +90,12 @@ entity regs is
     -- address of a read burst transaction.
 		S_AXI_ARADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		-- Burst length. The burst length gives the exact number of transfers in a burst
-		S_AXI_ARLEN	: in std_logic_vector(7 downto 0);
+		-- S_AXI_ARLEN	: in std_logic_vector(7 downto 0);
 		-- Burst size. This signal indicates the size of each transfer in the burst
-		S_AXI_ARSIZE	: in std_logic_vector(2 downto 0);
+		-- S_AXI_ARSIZE	: in std_logic_vector(2 downto 0);
 		-- Burst type. The burst type and the size information, 
     -- determine how the address for each transfer within the burst is calculated.
-		S_AXI_ARBURST	: in std_logic_vector(1 downto 0);
+		-- S_AXI_ARBURST	: in std_logic_vector(1 downto 0);
 		-- Write address valid. This signal indicates that
     -- the channel is signaling valid read address and
     -- control information.
@@ -115,7 +115,7 @@ entity regs is
 		S_AXI_RRESP	: out std_logic_vector(1 downto 0);
 		-- Read last. This signal indicates the last transfer
     -- in a read burst.
-		S_AXI_RLAST	: out std_logic;
+		-- S_AXI_RLAST	: out std_logic;
 		-- Read valid. This signal indicates that the channel
     -- is signaling the required read data.
 		S_AXI_RVALID	: out std_logic;

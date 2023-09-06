@@ -1,10 +1,11 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use IEEE.NUMERIC_STD.ALL;
 
 entity controller is
     generic(
-        C_M_AXI_BURST_LEN	: integer	:= 16;
+        C_M_AXI_BURST_LEN	: integer	:= 1;
         C_M_AXI_ADDR_WIDTH	: integer	:= 32;
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
@@ -12,30 +13,8 @@ entity controller is
 
         -- INTERRUPT PORTS
         ext_irq : in std_logic_vector(1 downto 0);
+        --FIXME internal interrupt handling
         int_irq : in std_logic_vector(2 downto 0);
-
-        -- FIXME Delete Users ports 
-
-        -- AXI_BASE_ADDRESS_I  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
-        -- --  WRITE CHANNEL
-        -- AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
-        --                                     -- to base address
-        -- AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        -- AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-        -- AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
-        -- AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
-        -- AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
-        -- -- READ CHANNEL
-
-        -- AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added
-        --                                                         -- to base address
-
-        -- AXI_READ_INIT_I : in  std_logic;    --starts read transaction
-        -- AXI_READ_DATA_O : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
-        -- AXI_READ_VLD_O  : out std_logic;    -- axi_read_data_o is valid
-        -- AXI_READ_RDY_I  : in std_logic;    -- axi_read_data_o is valid
-        -- AXI_READ_LAST_O : out std_logic;    -- axi_read_data_o is valid
-
         -- User ports ends
 
         --------------------------------------------------------------------------------
@@ -87,7 +66,7 @@ entity controller is
         -- write response. this signal indicates the status of the write transaction.
         M_AXI_BRESP	: in std_logic_vector(1 downto 0);
         -- -- Optional User-defined signal in the write response channel
-        -- M_AXI_BUSER	: in std_logic_vector(C_M_AXI_BUSER_WIDTH-1 downto 0);
+        M_AXI_BUSER	: in std_logic_vector(C_M_AXI_BUSER_WIDTH-1 downto 0);
         -- Write response valid. This signal indicates that the
         -- channel is signaling a valid write response.
         M_AXI_BVALID	: in std_logic;
@@ -260,10 +239,9 @@ architecture Behavioral of controller is
   end component;
 
 
-    signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+    -- signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
     --  WRITE CHANNEL
-    signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
-                                        -- to base address
+    -- signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     signal axi_write_init_s    : std_logic;  -- start write transactions    
     signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
@@ -271,21 +249,63 @@ architecture Behavioral of controller is
     signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
     -- READ CHANNEL
 
-    signal axi_read_address_s : std_logic_vector(31 downto 0);  -- address added
-                                                            -- to base address
-
+    -- signal axi_read_address_s : std_logic_vector(31 downto 0);  -- address added to base address
     signal axi_read_init_s : std_logic;    --starts read transaction
-    signal axi_read_data_s : std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
+    -- signal axi_read_data_s : std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
     signal axi_read_vld_s  : std_logic;    -- axi_read_data_o is valid
     signal axi_read_rdy_s  : std_logic;    -- axi_read_data_o is valid
     signal axi_read_last_s : std_logic;    -- axi_read_data_o is valid
 
-    type state_t is (IDLE, PB0_STATUS_READ, PB1_STATUS_READ, PP_STATUS_READ, INC_DROP_CNT, 
-                     PB_SETUP_CTRL2, PB_SETUP_CTRL3, PB_SETUP_CTRL4, PB_SETUP_CTRL2, PB_SETUP_CTRL3,
-                     IR_CLEAR);
+    signal axi_base_address_reg, axi_base_address_next  : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);  -- base address    
+    signal axi_write_address_reg, axi_write_address_next : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);  -- address added to base address
+    signal axi_read_address_reg, axi_read_address_next : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);  -- address added to base address
+    signal axi_read_data_reg, axi_read_data_next : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- data read from                                                             -- ddr
 
+    signal start_addr_reg, start_addr_next : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+
+    signal clear_intr_addr_reg, clear_intr_addr_next : std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+
+    signal pb_status_cnt_reg, pb_status_cnt_next: std_logic_vector(1 downto 0);  
+
+    signal setup_cnt_reg, setup_cnt_next : std_logic_vector(2 downto 0);  
+    signal cnt_max_reg, cnt_max_next : std_logic_vector(1 downto 0);  
+
+    type state_t is (IDLE, PB_STATUS_READ, PP_STATUS_READ, CTRL_READ, CTRL_SETUP, START_TASK, INC_DROP_CNT, INTR_CLEAR);
     signal state_reg, state_next : state_t;
-    -- signal busy_internal : std_logic;
+
+    -- Register addresses
+    constant REGS_BASE_ADDR: unsigned := x"00100000";
+
+    constant PB_REGS_MAX: unsigned := x"3";
+    constant PP_REGS_MAX: unsigned := x"4";
+
+    constant PB0_STS: unsigned := x"04";
+    constant PB0_START: unsigned := x"08";
+    constant PB0_CTRL2: unsigned := x"10";
+    constant PB0_CTRL3: unsigned := x"14";
+    constant PB0_CTRL4: unsigned := x"18";
+
+    constant PB1_STS: unsigned := x"1C";
+    constant PB1_START: unsigned := x"20";
+    constant PB1_CTRL2: unsigned := x"28";
+    constant PB1_CTRL3: unsigned := x"2C";
+    constant PB1_CTRL4: unsigned := x"30";
+
+    constant PP_STS: unsigned := x"34";
+    constant PP_START: unsigned := x"38";
+    constant PP_CTRL2: unsigned := x"40";
+    constant PP_CTRL3: unsigned := x"44";
+
+    constant EX_REGS_BASE_ADDR: unsigned := x"00200000";
+    constant EXT_PB_CTRL1: unsigned := x"00";
+    constant EXT_PB_CTRL2: unsigned := x"04";
+    constant EXT_PB_CTRL3: unsigned := x"08";
+    constant EXT_PB_CTRL4: unsigned := x"0C";
+
+    constant EXT_PP_CTRL1: unsigned := x"10";
+    constant EXT_PP_CTRL2: unsigned := x"14";
+    constant EXT_PP_CTRL3: unsigned := x"18";
+    constant EXT_DROP_CNT: unsigned := x"1C";
 
 begin
   -- [ ] main controller implementation
@@ -297,43 +317,256 @@ begin
       if(M_AXI_ACLK'event and M_AXI_ACLK = '1') then
         if M_AXI_ARESETN = '1' then
           state_reg <= IDLE;
+
+          axi_base_address_reg <= (others => '0');
+          axi_write_address_reg <= (others => '0');
+          axi_read_address_reg <= (others => '0');
+          axi_read_data_reg <= (others => '0');
+
+          start_addr_reg <= (others => '0');
+          clear_intr_addr_reg <= (others => '0');
+          pb_status_cnt_reg <= (others => '0');
+          setup_cnt_reg <= (others => '0');
+          cnt_max_reg <= (others => '0');
+
+
+          start_addr_reg <= (others => '0');
         else
           state_reg <= state_next;
+
+          axi_base_address_reg <= axi_base_address_next ;
+          axi_write_address_reg <= axi_write_address_next;
+          axi_read_address_reg <= axi_read_address_next;
+          axi_read_data_reg <= axi_read_data_next;
+
+          start_addr_reg <= start_addr_next;
+          clear_intr_addr_reg <= clear_intr_addr_next;
+          pb_status_cnt_reg <= pb_status_cnt_next;
+          setup_cnt_reg <= setup_cnt_next;
+          cnt_max_reg <= cnt_max_next;
         end if;
       end if;
   end process; 
 
   -- comb process
 
-  process(state_reg, ext_irq, int_irq, 
-          axi_write_rdy_s, axi_write_done_s, axi_read_data_s, axi_read_vld_s, axi_read_last_s) is
+  process(state_reg, ext_irq, int_irq, axi_write_done_s, axi_read_last_s, axi_read_data_reg,
+          axi_base_address_reg, axi_write_address_reg, axi_read_address_reg, start_addr_reg,
+          clear_intr_addr_reg, setup_cnt_reg, cnt_max_reg, axi_read_data_next, pb_status_cnt_reg) is
   begin
 
+      -- default values
       state_next <= state_reg;
-
-      axi_base_address_s <= (others => '0');
-
-      axi_write_address_s <= (others => '0');
+      axi_base_address_next <= axi_base_address_reg;
+      axi_write_address_next <= axi_write_address_reg; 
+      axi_read_address_next <= axi_read_address_reg;
+      axi_read_data_next  <= axi_read_data_reg;
+      start_addr_next  <= start_addr_reg;
+      clear_intr_addr_next <= clear_intr_addr_reg;
+      setup_cnt_next <= setup_cnt_reg;
+      cnt_max_next <= cnt_max_reg;
+      pb_status_cnt_next <= pb_status_cnt_reg;
+      
       axi_write_init_s <= '0';
       axi_write_data_s <= (others => '0');
       axi_write_vld_s <= '0';
-
       axi_read_init_s <= '0';
       axi_read_rdy_s <= '0';
 
       case state_reg is
   
           when IDLE =>
-              Dout <= Value0;
-  
-          when PB0_STATUS_READ =>
-              Dout <= Value1;
 
-          when PB1_STATUS_READ =>
-              Dout <= Value1;
+            if(ext_irq(0) = '1') then 
+              axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
+              axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_STS);
+
+              ---------------------------------------- 
+              state_next <= PB_STATUS_READ;
+              ---------------------------------------- 
+            elsif(ext_irq(1) = '1') then
+              ---------------------------------------- 
+              state_next <= PP_STATUS_READ;
+              ---------------------------------------- 
+            else
+
+              ---------------------------------------- 
+              state_next <= IDLE;
+              ---------------------------------------- 
+            end if;
+  
+          when PB_STATUS_READ =>
+
+              axi_read_rdy_s <= '1';
+              -- start transaction
+              axi_read_init_s <= '1';
+
+              if(axi_read_last_s = '1') then
+                if(axi_read_data_next(0) = '1') then
+                  axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+                  axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL2);
+                  cnt_max_next <= std_logic_vector(to_unsigned(2, 2));
+                  
+                  if(unsigned(pb_status_cnt_reg) = 0) then
+                    axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_CTRL2);
+                    start_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_START);
+                  else
+                    axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB1_CTRL2);
+                    start_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB1_START);
+                  end if;
+
+                    ---------------------------------------- 
+                    state_next <= CTRL_READ;
+                    ---------------------------------------- 
+                else
+                  axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
+                  axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB1_STS);
+                  pb_status_cnt_next <= std_logic_vector(unsigned(pb_status_cnt_reg) + 1);
+
+                  if(unsigned(pb_status_cnt_reg) = 1) then
+                    axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+                    axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
+                    clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
+
+                    ---------------------------------------- 
+                    state_next <= INC_DROP_CNT;
+                    ---------------------------------------- 
+                  else
+                    ---------------------------------------- 
+                    state_next <= PB_STATUS_READ;
+                    ---------------------------------------- 
+                    
+                  end if;
+                end if;
+              else
+                ---------------------------------------- 
+                state_next <= PB_STATUS_READ;
+                ---------------------------------------- 
+              end if;
 
           when PP_STATUS_READ =>
-              Dout <= Value1;
+              axi_read_rdy_s <= '1';
+              -- start transaction
+              axi_read_init_s <= '1';
+
+              if(axi_read_last_s = '1') then
+
+                if(axi_read_data_next(0) = '1') then
+                  axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+                  axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PP_CTRL2);
+                  axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PP_CTRL2);
+                  start_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PP_START);
+                  cnt_max_next <= std_logic_vector(to_unsigned(1, 2));
+
+                  ---------------------------------------- 
+                  state_next <= CTRL_READ;
+                  ---------------------------------------- 
+                else
+                  axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+                  axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
+                  clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PP_CTRL1);
+
+                  ---------------------------------------- 
+                  state_next <= INC_DROP_CNT;
+                  ---------------------------------------- 
+                end if;
+              else
+
+                ---------------------------------------- 
+                state_next <= PP_STATUS_READ;
+                ---------------------------------------- 
+              end if;
+
+          
+          when CTRL_READ =>
+              axi_read_rdy_s <= '1';
+              axi_read_init_s <= '1';
+
+              if(axi_read_last_s = '1') then
+                axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
+                ---------------------------------------- 
+                state_next <= CTRL_SETUP;
+                ---------------------------------------- 
+              else
+                ---------------------------------------- 
+                state_next <= CTRL_READ;
+                ---------------------------------------- 
+              end if;
+
+          when CTRL_SETUP =>
+              axi_write_data_s <= axi_read_data_reg;
+              axi_write_vld_s <= '1';
+              axi_write_init_s <= '1';
+
+              if(axi_write_done_s = '1') then 
+                setup_cnt_next <= std_logic_vector(unsigned(setup_cnt_reg) + 1);
+                if(unsigned(setup_cnt_reg) = unsigned(cnt_max_reg)) then
+                  axi_write_address_next <= start_addr_reg;
+                  ---------------------------------------- 
+                  state_next <= START_TASK;
+                  ---------------------------------------- 
+                else 
+                  -- Read new ctrl register
+                  axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+                  axi_read_address_next <= std_logic_vector(unsigned(axi_read_address_reg) + 4);
+                  axi_write_address_next <= std_logic_vector(unsigned(axi_write_address_reg) + 4);
+                  ---------------------------------------- 
+                  state_next <= CTRL_READ;
+                  ---------------------------------------- 
+                end if;
+
+              else
+                ---------------------------------------- 
+                state_next <= CTRL_READ;
+                ---------------------------------------- 
+              end if;
+          when START_TASK =>
+              axi_write_data_s(0) <= '1';
+              axi_write_vld_s <= '1';
+              axi_write_init_s <= '1';
+              if(axi_write_done_s = '1') then
+                axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+                axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
+                
+                ---------------------------------------- 
+                state_next <= INTR_CLEAR;
+                ---------------------------------------- 
+              else
+                ---------------------------------------- 
+                state_next <= START_TASK;
+                ---------------------------------------- 
+              end if;
+          when INC_DROP_CNT =>
+              axi_write_data_s(0) <= '1';
+              axi_write_vld_s <= '1';
+              axi_write_init_s <= '1';
+
+              if(axi_write_done_s = '1') then
+                axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+                axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
+                
+                ---------------------------------------- 
+                state_next <= INTR_CLEAR;
+                ---------------------------------------- 
+              else
+                ---------------------------------------- 
+                state_next <= START_TASK;
+                ---------------------------------------- 
+              end if;
+          when INTR_CLEAR =>
+              axi_write_data_s(0) <= '1';
+              axi_write_vld_s <= '1';
+              axi_write_init_s <= '1';
+
+              if(axi_write_done_s = '1') then
+                ---------------------------------------- 
+                state_next <= IDLE;
+                ---------------------------------------- 
+              else
+                ---------------------------------------- 
+                state_next <= INTR_CLEAR;
+                ---------------------------------------- 
+              end if;
   
       end case;
   end process;
@@ -348,16 +581,16 @@ begin
   port map(
     -- [x] Connect with actual controller signals
 
-    AXI_BASE_ADDRESS_I  => axi_base_address_s, 
-    AXI_WRITE_ADDRESS_I => axi_write_address_s, 
+    AXI_BASE_ADDRESS_I  => axi_base_address_reg, 
+    AXI_WRITE_ADDRESS_I => axi_write_address_reg, 
     AXI_WRITE_INIT_I    => axi_write_init_s, 
     AXI_WRITE_DATA_I    => axi_write_data_s, 
     AXI_WRITE_VLD_I     => axi_write_vld_s, 
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 
-    AXI_READ_ADDRESS_I => axi_read_address_s, 
+    AXI_READ_ADDRESS_I => axi_read_address_reg, 
     AXI_READ_INIT_I => axi_read_init_s, 
-    AXI_READ_DATA_O => axi_read_data_s, 
+    AXI_READ_DATA_O => axi_read_data_next, 
     AXI_READ_VLD_O  => axi_read_vld_s, 
     AXI_READ_RDY_I  => axi_read_rdy_s, 
     AXI_READ_LAST_O => axi_read_last_s, 
