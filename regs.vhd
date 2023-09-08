@@ -16,14 +16,54 @@ entity regs is
     
   );
   port (
+		int_irq_o : out std_logic_vector(2 downto 0);
 
-		-- FIXME Delete users ports 
-		-- ADDR_O : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
-		-- DATA_O : out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-		-- WR_O : out std_logic;
+		-- [x] interface with builder0
 
-		-- DATA_I : in std_logic_vector(C_S_AXI_DATA_WIDTH downto 0);
-		-- User ports ends
+		pb0_start_o : out std_logic;
+		pb0_busy_i : in std_logic;
+		pb0_irq_i : in std_logic;
+		pb0_addr_in_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pb0_byte_cnt_o : out std_logic_vector(3 downto 0);
+		pb0_pkt_type_o : out std_logic_vector(3 downto 0);
+		pb0_ecc_en_o : out std_logic;
+		pb0_crc_en_o : out std_logic;
+		pb0_ins_ecc_err_o : out std_logic_vector(1 downto 0);
+		pb0_ins_crc_err_o : out std_logic;
+		pb0_ecc_val_o : out std_logic_vector(3 downto 0);
+		pb0_crc_val_o: out std_logic_vector(6 downto 0);
+		pb0_sop_val_o: out std_logic_vector(3 downto 0);
+		pb0_data_sel_o: out std_logic_vector(3 downto 0);
+		pb0_addr_out_o: out std_logic_vector(31 downto 0);
+
+		-- [x] interface with builder1
+		pb1_start_o : out std_logic;
+		pb1_busy_i : in std_logic;
+		pb1_irq_i : in std_logic;
+		pb1_addr_in_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pb1_byte_cnt_o : out std_logic_vector(3 downto 0);
+		pb1_pkt_type_o : out std_logic_vector(3 downto 0);
+		pb1_ecc_en_o : out std_logic;
+		pb1_crc_en_o : out std_logic;
+		pb1_ins_ecc_err_o : out std_logic_vector(1 downto 0);
+		pb1_ins_crc_err_o : out std_logic;
+		pb1_ecc_val_o : out std_logic_vector(3 downto 0);
+		pb1_crc_val_o: out std_logic_vector(6 downto 0);
+		pb1_sop_val_o: out std_logic_vector(3 downto 0);
+		pb1_data_sel_o: out std_logic_vector(3 downto 0);
+		pb1_addr_out_o: out std_logic_vector(31 downto 0);
+		-- [x] interface with parser
+
+		pp_start_o : out std_logic;
+		pp_busy_i : in std_logic;
+		pp_irq_i : in std_logic;
+		pp_addr_hdr_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pp_ignore_ecc_err_o : out std_logic;
+		pp_pkt_ecc_corr_i : in std_logic;
+		pp_pkt_ecc_uncorr_i : in std_logic;
+		pp_pkt_crc_err_i : in std_logic;
+		pp_pkt_byte_cnt_i : in std_logic_vector(3 downto 0);
+		pp_pkt_type_i : in std_logic_vector(3 downto 0);
 
 		-- Global Clock Signal
 		S_AXI_ACLK	: in std_logic;
@@ -403,7 +443,85 @@ begin
   -- [x] AXI cont update to lite version
   -- [x] regs implementation
   -- [ ] top integration 
+	--------------------------------------------------------------------------------	
+	-- I/O connections controller - regs, internal irqs
+	--------------------------------------------------------------------------------	
+	int_irq_o(0) <= pb0_ctrl1_s;
+	int_irq_o(1) <= pb1_ctrl1_s;
+	int_irq_o(2) <= pp_ctrl1_s;
 
+	--------------------------------------------------------------------------------	
+	-- I/O connections PB0
+	--------------------------------------------------------------------------------	
+
+	pb0_start_o <= pb0_ctrl0_s; 
+	-- IMPORTANT all inputs to register are assinged inside corresponding proccesses
+	-- pb0_sts_s <= pb0_busy_i; 
+	--FIXME Interrupt req is not implemented fully because cont does not have connections with controller
+	-- done 
+	-- pb0_ctrl1_s <= pb0_irq_i; 
+
+	pb0_addr_in_o <= pb0_ctrl2_s; 
+  
+  -- ctr3 confing
+	pb0_byte_cnt_o <= pb0_ctrl3_s(3 downto 0); -- 4 
+	pb0_pkt_type_o <= pb0_ctrl3_s(7 downto 4); -- 4
+	pb0_ecc_en_o <= pb0_ctrl3_s(8); -- 1
+	pb0_crc_en_o <= pb0_ctrl3_s(9); -- 1
+	pb0_ins_ecc_err_o <= pb0_ctrl3_s(11 downto 10); -- 2
+	pb0_ins_crc_err_o <= pb0_ctrl3_s(12); -- 1
+	pb0_ecc_val_o <= pb0_ctrl3_s(16 downto 13); -- 4
+	pb0_crc_val_o <= pb0_ctrl3_s(23 downto 17); -- 7
+	pb0_sop_val_o <= pb0_ctrl3_s(27 downto 24); -- 4
+	pb0_data_sel_o <= pb0_ctrl3_s(31 downto 28); -- 4
+
+  -- byte access
+	pb0_addr_out_o <= pb0_ctrl4_s; 
+	
+	--------------------------------------------------------------------------------	
+	-- I/O connections PB1
+	--------------------------------------------------------------------------------	
+	pb1_start_o <= pb1_ctrl0_s; 
+	-- pb1_sts_s <= pb1_busy_i; 
+	--FIXME Interrupt req is not implemented fully because cont does not have connections with regs
+	-- pb1_ctrl1_s <= pb1_irq_i; 
+
+	pb1_addr_in_o <= pb1_ctrl2_s; 
+  
+  -- ctr3 confing
+	pb1_byte_cnt_o <= pb1_ctrl3_s(3 downto 0); 
+	pb1_pkt_type_o <= pb1_ctrl3_s(7 downto 4); 
+	pb1_ecc_en_o <= pb1_ctrl3_s(8); 
+	pb1_crc_en_o <= pb1_ctrl3_s(9); 
+	pb1_ins_ecc_err_o <= pb1_ctrl3_s(11 downto 10); 
+	pb1_ins_crc_err_o <= pb1_ctrl3_s(12); 
+	pb1_ecc_val_o <= pb1_ctrl3_s(16 downto 13); 
+	pb1_crc_val_o <= pb1_ctrl3_s(23 downto 17); 
+	pb1_sop_val_o <= pb1_ctrl3_s(27 downto 24); 
+	pb1_data_sel_o <= pb1_ctrl3_s(31 downto 28); 
+
+  -- byte access
+	pb1_addr_out_o <= pb1_ctrl4_s; 
+
+	--------------------------------------------------------------------------------	
+	-- I/O connections PP
+	--------------------------------------------------------------------------------	
+	
+
+	-- pp_sts_s(0) <= pp_busy_i;
+	-- pp_sts_s(1) <= pp_pkt_ecc_corr_i;
+	-- pp_sts_s(2) <= pp_pkt_ecc_uncorr_i;
+	-- pp_sts_s(3) <= pp_pkt_crc_err_i;
+	-- pp_sts_s(7 downto 4) <= pp_pkt_byte_cnt_i;
+	-- pp_sts_s(11 downto 8) <= pp_pkt_type_i;
+
+	pp_start_o <= pp_ctrl0_s; 
+
+
+	-- pp_ctrl1_s <= pp_irq_i; 
+
+	pp_addr_hdr_o <= pp_ctrl2_s; 
+	pp_ignore_ecc_err_o <= pp_ctrl3_s; 
 	--------------------------------------------------------------------------------	
 	-- Regs
 	--------------------------------------------------------------------------------	
@@ -427,7 +545,7 @@ begin
 			if S_AXI_ARESETN = '1' then
 				pb0_sts_s <= '0';
 			else
-				pb0_sts_s <= pb0_sts_conf;
+				pb0_sts_s <= pb0_busy_i;
 			end if;
 		end if;
 	end process;
@@ -455,7 +573,7 @@ begin
 					pb0_ctrl1_s <= '0';
 				end if;
 			else 
-				pb0_ctrl1_s <= pb0_ctrl1_conf;
+				pb0_ctrl1_s <= pb0_irq_i;
 			end if;
 		end if;
 	end process;
@@ -524,7 +642,7 @@ begin
 			if S_AXI_ARESETN = '1' then
 				pb1_sts_s <= '0';
 			else
-				pb1_sts_s <= pb1_sts_conf;
+				pb1_sts_s <= pb1_busy_i;
 			end if;
 		end if;
 	end process;
@@ -552,7 +670,7 @@ begin
 					pb1_ctrl1_s <= '0';
 				end if;
 			else 
-				pb1_ctrl1_s <= pb1_ctrl1_conf;
+				pb1_ctrl1_s <= pb1_irq_i;
 			end if;
 		end if;
 	end process;
@@ -621,7 +739,12 @@ begin
 			if S_AXI_ARESETN = '1' then
 				pp_sts_s <= (others => '0');
 			else
-				pp_sts_s <= pp_sts_conf;
+				pp_sts_s(0) <= pp_busy_i;
+				pp_sts_s(1) <= pp_pkt_ecc_corr_i;
+				pp_sts_s(2) <= pp_pkt_ecc_uncorr_i;
+				pp_sts_s(3) <= pp_pkt_crc_err_i;
+				pp_sts_s(7 downto 4) <= pp_pkt_byte_cnt_i;
+				pp_sts_s(11 downto 8) <= pp_pkt_type_i;
 			end if;
 		end if;
 	end process;
@@ -649,7 +772,7 @@ begin
 					pp_ctrl1_s <= '0';
 				end if;
 			else 
-				pp_ctrl1_s <= pp_ctrl1_conf;
+				pp_ctrl1_s <= pp_irq_i; 
 			end if;
 		end if;
 	end process;
@@ -694,11 +817,6 @@ begin
   )
   port map(
 
-    -- FIXME Connect with actual memory ports
-    -- ADDR_O => open, 
-    -- DATA_O => open, 
-    -- WR_O => open, 
-    -- DATA_I => (others => '0'), 
 		reg_data_o => reg_data_s,
 
 		sys_cfg_wr_o => sys_cfg_wr_s, 

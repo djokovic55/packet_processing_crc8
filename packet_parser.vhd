@@ -13,30 +13,16 @@ entity packet_parser is
     port (
 
         -- INTERRUPT PORTS
-        ext_irq : in std_logic_vector(1 downto 0);
-        int_irq : in std_logic_vector(2 downto 0);
-
-        -- FIXME Delete Users ports 
-
-        AXI_BASE_ADDRESS_I  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
-        --  WRITE CHANNEL
-        AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
-                                            -- to base address
-        AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-        AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
-        AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
-        AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
-        -- READ CHANNEL
-
-        AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added
-                                                                -- to base address
-
-        AXI_READ_INIT_I : in  std_logic;    --starts read transaction
-        AXI_READ_DATA_O : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
-        AXI_READ_VLD_O  : out std_logic;    -- axi_read_data_o is valid
-        AXI_READ_RDY_I  : in std_logic;    -- axi_read_data_o is valid
-        AXI_READ_LAST_O : out std_logic;    -- axi_read_data_o is valid
+        -- FIXME interface with regs
+        start_i : in std_logic;
+        busy_o : out std_logic;
+        irq_o : out std_logic;
+        addr_hdr_i : in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+        ignore_ecc_err_i : in std_logic;
+        pkt_ecc_corr_o : out std_logic;
+        pkt_crc_err_o : out std_logic;
+        pkt_byte_cnt_o : out std_logic_vector(3 downto 0);
+        pkt_type_o : out std_logic_vector(3 downto 0);
 
         -- User ports ends
 
@@ -265,6 +251,23 @@ architecture Behavioral of packet_parser is
 	);
   end component;
 
+  signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+  --  WRITE CHANNEL
+  signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
+  signal axi_write_init_s    : std_logic;  -- start write transactions    
+  signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
+  signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
+  signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
+  -- READ CHANNEL
+
+  signal axi_read_address_s : std_logic_vector(31 downto 0);  -- address added to base address
+  signal axi_read_init_s : std_logic;    --starts read transaction
+  signal axi_read_data_s : std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
+  signal axi_read_vld_s  : std_logic;    -- axi_read_data_o is valid
+  signal axi_read_rdy_s  : std_logic;    -- axi_read_data_o is valid
+  signal axi_read_last_s : std_logic;    -- axi_read_data_o is valid
+
 begin
   -- [ ] packet_parser implementation
   -- [x] master AXI cont added
@@ -279,19 +282,19 @@ begin
   )
   port map(
     --FIXME Connect with actual packet_parser signals
-    AXI_BASE_ADDRESS_I  => AXI_BASE_ADDRESS_I, 
-    AXI_WRITE_ADDRESS_I => AXI_WRITE_ADDRESS_I, 
-    AXI_WRITE_INIT_I    => AXI_WRITE_INIT_I, 
-    AXI_WRITE_DATA_I    => AXI_WRITE_DATA_I, 
-    AXI_WRITE_VLD_I     => AXI_WRITE_VLD_I, 
-    AXI_WRITE_RDY_O     => AXI_WRITE_RDY_O, 
-    AXI_WRITE_DONE_O    => AXI_WRITE_DONE_O, 
-    AXI_READ_ADDRESS_I => AXI_READ_ADDRESS_I, 
-    AXI_READ_INIT_I => AXI_READ_INIT_I, 
-    AXI_READ_DATA_O => AXI_READ_DATA_O, 
-    AXI_READ_VLD_O  => AXI_READ_VLD_O, 
-    AXI_READ_RDY_I  => AXI_READ_RDY_I, 
-    AXI_READ_LAST_O => AXI_READ_LAST_O, 
+    AXI_BASE_ADDRESS_I  => axi_base_address_s, 
+    AXI_WRITE_ADDRESS_I => axi_write_address_s, 
+    AXI_WRITE_INIT_I    => axi_write_init_s, 
+    AXI_WRITE_DATA_I    => axi_write_data_s, 
+    AXI_WRITE_VLD_I     => axi_write_vld_s, 
+    AXI_WRITE_RDY_O     => axi_write_rdy_s, 
+    AXI_WRITE_DONE_O    => axi_write_done_s, 
+    AXI_READ_ADDRESS_I => axi_read_address_s, 
+    AXI_READ_INIT_I => axi_read_init_s, 
+    AXI_READ_DATA_O => axi_read_data_s, 
+    AXI_READ_VLD_O  => axi_read_vld_s, 
+    AXI_READ_RDY_I  => axi_read_rdy_s, 
+    AXI_READ_LAST_O => axi_read_last_s, 
 
 		M_AXI_ACLK => M_AXI_ACLK,	
 		M_AXI_ARESETN => M_AXI_ARESETN,	

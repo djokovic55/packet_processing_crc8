@@ -66,7 +66,7 @@ entity controller is
         -- write response. this signal indicates the status of the write transaction.
         M_AXI_BRESP	: in std_logic_vector(1 downto 0);
         -- -- Optional User-defined signal in the write response channel
-        M_AXI_BUSER	: in std_logic_vector(C_M_AXI_BUSER_WIDTH-1 downto 0);
+        -- M_AXI_BUSER	: in std_logic_vector(C_M_AXI_BUSER_WIDTH-1 downto 0);
         -- Write response valid. This signal indicates that the
         -- channel is signaling a valid write response.
         M_AXI_BVALID	: in std_logic;
@@ -281,18 +281,21 @@ architecture Behavioral of controller is
 
     constant PB0_STS: unsigned := x"04";
     constant PB0_START: unsigned := x"08";
+    constant PB0_CTRL1: unsigned := x"0C";
     constant PB0_CTRL2: unsigned := x"10";
     constant PB0_CTRL3: unsigned := x"14";
     constant PB0_CTRL4: unsigned := x"18";
 
     constant PB1_STS: unsigned := x"1C";
     constant PB1_START: unsigned := x"20";
+    constant PB1_CTRL1: unsigned := x"24";
     constant PB1_CTRL2: unsigned := x"28";
     constant PB1_CTRL3: unsigned := x"2C";
     constant PB1_CTRL4: unsigned := x"30";
 
     constant PP_STS: unsigned := x"34";
     constant PP_START: unsigned := x"38";
+    constant PP_CTRL1: unsigned := x"3C";
     constant PP_CTRL2: unsigned := x"40";
     constant PP_CTRL3: unsigned := x"44";
 
@@ -376,23 +379,37 @@ begin
       case state_reg is
   
           when IDLE =>
+          
+            axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
+            ---------------------------------------- 
+            state_next <= INTR_CLEAR;
+            ---------------------------------------- 
 
-            if(ext_irq(0) = '1') then 
-              axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
-              axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_STS);
-
-              ---------------------------------------- 
-              state_next <= PB_STATUS_READ;
-              ---------------------------------------- 
-            elsif(ext_irq(1) = '1') then
-              ---------------------------------------- 
-              state_next <= PP_STATUS_READ;
-              ---------------------------------------- 
+            if(int_irq(0) = '1') then
+              clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_CTRL1);
+            elsif(int_irq(1) = '1') then
+              clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB1_CTRL1);
+            elsif(int_irq(2) = '1') then
+              clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PP_CTRL1);
             else
 
-              ---------------------------------------- 
-              state_next <= IDLE;
-              ---------------------------------------- 
+              if(ext_irq(0) = '1') then 
+                axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
+                axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_STS);
+
+                ---------------------------------------- 
+                state_next <= PB_STATUS_READ;
+                ---------------------------------------- 
+              elsif(ext_irq(1) = '1') then
+                ---------------------------------------- 
+                state_next <= PP_STATUS_READ;
+                ---------------------------------------- 
+              else
+
+                ---------------------------------------- 
+                state_next <= IDLE;
+                ---------------------------------------- 
+              end if;
             end if;
   
           when PB_STATUS_READ =>
@@ -402,6 +419,9 @@ begin
               axi_read_init_s <= '1';
 
               if(axi_read_last_s = '1') then
+
+                clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
+
                 if(axi_read_data_next(0) = '1') then
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL2);
@@ -426,7 +446,6 @@ begin
                   if(unsigned(pb_status_cnt_reg) = 1) then
                     axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                     axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
-                    clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
 
                     ---------------------------------------- 
                     state_next <= INC_DROP_CNT;
@@ -451,6 +470,8 @@ begin
 
               if(axi_read_last_s = '1') then
 
+                clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PP_CTRL1);
+
                 if(axi_read_data_next(0) = '1') then
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PP_CTRL2);
@@ -464,7 +485,6 @@ begin
                 else
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
-                  clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PP_CTRL1);
 
                   ---------------------------------------- 
                   state_next <= INC_DROP_CNT;
@@ -526,7 +546,7 @@ begin
               axi_write_init_s <= '1';
               if(axi_write_done_s = '1') then
                 axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
-                axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
+                axi_write_address_next <= clear_intr_addr_reg;
                 
                 ---------------------------------------- 
                 state_next <= INTR_CLEAR;
@@ -543,7 +563,7 @@ begin
 
               if(axi_write_done_s = '1') then
                 axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
-                axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
+                axi_write_address_next <= clear_intr_addr_reg;
                 
                 ---------------------------------------- 
                 state_next <= INTR_CLEAR;

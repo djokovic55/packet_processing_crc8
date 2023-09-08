@@ -464,7 +464,7 @@ architecture rtl of top is
         -- write response. this signal indicates the status of the write transaction.
         M_AXI_BRESP	: in std_logic_vector(1 downto 0);
         -- -- Optional User-defined signal in the write response channel
-        M_AXI_BUSER	: in std_logic_vector(C_M_AXI_BUSER_WIDTH-1 downto 0);
+        -- M_AXI_BUSER	: in std_logic_vector(C_M_AXI_BUSER_WIDTH-1 downto 0);
         -- Write response valid. This signal indicates that the
         -- channel is signaling a valid write response.
         M_AXI_BVALID	: in std_logic;
@@ -509,7 +509,7 @@ architecture rtl of top is
     );
   end component;
 
-  component packet_builder1 is
+  component packet_builder is
     generic(
         C_M_AXI_BURST_LEN	: integer	:= 16;
         C_M_AXI_ADDR_WIDTH	: integer	:= 32;
@@ -517,27 +517,22 @@ architecture rtl of top is
     );
     port (
 
-        -- FIXME Delete Users ports 
 
-        AXI_BASE_ADDRESS_I  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
-        --  WRITE CHANNEL
-        AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
-                                            -- to base address
-        AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-        AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
-        AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
-        AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
-        -- READ CHANNEL
-
-        AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added
-                                                                -- to base address
-
-        AXI_READ_INIT_I : in  std_logic;    --starts read transaction
-        AXI_READ_DATA_O : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
-        AXI_READ_VLD_O  : out std_logic;    -- axi_read_data_o is valid
-        AXI_READ_RDY_I  : in std_logic;    -- axi_read_data_o is valid
-        AXI_READ_LAST_O : out std_logic;    -- axi_read_data_o is valid
+        start_i : in std_logic;
+        busy_o : out std_logic;
+        irq_o : out std_logic;
+        addr_in_i : in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+        byte_cnt_i : in std_logic_vector(3 downto 0);
+        pkt_type_i : in std_logic_vector(3 downto 0);
+        ecc_en_i : in std_logic;
+        crc_en_i : in std_logic;
+        ins_ecc_err_i : in std_logic_vector(1 downto 0);
+        ins_crc_err_i : in std_logic;
+        ecc_val_i : in std_logic_vector(3 downto 0);
+        crc_val_i: in std_logic_vector(6 downto 0);
+        sop_val_i: in std_logic_vector(3 downto 0);
+        data_sel_i: in std_logic_vector(3 downto 0);
+        addr_out_i: in std_logic_vector(31 downto 0);
 
         -- User ports ends
 
@@ -635,136 +630,6 @@ architecture rtl of top is
     );
   end component;
 
-  component packet_builder2 is
-    generic(
-        C_M_AXI_BURST_LEN	: integer	:= 16;
-        C_M_AXI_ADDR_WIDTH	: integer	:= 32;
-        C_M_AXI_DATA_WIDTH	: integer	:= 32
-    );
-    port (
-
-        -- INTERRUPT PORTS
-        ext_irq : in std_logic_vector(1 downto 0);
-        int_irq : in std_logic_vector(2 downto 0);
-
-
-        -- FIXME Delete Users ports 
-
-        AXI_BASE_ADDRESS_I  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
-        --  WRITE CHANNEL
-        AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
-                                            -- to base address
-        AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-        AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
-        AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
-        AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
-        -- READ CHANNEL
-
-        AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added
-                                                                -- to base address
-
-        AXI_READ_INIT_I : in  std_logic;    --starts read transaction
-        AXI_READ_DATA_O : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
-        AXI_READ_VLD_O  : out std_logic;    -- axi_read_data_o is valid
-        AXI_READ_RDY_I  : in std_logic;    -- axi_read_data_o is valid
-        AXI_READ_LAST_O : out std_logic;    -- axi_read_data_o is valid
-
-        -- User ports ends
-
-        --------------------------------------------------------------------------------
-        -- Global Clock Signal.
-        --------------------------------------------------------------------------------
-        M_AXI_ACLK	: in std_logic;
-        -- Global Reset Singal. This Signal is Active Low
-        M_AXI_ARESETN	: in std_logic;
-
-        --------------------------------------------------------------------------------
-        -- MASTER INTERFACE WRITE ADDRESS
-        --------------------------------------------------------------------------------
-        M_AXI_AWADDR	: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
-        -- Burst length. The burst length gives the exact number of transfers in a burst
-        M_AXI_AWLEN	: out std_logic_vector(7 downto 0);
-        -- Burst size. This signal indicates the size of each transfer in the burst
-        M_AXI_AWSIZE	: out std_logic_vector(2 downto 0);
-        -- Burst type. The burst type and the size information, 
-        -- determine how the address for each transfer within the burst is calculated.
-        M_AXI_AWBURST	: out std_logic_vector(1 downto 0);
-        -- Write address valid. This signal indicates that
-        -- the channel is signaling valid write address and control information.
-        M_AXI_AWVALID	: out std_logic;
-        -- Write address ready. This signal indicates that
-        -- the slave is ready to accept an address and associated control signals
-        M_AXI_AWREADY	: in std_logic;
-
-        --------------------------------------------------------------------------------
-        -- MASTER INTERFACE WRITE DATA.
-        --------------------------------------------------------------------------------
-        M_AXI_WDATA	: out std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-        -- Write strobes. This signal indicates which byte
-        -- lanes hold valid data. There is one write strobe
-        -- bit for each eight bits of the write data bus.
-        M_AXI_WSTRB	: out std_logic_vector(C_M_AXI_DATA_WIDTH/8-1 downto 0);
-        -- Write last. This signal indicates the last transfer in a write burst.
-        M_AXI_WLAST	: out std_logic;
-        -- Write valid. This signal indicates that valid write
-        -- data and strobes are available
-        M_AXI_WVALID	: out std_logic;
-        -- Write ready. This signal indicates that the slave
-        -- can accept the write data.
-        M_AXI_WREADY	: in std_logic;
-
-        --------------------------------------------------------------------------------
-        -- MASTER INTERFACE WRITE RESPONSE.
-        --------------------------------------------------------------------------------
-        -- m_axi_bid	: in std_logic_vector(c_m_axi_id_width-1 downto 0);
-        -- write response. this signal indicates the status of the write transaction.
-        M_AXI_BRESP	: in std_logic_vector(1 downto 0);
-        -- -- Optional User-defined signal in the write response channel
-        -- M_AXI_BUSER	: in std_logic_vector(C_M_AXI_BUSER_WIDTH-1 downto 0);
-        -- Write response valid. This signal indicates that the
-        -- channel is signaling a valid write response.
-        M_AXI_BVALID	: in std_logic;
-        -- Response ready. This signal indicates that the master
-        -- can accept a write response.
-        M_AXI_BREADY	: out std_logic;
-        
-        --------------------------------------------------------------------------------
-        -- MASTER INTERFACE READ ADDRESS.
-        --------------------------------------------------------------------------------
-        -- Read address. This signal indicates the initial
-        -- address of a read burst transaction.
-        M_AXI_ARADDR	: out std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
-        -- Burst length. The burst length gives the exact number of transfers in a burst
-        M_AXI_ARLEN	: out std_logic_vector(7 downto 0);
-        -- Burst size. This signal indicates the size of each transfer in the burst
-        M_AXI_ARSIZE	: out std_logic_vector(2 downto 0);
-        -- Burst type. The burst type and the size information, 
-        -- determine how the address for each transfer within the burst is calculated.
-        M_AXI_ARBURST	: out std_logic_vector(1 downto 0);
-        -- Write address valid. This signal indicates that
-        -- the channel is signaling valid read address and control information
-        M_AXI_ARVALID	: out std_logic;
-        -- Read address ready. This signal indicates that
-        -- the slave is ready to accept an address and associated control signals
-        M_AXI_ARREADY	: in std_logic;
-
-        --------------------------------------------------------------------------------
-        -- MASTER READ DATA
-        --------------------------------------------------------------------------------
-        M_AXI_RDATA	: in std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-        -- Read response. This signal indicates the status of the read transfer
-        M_AXI_RRESP	: in std_logic_vector(1 downto 0);
-        -- Read last. This signal indicates the last transfer in a read burst
-        M_AXI_RLAST	: in std_logic;
-        -- Read valid. This signal indicates that the channel
-        -- is signaling the required read data.
-        M_AXI_RVALID	: in std_logic;
-        -- Read ready. This signal indicates that the master can
-        -- accept the read data and response information.
-        M_AXI_RREADY	: out std_logic
-    );
-  end component;
 
   component packet_parser is
     generic(
@@ -774,35 +639,17 @@ architecture rtl of top is
     );
     port (
 
-        -- INTERRUPT PORTS
-        ext_irq : in std_logic_vector(1 downto 0);
-        int_irq : in std_logic_vector(2 downto 0);
-
-
-        -- FIXME Delete Users ports 
-
-        AXI_BASE_ADDRESS_I  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
-        --  WRITE CHANNEL
-        AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
-                                            -- to base address
-        AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
-        AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-        AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
-        AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
-        AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
-        -- READ CHANNEL
-
-        AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added
-                                                                -- to base address
-
-        AXI_READ_INIT_I : in  std_logic;    --starts read transaction
-        AXI_READ_DATA_O : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
-        AXI_READ_VLD_O  : out std_logic;    -- axi_read_data_o is valid
-        AXI_READ_RDY_I  : in std_logic;    -- axi_read_data_o is valid
-        AXI_READ_LAST_O : out std_logic;    -- axi_read_data_o is valid
 
         -- User ports ends
-
+        start_i : in std_logic;
+        busy_o : out std_logic;
+        irq_o : out std_logic;
+        addr_hdr_i : in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
+        ignore_ecc_err_i : in std_logic;
+        pkt_ecc_corr_o : out std_logic;
+        pkt_crc_err_o : out std_logic;
+        pkt_byte_cnt_o : out std_logic_vector(3 downto 0);
+        pkt_type_o : out std_logic_vector(3 downto 0);
         --------------------------------------------------------------------------------
         -- Global Clock Signal.
         --------------------------------------------------------------------------------
@@ -1125,7 +972,54 @@ architecture rtl of top is
     
   );
   port (
+		int_irq_o : out std_logic_vector(2 downto 0);
 
+		-- [x] interface with builder0
+
+		pb0_start_o : out std_logic;
+		pb0_busy_i : in std_logic;
+		pb0_irq_i : in std_logic;
+		pb0_addr_in_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pb0_byte_cnt_o : out std_logic_vector(3 downto 0);
+		pb0_pkt_type_o : out std_logic_vector(3 downto 0);
+		pb0_ecc_en_o : out std_logic;
+		pb0_crc_en_o : out std_logic;
+		pb0_ins_ecc_err_o : out std_logic_vector(1 downto 0);
+		pb0_ins_crc_err_o : out std_logic;
+		pb0_ecc_val_o : out std_logic_vector(3 downto 0);
+		pb0_crc_val_o: out std_logic_vector(6 downto 0);
+		pb0_sop_val_o: out std_logic_vector(3 downto 0);
+		pb0_data_sel_o: out std_logic_vector(3 downto 0);
+		pb0_addr_out_o: out std_logic_vector(31 downto 0);
+
+		-- [x] interface with builder1
+		pb1_start_o : out std_logic;
+		pb1_busy_i : in std_logic;
+		pb1_irq_i : in std_logic;
+		pb1_addr_in_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pb1_byte_cnt_o : out std_logic_vector(3 downto 0);
+		pb1_pkt_type_o : out std_logic_vector(3 downto 0);
+		pb1_ecc_en_o : out std_logic;
+		pb1_crc_en_o : out std_logic;
+		pb1_ins_ecc_err_o : out std_logic_vector(1 downto 0);
+		pb1_ins_crc_err_o : out std_logic;
+		pb1_ecc_val_o : out std_logic_vector(3 downto 0);
+		pb1_crc_val_o: out std_logic_vector(6 downto 0);
+		pb1_sop_val_o: out std_logic_vector(3 downto 0);
+		pb1_data_sel_o: out std_logic_vector(3 downto 0);
+		pb1_addr_out_o: out std_logic_vector(31 downto 0);
+		-- [x] interface with parser
+
+		pp_start_o : out std_logic;
+		pp_busy_i : in std_logic;
+		pp_irq_i : in std_logic;
+		pp_addr_hdr_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pp_ignore_ecc_err_o : out std_logic;
+		pp_pkt_ecc_corr_i : in std_logic;
+		pp_pkt_ecc_uncorr_i : in std_logic;
+		pp_pkt_crc_err_i : in std_logic;
+		pp_pkt_byte_cnt_i : in std_logic_vector(3 downto 0);
+		pp_pkt_type_i : in std_logic_vector(3 downto 0);
 		-- Global Clock Signal
 		S_AXI_ACLK	: in std_logic;
 		-- Global Reset Signal. This Signal is Active LOW
@@ -1346,11 +1240,6 @@ architecture rtl of top is
   );
   end component;
 
-  --------------------------------------------------------------------------------
-  -- ex_regs - controller signals 
-  --------------------------------------------------------------------------------
-  signal ext_irq_s : std_logic_vector(1 downto 0);
-  -- signal int_irq_s : std_logic_vector(2 downto 0);
 
   --------------------------------------------------------------------------------
   -- MASTERS signals connections
@@ -1574,6 +1463,66 @@ architecture rtl of top is
   signal m_axi_int_rready_exreg : std_logic;
   --------------------------------------------------------------------------------
 
+  --------------------------------------------------------------------------------
+  -- ex_regs - controller signals 
+  --------------------------------------------------------------------------------
+  signal ext_irq_s : std_logic_vector(1 downto 0);
+  signal int_irq_s : std_logic_vector(2 downto 0);
+
+  --------------------------------------------------------------------------------
+  -- regs - builder0 signals 
+  --------------------------------------------------------------------------------
+
+  signal pb0_start_s : std_logic;
+  signal pb0_busy_s : std_logic;
+  signal pb0_irq_s : std_logic;
+  signal pb0_addr_in_s : std_logic_vector(ADDR_WIDTH-1 downto 0);
+  signal pb0_byte_cnt_s : std_logic_vector(3 downto 0);
+  signal pb0_pkt_type_s : std_logic_vector(3 downto 0);
+  signal pb0_ecc_en_s : std_logic;
+  signal pb0_crc_en_s : std_logic;
+  signal pb0_ins_ecc_err_s : std_logic_vector(1 downto 0);
+  signal pb0_ins_crc_err_s : std_logic;
+  signal pb0_ecc_val_s : std_logic_vector(3 downto 0);
+  signal pb0_crc_val_s: std_logic_vector(6 downto 0);
+  signal pb0_sop_val_s: std_logic_vector(3 downto 0);
+  signal pb0_data_sel_s: std_logic_vector(3 downto 0);
+  signal pb0_addr_out_s: std_logic_vector(31 downto 0);
+
+  --------------------------------------------------------------------------------
+  -- regs - builder1 signals 
+  --------------------------------------------------------------------------------
+
+  signal pb1_start_s : std_logic;
+  signal pb1_busy_s : std_logic;
+  signal pb1_irq_s : std_logic;
+  signal pb1_addr_in_s : std_logic_vector(ADDR_WIDTH-1 downto 0);
+  signal pb1_byte_cnt_s : std_logic_vector(3 downto 0);
+  signal pb1_pkt_type_s : std_logic_vector(3 downto 0);
+  signal pb1_ecc_en_s : std_logic;
+  signal pb1_crc_en_s : std_logic;
+  signal pb1_ins_ecc_err_s : std_logic_vector(1 downto 0);
+  signal pb1_ins_crc_err_s : std_logic;
+  signal pb1_ecc_val_s : std_logic_vector(3 downto 0);
+  signal pb1_crc_val_s: std_logic_vector(6 downto 0);
+  signal pb1_sop_val_s: std_logic_vector(3 downto 0);
+  signal pb1_data_sel_s: std_logic_vector(3 downto 0);
+  signal pb1_addr_out_s: std_logic_vector(31 downto 0);
+
+  --------------------------------------------------------------------------------
+  -- regs - parser signals 
+  --------------------------------------------------------------------------------
+  signal pp_start_s : std_logic;
+  signal pp_busy_s : std_logic;
+  signal pp_irq_s : std_logic;
+  signal pp_addr_hdr_s : std_logic_vector(ADDR_WIDTH-1 downto 0);
+  signal pp_ignore_ecc_err_s : std_logic;
+  signal pp_pkt_ecc_corr_s : std_logic;
+	signal pp_pkt_ecc_uncorr_s : std_logic;
+  signal pp_pkt_crc_err_s : std_logic;
+  signal pp_pkt_byte_cnt_s : std_logic_vector(3 downto 0);
+  signal pp_pkt_type_s : std_logic_vector(3 downto 0);
+
 begin
 
   intcon: interconnect
@@ -1775,7 +1724,7 @@ begin
     m_axi_int_arready_reg => m_axi_int_arready_reg,
     m_axi_int_rdata_reg => m_axi_int_rdata_reg,
     m_axi_int_rresp_reg => m_axi_int_rresp_reg,
-    m_axi_int_rlast_reg => '1',
+    m_axi_int_rlast_reg => m_axi_int_rvalid_reg,
     m_axi_int_rvalid_reg => m_axi_int_rvalid_reg,
     m_axi_int_rready_reg => m_axi_int_rready_reg,
     --------------------------------------------------------------------------------
@@ -1802,7 +1751,8 @@ begin
     m_axi_int_arready_exreg => m_axi_int_arready_exreg,
     m_axi_int_rdata_exreg => m_axi_int_rdata_exreg,
     m_axi_int_rresp_exreg => m_axi_int_rresp_exreg,
-    m_axi_int_rlast_exreg => '1',
+    -- rvalid connected as rlast because only lite transactions are performed
+    m_axi_int_rlast_exreg => m_axi_int_rvalid_exreg,
     m_axi_int_rvalid_exreg => m_axi_int_rvalid_exreg,
     m_axi_int_rready_exreg => m_axi_int_rready_exreg
     --------------------------------------------------------------------------------
@@ -1815,7 +1765,7 @@ begin
 
     C_M_AXI_DATA_WIDTH => DATA_WIDTH,
     C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
-    C_M_AXI_BURST_LEN => BURST_LEN
+    C_M_AXI_BURST_LEN => 1
   ) 
   port map(
         ext_irq => ext_irq_s,
@@ -1868,7 +1818,7 @@ begin
 
   );
 
-  builder1: packet_builder1
+  packet_builder0: packet_builder
   generic map (
 
     C_M_AXI_DATA_WIDTH => DATA_WIDTH,
@@ -1876,24 +1826,22 @@ begin
     C_M_AXI_BURST_LEN => BURST_LEN
   ) 
   port map(
-        ext_irq => (others => '0'),
-        int_irq => (others => '0'),
 
-        -- FIXME Delete Users ports 
-
-        AXI_BASE_ADDRESS_I => AXI_BASE_ADDRESS_I_PB0,  
-        AXI_WRITE_ADDRESS_I => AXI_WRITE_ADDRESS_I_PB0,
-        AXI_WRITE_INIT_I => AXI_WRITE_INIT_I_PB0,    
-        AXI_WRITE_DATA_I => AXI_WRITE_DATA_I_PB0,
-        AXI_WRITE_VLD_I => AXI_WRITE_VLD_I_PB0,
-        AXI_WRITE_RDY_O => AXI_WRITE_RDY_O_PB0,
-        AXI_WRITE_DONE_O => AXI_WRITE_DONE_O_PB0,
-        AXI_READ_ADDRESS_I => AXI_READ_ADDRESS_I_PB0,
-        AXI_READ_INIT_I => AXI_READ_INIT_I_PB0,
-        AXI_READ_DATA_O => AXI_READ_DATA_O_PB0,
-        AXI_READ_VLD_O => AXI_READ_VLD_O_PB0,
-        AXI_READ_RDY_I => AXI_READ_RDY_I_PB0,
-        AXI_READ_LAST_O => AXI_READ_LAST_O_PB0,
+        start_i => pb0_start_s,
+        busy_o => pb0_busy_s,
+        irq_o => pb0_irq_s,
+        addr_in_i => pb0_addr_in_s,
+        byte_cnt_i => pb0_byte_cnt_s,
+        pkt_type_i => pb0_pkt_type_s,
+        ecc_en_i => pb0_ecc_en_s,
+        crc_en_i => pb0_crc_en_s,
+        ins_ecc_err_i => pb0_ins_ecc_err_s,
+        ins_crc_err_i => pb0_ins_crc_err_s,
+        ecc_val_i => pb0_ecc_val_s,
+        crc_val_i => pb0_crc_val_s,
+        sop_val_i => pb0_sop_val_s,
+        data_sel_i => pb0_data_sel_s,
+        addr_out_i => pb0_addr_out_s,
 
         M_AXI_ACLK => clk,
         M_AXI_ARESETN => reset,
@@ -1926,7 +1874,7 @@ begin
 
   );
 
-  builder2: packet_builder2
+  packet_builder1: packet_builder
   generic map (
 
     C_M_AXI_DATA_WIDTH => DATA_WIDTH,
@@ -1934,24 +1882,22 @@ begin
     C_M_AXI_BURST_LEN => BURST_LEN
   ) 
   port map(
-        ext_irq => (others => '0'),
-        int_irq => (others => '0'),
 
-        -- FIXME Delete Users ports 
-
-        AXI_BASE_ADDRESS_I => AXI_BASE_ADDRESS_I_PB1,  
-        AXI_WRITE_ADDRESS_I => AXI_WRITE_ADDRESS_I_PB1,
-        AXI_WRITE_INIT_I => AXI_WRITE_INIT_I_PB1,    
-        AXI_WRITE_DATA_I => AXI_WRITE_DATA_I_PB1,
-        AXI_WRITE_VLD_I => AXI_WRITE_VLD_I_PB1,
-        AXI_WRITE_RDY_O => AXI_WRITE_RDY_O_PB1,
-        AXI_WRITE_DONE_O => AXI_WRITE_DONE_O_PB1,
-        AXI_READ_ADDRESS_I => AXI_READ_ADDRESS_I_PB1,
-        AXI_READ_INIT_I => AXI_READ_INIT_I_PB1,
-        AXI_READ_DATA_O => AXI_READ_DATA_O_PB1,
-        AXI_READ_VLD_O => AXI_READ_VLD_O_PB1,
-        AXI_READ_RDY_I => AXI_READ_RDY_I_PB1,
-        AXI_READ_LAST_O => AXI_READ_LAST_O_PB1,
+        start_i => pb1_start_s,
+        busy_o => pb1_busy_s,
+        irq_o => pb1_irq_s,
+        addr_in_i => pb1_addr_in_s,
+        byte_cnt_i => pb1_byte_cnt_s,
+        pkt_type_i => pb1_pkt_type_s,
+        ecc_en_i => pb1_ecc_en_s,
+        crc_en_i => pb1_crc_en_s,
+        ins_ecc_err_i => pb1_ins_ecc_err_s,
+        ins_crc_err_i => pb1_ins_crc_err_s,
+        ecc_val_i => pb1_ecc_val_s,
+        crc_val_i => pb1_crc_val_s,
+        sop_val_i => pb1_sop_val_s,
+        data_sel_i => pb1_data_sel_s,
+        addr_out_i => pb1_addr_out_s,
 
         M_AXI_ACLK => clk,
         M_AXI_ARESETN => reset,
@@ -1992,24 +1938,17 @@ begin
     C_M_AXI_BURST_LEN => BURST_LEN
   ) 
   port map(
-        ext_irq => (others => '0'),
-        int_irq => (others => '0'),
 
-        -- FIXME Delete Users ports 
 
-        AXI_BASE_ADDRESS_I => AXI_BASE_ADDRESS_I_PP,  
-        AXI_WRITE_ADDRESS_I => AXI_WRITE_ADDRESS_I_PP,
-        AXI_WRITE_INIT_I => AXI_WRITE_INIT_I_PP,    
-        AXI_WRITE_DATA_I => AXI_WRITE_DATA_I_PP,
-        AXI_WRITE_VLD_I => AXI_WRITE_VLD_I_PP,
-        AXI_WRITE_RDY_O => AXI_WRITE_RDY_O_PP,
-        AXI_WRITE_DONE_O => AXI_WRITE_DONE_O_PP,
-        AXI_READ_ADDRESS_I => AXI_READ_ADDRESS_I_PP,
-        AXI_READ_INIT_I => AXI_READ_INIT_I_PP,
-        AXI_READ_DATA_O => AXI_READ_DATA_O_PP,
-        AXI_READ_VLD_O => AXI_READ_VLD_O_PP,
-        AXI_READ_RDY_I => AXI_READ_RDY_I_PP,
-        AXI_READ_LAST_O => AXI_READ_LAST_O_PP,
+        start_i => pp_start_s,
+        busy_o => pp_busy_s,
+        irq_o => pp_irq_s,
+        addr_hdr_i => pp_addr_hdr_s,
+        ignore_ecc_err_i => pp_ignore_ecc_err_s,
+        pkt_ecc_corr_o => pp_pkt_ecc_corr_s,
+        pkt_crc_err_o => pp_pkt_crc_err_s,
+        pkt_byte_cnt_o => pp_pkt_byte_cnt_s,
+        pkt_type_o => pp_pkt_type_s,
 
         M_AXI_ACLK => clk,
         M_AXI_ARESETN => reset,
@@ -2125,6 +2064,54 @@ begin
   ) 
 
   port map(
+
+    int_irq_o => int_irq_s,
+
+		pb0_start_o => pb0_start_s,
+		pb0_busy_i => pb0_busy_s,
+		pb0_irq_i => pb0_irq_s,
+		pb0_addr_in_o => pb0_addr_in_s,
+		pb0_byte_cnt_o => pb0_byte_cnt_s,
+		pb0_pkt_type_o => pb0_pkt_type_s,
+		pb0_ecc_en_o => pb0_ecc_en_s,
+		pb0_crc_en_o => pb0_crc_en_s,
+		pb0_ins_ecc_err_o => pb0_ins_ecc_err_s,
+		pb0_ins_crc_err_o => pb0_ins_crc_err_s,
+		pb0_ecc_val_o => pb0_ecc_val_s,
+		pb0_crc_val_o => pb0_crc_val_s,
+		pb0_sop_val_o => pb0_sop_val_s,
+		pb0_data_sel_o => pb0_data_sel_s,
+		pb0_addr_out_o => pb0_addr_out_s,
+
+		-- [x] interface with builder1
+		pb1_start_o => pb1_start_s,
+		pb1_busy_i => pb1_busy_s,
+		pb1_irq_i => pb1_irq_s,
+		pb1_addr_in_o => pb1_addr_in_s,
+		pb1_byte_cnt_o => pb1_byte_cnt_s,
+		pb1_pkt_type_o => pb1_pkt_type_s,
+		pb1_ecc_en_o => pb1_ecc_en_s,
+		pb1_crc_en_o => pb1_crc_en_s,
+		pb1_ins_ecc_err_o => pb1_ins_ecc_err_s,
+		pb1_ins_crc_err_o => pb1_ins_crc_err_s,
+		pb1_ecc_val_o => pb1_ecc_val_s,
+		pb1_crc_val_o => pb1_crc_val_s,
+		pb1_sop_val_o => pb1_sop_val_s,
+		pb1_data_sel_o => pb1_data_sel_s,
+		pb1_addr_out_o => pb1_addr_out_s,
+		-- [x] interface with parser
+
+		pp_start_o => pp_start_s,
+		pp_busy_i => pp_busy_s,
+		pp_irq_i => pp_irq_s,
+		pp_addr_hdr_o => pp_addr_hdr_s,
+		pp_ignore_ecc_err_o => pp_ignore_ecc_err_s,
+		pp_pkt_ecc_corr_i => pp_pkt_ecc_corr_s,
+		pp_pkt_ecc_uncorr_i => pp_pkt_ecc_uncorr_s,
+		pp_pkt_crc_err_i => pp_pkt_crc_err_s,
+		pp_pkt_byte_cnt_i => pp_pkt_byte_cnt_s,
+		pp_pkt_type_i => pp_pkt_type_s,
+
 		S_AXI_ACLK => clk,
 		S_AXI_ARESETN => reset,
 

@@ -113,6 +113,7 @@ entity slave_axi_lite_regs_cont is
 
   S_AXI_RDATA : out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
   S_AXI_RRESP : out std_logic_vector(1 downto 0);
+  -- IMPORTANT can be connected as rlast?
   S_AXI_RVALID : out std_logic;
   S_AXI_RREADY : in std_logic);
 end slave_axi_lite_regs_cont;
