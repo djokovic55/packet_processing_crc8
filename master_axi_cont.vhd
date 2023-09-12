@@ -389,7 +389,8 @@ begin
 	      else                                                                          
 					 -- IMPORTANT wlast needs write_index
 					 -- BUG changed that write_index is converted to unsigned, comparison is done with unsigned values
-	        if ((((unsigned(write_index) = to_unsigned(C_M_AXI_BURST_LEN-2,C_TRANSACTIONS_NUM+1)) and C_M_AXI_BURST_LEN >= 2) and wnext = '1') or (C_M_AXI_BURST_LEN = 1)) then
+					 -- BUG changed to C_M_AXI_BURST_LEN-1 because elaboration fails for -1 
+	        if ((((unsigned(write_index) = to_unsigned(C_M_AXI_BURST_LEN-1,C_TRANSACTIONS_NUM+1)) and C_M_AXI_BURST_LEN >= 2) and wnext = '1') or (C_M_AXI_BURST_LEN = 1)) then
 	          axi_wlast <= '1';                                                         
 	          -- Deassrt axi_wlast when the last write data has been                    
 	          -- accepted by the slave with a valid response                            

@@ -270,41 +270,41 @@ architecture arch_imp of slave_axi_lite_regs_cont is
         loc_addr := axi_awaddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
         if (slv_reg_wren = '1') then
           case loc_addr is
-          when x"00" =>
+          when "00000" =>
             sys_cfg_wr_o <= '1';
           --when x"01" => RO reg
 
-          when x"02" =>
+          when "00010" =>
             pb0_ctrl0_wr_o <= '1';
-          when x"03" =>
+          when "00011" =>
             pb0_ctrl1_wr_o <= '1';
-          when x"04" =>
+          when "00100" =>
             pb0_ctrl2_wr_o <= S_AXI_WSTRB;
-          when x"05" =>
+          when "00101" =>
             pb0_ctrl3_wr_o <= S_AXI_WSTRB;
-          when x"06" =>
+          when "00110" =>
             pb0_ctrl4_wr_o <= S_AXI_WSTRB;
           --when x"07" => RO reg
           
-          when x"08" =>
+          when "01000" =>
             pb1_ctrl0_wr_o <= '1';
-          when x"09" =>
+          when "01001" =>
             pb1_ctrl1_wr_o <= '1';
-          when x"0a" =>
+          when "01010" =>
             pb1_ctrl2_wr_o <= S_AXI_WSTRB;
-          when x"0b" =>
+          when "01011" =>
             pb1_ctrl3_wr_o <= S_AXI_WSTRB;
-          when x"0c" =>
+          when "01100" =>
             pb1_ctrl4_wr_o <= S_AXI_WSTRB;
           --when x"0d" => RO reg
 
-          when x"0e" =>
+          when "01110" =>
             pp_ctrl0_wr_o <= '1';
-          when x"0f" =>
+          when "01111" =>
             pp_ctrl1_wr_o <= '1';
-          when x"10" =>
+          when "10000" =>
             pp_ctrl2_wr_o <= S_AXI_WSTRB;
-          when x"11" =>
+          when "10001" =>
             pp_ctrl3_wr_o <= '1';
           when others =>
           end case;
@@ -401,43 +401,43 @@ architecture arch_imp of slave_axi_lite_regs_cont is
     -- Address decoding for reading registers
     loc_addr := axi_araddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
     case loc_addr is
-    when x"00" =>
+    when "00000" =>
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-3))&sys_cfg_i;
-    when x"01" => 
+    when "00001" => 
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb0_sts_i;
-    when x"02" =>
+    when "00010" =>
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb0_ctrl0_i;
-    when x"03" =>
+    when "00011" =>
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb0_ctrl1_i;
-    when x"04" =>
+    when "00100" =>
       reg_data_out <= pb0_ctrl2_i;
-    when x"05" =>
+    when "00101" =>
       reg_data_out <= pb0_ctrl3_i;
-    when x"06" =>
+    when "00110" =>
       reg_data_out <= pb0_ctrl4_i;
 
-    when x"07" => 
+    when "00111" => 
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb1_sts_i;
-    when x"08" =>
+    when "01000" =>
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb1_ctrl0_i;
-    when x"09" =>
+    when "01001" =>
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pb1_ctrl1_i;
-    when x"0a" =>
+    when "01010" =>
       reg_data_out <= pb1_ctrl2_i;
-    when x"0b" =>
+    when "01011" =>
       reg_data_out <= pb1_ctrl3_i;
-    when x"0c" =>
+    when "01100" =>
       reg_data_out <= pb1_ctrl4_i;
 
-    when x"0d" => 
+    when "01101" => 
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-12))&pp_sts_i;
-    when x"0e" =>
+    when "01110" =>
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pp_ctrl0_i;
-    when x"0f" =>
+    when "01111" =>
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pp_ctrl1_i;
-    when x"10" =>
+    when "10000" =>
       reg_data_out <= pp_ctrl2_i;
-    when x"11" =>
+    when "10001" =>
       reg_data_out <= std_logic_vector(to_unsigned(0, C_S_AXI_DATA_WIDTH-1))&pp_ctrl3_i;
     when others =>
     end case;

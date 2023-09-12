@@ -3,14 +3,23 @@ checker  checker_top_ex_regs(
 	clk	,
 	reset	,
 
-  ext_pb_ctrl1_conf, 
-  ext_pb_ctrl2_conf, 
-  ext_pb_ctrl3_conf, 
-  ext_pb_ctrl4_conf, 
+  pb_irq,
+  pb_addr_in,
+  pb_byte_cnt,
+  pb_pkt_type,
+  pb_ecc_en,
+  pb_crc_en,
+  pb_ins_ecc_err,
+  pb_ins_crc_err,
+  pb_ecc_val,
+  pb_crc_val,
+  pb_sop_val,
+  pb_data_sel,
+  pb_addr_out,
 
-  ext_pp_ctrl1_conf, 
-  ext_pp_ctrl2_conf, 
-  ext_pp_ctrl3_conf
+  pp_irq,
+  pp_addr_hdr,
+  pp_ignore_ecc_err
 
 );
 

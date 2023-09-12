@@ -12,14 +12,23 @@ entity top is
         clk : in std_logic;
         reset : in std_logic;
 
-        EXT_PB_CTRL1_CONF : in std_logic; 
-        EXT_PB_CTRL2_CONF : in std_logic_vector(DATA_WIDTH-1 downto 0); 
-        EXT_PB_CTRL3_CONF : in std_logic_vector(DATA_WIDTH-1 downto 0); 
-        EXT_PB_CTRL4_CONF : in std_logic_vector(DATA_WIDTH-1 downto 0); 
+				pb_irq_i : in std_logic;
+				pb_addr_in_i : in std_logic_vector(ADDR_WIDTH-1 downto 0);
+				pb_byte_cnt_i : in std_logic_vector(3 downto 0);
+				pb_pkt_type_i : in std_logic_vector(3 downto 0);
+				pb_ecc_en_i : in std_logic;
+				pb_crc_en_i : in std_logic;
+				pb_ins_ecc_err_i : in std_logic_vector(1 downto 0);
+				pb_ins_crc_err_i : in std_logic;
+				pb_ecc_val_i : in std_logic_vector(3 downto 0);
+				pb_crc_val_i: in std_logic_vector(6 downto 0);
+				pb_sop_val_i: in std_logic_vector(3 downto 0);
+				pb_data_sel_i: in std_logic_vector(3 downto 0);
+				pb_addr_out_i: in std_logic_vector(DATA_WIDTH-1 downto 0);
 
-        EXT_PP_CTRL1_CONF : in std_logic; 
-        EXT_PP_CTRL2_CONF : in std_logic_vector(DATA_WIDTH-1 downto 0); 
-        EXT_PP_CTRL3_CONF : in std_logic
+				pp_irq_i : in std_logic;
+				pp_addr_hdr_i : in std_logic_vector(ADDR_WIDTH-1 downto 0);
+				pp_ignore_ecc_err_i : in std_logic
   );
 end entity;
 -- some test
@@ -1462,10 +1471,21 @@ architecture rtl of top is
   signal m_axi_int_rvalid_exreg : std_logic;
   signal m_axi_int_rready_exreg : std_logic;
   --------------------------------------------------------------------------------
+	-- SECTION top signals
+  --------------------------------------------------------------------------------
+
+	signal ext_pb_ctrl1_s : std_logic; 
+	signal ext_pb_ctrl2_s : std_logic_vector(DATA_WIDTH-1 downto 0); 
+	signal ext_pb_ctrl3_s : std_logic_vector(DATA_WIDTH-1 downto 0); 
+	signal ext_pb_ctrl4_s : std_logic_vector(DATA_WIDTH-1 downto 0); 
+
+	signal ext_pp_ctrl1_s : std_logic; 
+	signal ext_pp_ctrl2_s : std_logic_vector(DATA_WIDTH-1 downto 0); 
+	signal ext_pp_ctrl3_s : std_logic;
 
   --------------------------------------------------------------------------------
   -- ex_regs - controller signals 
-  --------------------------------------------------------------------------------
+  
   signal ext_irq_s : std_logic_vector(1 downto 0);
   signal int_irq_s : std_logic_vector(2 downto 0);
 
@@ -1524,7 +1544,37 @@ architecture rtl of top is
   signal pp_pkt_type_s : std_logic_vector(3 downto 0);
 
 begin
+	
+  --------------------------------------------------------------------------------
+  -- SECTION top signals connections
+  --------------------------------------------------------------------------------
 
+	ext_pb_ctrl1_s <= pb_irq_i; 
+	ext_pb_ctrl2_s <= pb_addr_in_i; 
+
+  
+  -- ctrl3 config
+	ext_pb_ctrl3_s(3 downto 0) <= pb_byte_cnt_i; 
+	ext_pb_ctrl3_s(7 downto 4) <= pb_pkt_type_i; 
+	ext_pb_ctrl3_s(8) <= pb_ecc_en_i; 
+	ext_pb_ctrl3_s(9) <= pb_crc_en_i; 
+	ext_pb_ctrl3_s(11 downto 10) <= pb_ins_ecc_err_i; 
+	ext_pb_ctrl3_s(12) <= pb_ins_crc_err_i; 
+	ext_pb_ctrl3_s(16 downto 13) <= pb_ecc_val_i; 
+	ext_pb_ctrl3_s(23 downto 17) <= pb_crc_val_i; 
+	ext_pb_ctrl3_s(27 downto 24) <= pb_sop_val_i; 
+	ext_pb_ctrl3_s(31 downto 28) <= pb_data_sel_i; 
+
+  -- byte access
+	ext_pb_ctrl4_s <= pb_addr_out_i; 
+
+  --------------------------------------------------------------------------------
+
+	ext_pp_ctrl1_s <= pp_irq_i; 
+	ext_pp_ctrl2_s <= pp_addr_hdr_i; 
+	ext_pp_ctrl3_s <= pp_ignore_ecc_err_i; 
+
+  --------------------------------------------------------------------------------
   intcon: interconnect
   generic map(
     C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
@@ -2159,14 +2209,14 @@ begin
 
 		EXT_IRQ => ext_irq_s,
 
-		EXT_PB_CTRL1_CONF => EXT_PB_CTRL1_CONF, 
-		EXT_PB_CTRL2_CONF => EXT_PB_CTRL2_CONF, 
-		EXT_PB_CTRL3_CONF => EXT_PB_CTRL3_CONF, 
-		EXT_PB_CTRL4_CONF => EXT_PB_CTRL4_CONF, 
+		EXT_PB_CTRL1_CONF => ext_pb_ctrl1_s, 
+		EXT_PB_CTRL2_CONF => ext_pb_ctrl2_s, 
+		EXT_PB_CTRL3_CONF => ext_pb_ctrl3_s, 
+		EXT_PB_CTRL4_CONF => ext_pb_ctrl4_s, 
 
-		EXT_PP_CTRL1_CONF => EXT_PP_CTRL1_CONF, 
-		EXT_PP_CTRL2_CONF => EXT_PP_CTRL2_CONF, 
-		EXT_PP_CTRL3_CONF => EXT_PP_CTRL3_CONF, 
+		EXT_PP_CTRL1_CONF => ext_pp_ctrl1_s, 
+		EXT_PP_CTRL2_CONF => ext_pp_ctrl2_s, 
+		EXT_PP_CTRL3_CONF => ext_pp_ctrl3_s, 
 
 		S_AXI_AWADDR => m_axi_int_awaddr_exreg,
 		-- S_AXI_AWLEN => m_axi_int_awlen_exreg,
