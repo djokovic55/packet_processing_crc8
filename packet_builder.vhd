@@ -270,6 +270,21 @@ architecture Behavioral of packet_builder is
 begin
   -- [ ] packet_builder1 implementation
   -- [x] master AXI cont added
+	axi_base_address_s <= (others => '0');
+	axi_write_address_s <= (others => '0');
+	axi_write_init_s <= '0';
+	axi_write_data_s <= (others => '0');
+	axi_write_vld_s <= '0';
+
+
+	axi_read_address_s <= (others => '0');
+	axi_read_init_s <= '0';
+	axi_read_data_s <= (others => '0');
+	axi_read_rdy_s <= '0';
+
+	-- status
+	busy_o <= '0';
+
   
 
 

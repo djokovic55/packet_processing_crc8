@@ -28,5 +28,8 @@ checker  checker_top_ex_regs(
 	endclocking
 
 	default disable iff reset;
+	
+	pb_irq_c: cover property(pb_irq[*5]);
+	pp_irq_c: cover property(pp_irq[*5]);
 
 endchecker
