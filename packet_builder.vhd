@@ -266,6 +266,8 @@ architecture Behavioral of packet_builder is
     signal axi_read_rdy_s  : std_logic;    -- axi_read_data_o is valid
     signal axi_read_last_s : std_logic;    -- axi_read_data_o is valid
 
+    signal busy_reg, busy_next : std_logic;    -- axi_read_data_o is valid
+
 
 begin
   -- [ ] packet_builder1 implementation
@@ -282,11 +284,28 @@ begin
 	axi_read_data_s <= (others => '0');
 	axi_read_rdy_s <= '0';
 
-	-- status
-	busy_o <= '0';
 
-  
+	seq_logic : process(M_AXI_ACLK)
+	begin
+      if(M_AXI_ACLK'event and M_AXI_ACLK = '1') then
+        if M_AXI_ARESETN = '1' then
+					busy_reg <= '1';
+				else
+					busy_reg <= busy_next;
+				end if;
+			end if;
+	end process;
 
+	comb_logic: process(busy_reg, start_i)
+	begin
+      if(start_i = '1') then
+				busy_next <= '0';
+			else
+				busy_next <= busy_reg;
+			end if;
+	end process;
+
+	busy_o <= busy_reg;
 
   master_axi_cont_ctrl: master_axi_cont
   generic map(

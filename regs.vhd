@@ -584,14 +584,19 @@ begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pb0_ctrl2_s <= (others => '0');
-			elsif pb0_ctrl2_wr_s(3) = '1' then
-				pb0_ctrl2_s(31 downto 24) <= reg_data_s(31 downto 24);
-			elsif pb0_ctrl2_wr_s(2) = '1' then
-				pb0_ctrl2_s(23 downto 16) <= reg_data_s(23 downto 16);
-			elsif pb0_ctrl2_wr_s(1) = '1' then
-				pb0_ctrl2_s(15 downto 8) <= reg_data_s(15 downto 8);
-			elsif pb0_ctrl2_wr_s(0) = '1' then
-				pb0_ctrl2_s(7 downto 0) <= reg_data_s(7 downto 0);
+			else
+				if pb0_ctrl2_wr_s(3) = '1' then
+					pb0_ctrl2_s(31 downto 24) <= reg_data_s(31 downto 24);
+				end if;
+				if pb0_ctrl2_wr_s(2) = '1' then
+					pb0_ctrl2_s(23 downto 16) <= reg_data_s(23 downto 16);
+				end if;
+				if pb0_ctrl2_wr_s(1) = '1' then
+					pb0_ctrl2_s(15 downto 8) <= reg_data_s(15 downto 8);
+				end if;
+				if pb0_ctrl2_wr_s(0) = '1' then
+					pb0_ctrl2_s(7 downto 0) <= reg_data_s(7 downto 0);
+				end if;
 			end if;
 		end if;
 	end process;
@@ -603,14 +608,19 @@ begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pb0_ctrl3_s <= (others => '0');
-			elsif pb0_ctrl3_wr_s(3) = '1' then
-				pb0_ctrl3_s(31 downto 24) <= reg_data_s(31 downto 24);
-			elsif pb0_ctrl3_wr_s(2) = '1' then
-				pb0_ctrl3_s(23 downto 16) <= reg_data_s(23 downto 16);
-			elsif pb0_ctrl3_wr_s(1) = '1' then
-				pb0_ctrl3_s(15 downto 8) <= reg_data_s(15 downto 8);
-			elsif pb0_ctrl3_wr_s(0) = '1' then
-				pb0_ctrl3_s(7 downto 0) <= reg_data_s(7 downto 0);
+			else
+				if pb0_ctrl3_wr_s(3) = '1' then
+					pb0_ctrl3_s(31 downto 24) <= reg_data_s(31 downto 24);
+				end if;
+				if pb0_ctrl3_wr_s(2) = '1' then
+					pb0_ctrl3_s(23 downto 16) <= reg_data_s(23 downto 16);
+				end if;
+				if pb0_ctrl3_wr_s(1) = '1' then
+					pb0_ctrl3_s(15 downto 8) <= reg_data_s(15 downto 8);
+				end if;
+				if pb0_ctrl3_wr_s(0) = '1' then
+					pb0_ctrl3_s(7 downto 0) <= reg_data_s(7 downto 0);
+				end if;
 			end if;
 		end if;
 	end process;
@@ -622,14 +632,19 @@ begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pb0_ctrl4_s <= (others => '0');
-			elsif pb0_ctrl4_wr_s(3) = '1' then
-				pb0_ctrl4_s(31 downto 24) <= reg_data_s(31 downto 24);
-			elsif pb0_ctrl4_wr_s(2) = '1' then
-				pb0_ctrl4_s(23 downto 16) <= reg_data_s(23 downto 16);
-			elsif pb0_ctrl4_wr_s(1) = '1' then
-				pb0_ctrl4_s(15 downto 8) <= reg_data_s(15 downto 8);
-			elsif pb0_ctrl4_wr_s(0) = '1' then
-				pb0_ctrl4_s(7 downto 0) <= reg_data_s(7 downto 0);
+			else
+				if pb0_ctrl4_wr_s(3) = '1' then
+					pb0_ctrl4_s(31 downto 24) <= reg_data_s(31 downto 24);
+				end if;
+				if pb0_ctrl4_wr_s(2) = '1' then
+					pb0_ctrl4_s(23 downto 16) <= reg_data_s(23 downto 16);
+				end if;
+				if pb0_ctrl4_wr_s(1) = '1' then
+					pb0_ctrl4_s(15 downto 8) <= reg_data_s(15 downto 8);
+				end if;
+				if pb0_ctrl4_wr_s(0) = '1' then
+					pb0_ctrl4_s(7 downto 0) <= reg_data_s(7 downto 0);
+				end if;
 			end if;
 		end if;
 	end process;
@@ -681,14 +696,19 @@ begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pb1_ctrl2_s <= (others => '0');
-			elsif pb1_ctrl2_wr_s(3) = '1' then
-				pb1_ctrl2_s(31 downto 24) <= reg_data_s(31 downto 24);
-			elsif pb1_ctrl2_wr_s(2) = '1' then
-				pb1_ctrl2_s(23 downto 16) <= reg_data_s(23 downto 16);
-			elsif pb1_ctrl2_wr_s(1) = '1' then
-				pb1_ctrl2_s(15 downto 8) <= reg_data_s(15 downto 8);
-			elsif pb1_ctrl2_wr_s(0) = '1' then
-				pb1_ctrl2_s(7 downto 0) <= reg_data_s(7 downto 0);
+			else
+				if pb1_ctrl2_wr_s(3) = '1' then
+					pb1_ctrl2_s(31 downto 24) <= reg_data_s(31 downto 24);
+				end if;
+				if pb1_ctrl2_wr_s(2) = '1' then
+					pb1_ctrl2_s(23 downto 16) <= reg_data_s(23 downto 16);
+				end if;
+				if pb1_ctrl2_wr_s(1) = '1' then
+					pb1_ctrl2_s(15 downto 8) <= reg_data_s(15 downto 8);
+				end if;
+				if pb1_ctrl2_wr_s(0) = '1' then
+					pb1_ctrl2_s(7 downto 0) <= reg_data_s(7 downto 0);
+				end if;
 			end if;
 		end if;
 	end process;
@@ -700,14 +720,19 @@ begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pb1_ctrl3_s <= (others => '0');
-			elsif pb1_ctrl3_wr_s(3) = '1' then
-				pb1_ctrl3_s(31 downto 24) <= reg_data_s(31 downto 24);
-			elsif pb1_ctrl3_wr_s(2) = '1' then
-				pb1_ctrl3_s(23 downto 16) <= reg_data_s(23 downto 16);
-			elsif pb1_ctrl3_wr_s(1) = '1' then
-				pb1_ctrl3_s(15 downto 8) <= reg_data_s(15 downto 8);
-			elsif pb1_ctrl3_wr_s(0) = '1' then
-				pb1_ctrl3_s(7 downto 0) <= reg_data_s(7 downto 0);
+			else
+				if pb1_ctrl3_wr_s(3) = '1' then
+					pb1_ctrl3_s(31 downto 24) <= reg_data_s(31 downto 24);
+				end if;
+				if pb1_ctrl3_wr_s(2) = '1' then
+					pb1_ctrl3_s(23 downto 16) <= reg_data_s(23 downto 16);
+				end if;
+				if pb1_ctrl3_wr_s(1) = '1' then
+					pb1_ctrl3_s(15 downto 8) <= reg_data_s(15 downto 8);
+				end if;
+				if pb1_ctrl3_wr_s(0) = '1' then
+					pb1_ctrl3_s(7 downto 0) <= reg_data_s(7 downto 0);
+				end if;
 			end if;
 		end if;
 	end process;
@@ -719,14 +744,19 @@ begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pb1_ctrl4_s <= (others => '0');
-			elsif pb1_ctrl4_wr_s(3) = '1' then
-				pb1_ctrl4_s(31 downto 24) <= reg_data_s(31 downto 24);
-			elsif pb1_ctrl4_wr_s(2) = '1' then
-				pb1_ctrl4_s(23 downto 16) <= reg_data_s(23 downto 16);
-			elsif pb1_ctrl4_wr_s(1) = '1' then
-				pb1_ctrl4_s(15 downto 8) <= reg_data_s(15 downto 8);
-			elsif pb1_ctrl4_wr_s(0) = '1' then
-				pb1_ctrl4_s(7 downto 0) <= reg_data_s(7 downto 0);
+			else
+				if pb1_ctrl4_wr_s(3) = '1' then
+					pb1_ctrl4_s(31 downto 24) <= reg_data_s(31 downto 24);
+				end if;
+				if pb1_ctrl4_wr_s(2) = '1' then
+					pb1_ctrl4_s(23 downto 16) <= reg_data_s(23 downto 16);
+				end if;
+				if pb1_ctrl4_wr_s(1) = '1' then
+					pb1_ctrl4_s(15 downto 8) <= reg_data_s(15 downto 8);
+				end if;
+				if pb1_ctrl4_wr_s(0) = '1' then
+					pb1_ctrl4_s(7 downto 0) <= reg_data_s(7 downto 0);
+				end if;
 			end if;
 		end if;
 	end process;
@@ -783,14 +813,19 @@ begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
 			if S_AXI_ARESETN = '1' then
 				pp_ctrl2_s <= (others => '0');
-			elsif pp_ctrl2_wr_s(3) = '1' then
-				pp_ctrl2_s(31 downto 24) <= reg_data_s(31 downto 24);
-			elsif pp_ctrl2_wr_s(2) = '1' then
-				pp_ctrl2_s(23 downto 16) <= reg_data_s(23 downto 16);
-			elsif pp_ctrl2_wr_s(1) = '1' then
-				pp_ctrl2_s(15 downto 8) <= reg_data_s(15 downto 8);
-			elsif pp_ctrl2_wr_s(0) = '1' then
-				pp_ctrl2_s(7 downto 0) <= reg_data_s(7 downto 0);
+			else
+				if pp_ctrl2_wr_s(3) = '1' then
+					pp_ctrl2_s(31 downto 24) <= reg_data_s(31 downto 24);
+				end if;
+				if pp_ctrl2_wr_s(2) = '1' then
+					pp_ctrl2_s(23 downto 16) <= reg_data_s(23 downto 16);
+				end if;
+				if pp_ctrl2_wr_s(1) = '1' then
+					pp_ctrl2_s(15 downto 8) <= reg_data_s(15 downto 8);
+				end if;
+				if pp_ctrl2_wr_s(0) = '1' then
+					pp_ctrl2_s(7 downto 0) <= reg_data_s(7 downto 0);
+				end if;
 			end if;
 		end if;
 	end process;

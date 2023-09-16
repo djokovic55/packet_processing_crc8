@@ -242,6 +242,7 @@ architecture Behavioral of controller is
     --  WRITE CHANNEL
     signal axi_write_init_reg, axi_write_init_next : std_logic;    --starts write transaction
     signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+    signal axi_write_data_next, axi_write_data_reg    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
     signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
     signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
@@ -312,7 +313,7 @@ begin
   -- [x] master AXI cont added
   
 
-  state: process(M_AXI_ACLK, M_AXI_ARESETN)
+  state: process(M_AXI_ACLK)
   begin
       if(M_AXI_ACLK'event and M_AXI_ACLK = '1') then
         if M_AXI_ARESETN = '1' then
@@ -320,6 +321,8 @@ begin
 
           axi_base_address_reg <= (others => '0');
           axi_write_address_reg <= (others => '0');
+					axi_write_data_reg <= (others => '0');
+
           axi_read_address_reg <= (others => '0');
           axi_read_data_reg <= (others => '0');
 
@@ -339,6 +342,7 @@ begin
           axi_base_address_reg <= axi_base_address_next ;
           axi_write_address_reg <= axi_write_address_next;
           axi_write_init_reg <= axi_write_init_next;
+					axi_write_data_reg <= axi_write_data_next;
 
           axi_read_address_reg <= axi_read_address_next;
           axi_read_data_reg <= axi_read_data_next;
@@ -355,10 +359,9 @@ begin
   end process; 
 
   -- comb process
-
   process(state_reg, ext_irq, int_irq, axi_write_done_s, axi_read_last_s, axi_read_data_reg,
           axi_base_address_reg, axi_write_address_reg, axi_read_address_reg, start_addr_reg,
-          clear_intr_addr_reg, setup_cnt_reg, cnt_max_reg, axi_read_data_next, pb_status_cnt_reg, axi_read_init_reg, axi_write_init_reg) is
+          clear_intr_addr_reg, setup_cnt_reg, cnt_max_reg, axi_read_data_next, pb_status_cnt_reg, axi_read_init_reg, axi_write_init_reg, axi_write_data_reg) is
   begin
 
       -- default values
@@ -366,14 +369,16 @@ begin
       axi_base_address_next <= axi_base_address_reg;
       axi_write_address_next <= axi_write_address_reg; 
       axi_read_address_next <= axi_read_address_reg;
-      axi_read_data_next  <= axi_read_data_reg;
+			-- BUG read_data is received only from axi_controller
+      --axi_read_data_next  <= axi_read_data_reg;
+
       start_addr_next  <= start_addr_reg;
       clear_intr_addr_next <= clear_intr_addr_reg;
       setup_cnt_next <= setup_cnt_reg;
       cnt_max_next <= cnt_max_reg;
       pb_status_cnt_next <= pb_status_cnt_reg;
       
-      axi_write_data_s <= (others => '0');
+      axi_write_data_next <= axi_write_data_reg;
       axi_write_vld_s <= '0';
       axi_read_rdy_s <= '0';
 
@@ -446,7 +451,7 @@ begin
                 clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
 
 
-                if(axi_read_data_next(0) = '0') then
+                if(axi_read_data_next(0) = '1') then
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL2);
                   cnt_max_next <= std_logic_vector(to_unsigned(2, 2));
@@ -475,6 +480,7 @@ begin
                     axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
 										-- start new trans one cycle earlier
 										axi_write_init_next <= '1';
+										axi_write_data_next <= x"00000001";
 
                     ---------------------------------------- 
                     state_next <= INC_DROP_CNT;
@@ -503,7 +509,7 @@ begin
 
                 clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PP_CTRL1);
 
-                if(axi_read_data_next(0) = '0') then
+                if(axi_read_data_next(0) = '1') then
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PP_CTRL2);
                   axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PP_CTRL2);
@@ -520,6 +526,7 @@ begin
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
 									-- start new trans one cycle earlier
 									axi_write_init_next <= '1';
+									axi_write_data_next <= x"00000001";
 
                   ---------------------------------------- 
                   state_next <= INC_DROP_CNT;
@@ -542,6 +549,10 @@ begin
 
 								-- start new trans one cycle earlier
 								axi_write_init_next <= '1';
+
+								-- register read data to write_reg
+								axi_write_data_next <= axi_read_data_next;
+
                 ---------------------------------------- 
                 state_next <= CTRL_SETUP;
                 ---------------------------------------- 
@@ -552,7 +563,8 @@ begin
               end if;
 
           when CTRL_SETUP =>
-              axi_write_data_s <= axi_read_data_reg;
+              -- axi_write_data_s <= axi_read_data_reg;
+							-- data is valid because write_data is ready in write_data_reg
               axi_write_vld_s <= '1';
 
               if(axi_write_done_s = '1') then 
@@ -562,6 +574,7 @@ begin
 
 									-- start new trans one cycle earlier
 									axi_write_init_next <= '1';
+									axi_write_data_next <= x"00000001";
                   ---------------------------------------- 
                   state_next <= START_TASK;
                   ---------------------------------------- 
@@ -584,7 +597,7 @@ begin
                 ---------------------------------------- 
               end if;
           when START_TASK =>
-              axi_write_data_s(0) <= '1';
+              -- axi_write_data_s(0) <= '1';
               axi_write_vld_s <= '1';
 
               if(axi_write_done_s = '1') then
@@ -593,6 +606,7 @@ begin
                 
 								-- start new trans one cycle earlier
 								axi_write_init_next <= '1';
+								-- write data takes previous value
                 ---------------------------------------- 
                 state_next <= INTR_CLEAR;
                 ---------------------------------------- 
@@ -602,7 +616,7 @@ begin
                 ---------------------------------------- 
               end if;
           when INC_DROP_CNT =>
-              axi_write_data_s(0) <= '1';
+              -- axi_write_data_s(0) <= '1';
               axi_write_vld_s <= '1';
 
               if(axi_write_done_s = '1') then
@@ -620,7 +634,7 @@ begin
                 ---------------------------------------- 
               end if;
           when INTR_CLEAR =>
-              axi_write_data_s(0) <= '1';
+              -- axi_write_data_s(0) <= '1';
               axi_write_vld_s <= '1';
 
               if(axi_write_done_s = '1') then
@@ -649,7 +663,7 @@ begin
     AXI_BASE_ADDRESS_I  => axi_base_address_reg, 
     AXI_WRITE_ADDRESS_I => axi_write_address_reg, 
     AXI_WRITE_INIT_I    => axi_write_init_reg, 
-    AXI_WRITE_DATA_I    => axi_write_data_s, 
+    AXI_WRITE_DATA_I    => axi_write_data_reg, 
     AXI_WRITE_VLD_I     => axi_write_vld_s, 
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 

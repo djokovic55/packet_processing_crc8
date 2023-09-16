@@ -272,6 +272,19 @@ begin
   -- [ ] packet_parser implementation
   -- [x] master AXI cont added
   
+	axi_base_address_s <= (others => '0');
+	axi_write_address_s <= (others => '0');
+	axi_write_init_s <= '0';
+	axi_write_data_s <= (others => '0');
+	axi_write_vld_s <= '0';
+
+
+	axi_read_address_s <= (others => '0');
+	axi_read_init_s <= '0';
+	axi_read_data_s <= (others => '0');
+	axi_read_rdy_s <= '0';
+
+	busy_o <= '1';
 
 
   master_axi_cont_ctrl: master_axi_cont
