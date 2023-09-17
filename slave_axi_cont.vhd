@@ -19,7 +19,7 @@ entity slave_axi_cont is
 		-- Users to add ports here
 		ADDR_O : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		DATA_O : out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-		WR_O : out std_logic;
+		WR_O : out std_logic_vector(3 downto 0);
 
 		DATA_I : in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 
@@ -441,7 +441,9 @@ elsif((unsigned(axi_arlen_cntr) = unsigned(axi_arlen) - 1) and axi_rlast = '0' a
 
 	-- Add user logic here
 
-	WR_O <= axi_wready and S_AXI_WVALID;
+	WR_O <= S_AXI_WSTRB when axi_wready = '1' and S_AXI_WVALID = '1' else
+					(others => '0');
+
 	ADDR_O <= axi_araddr when axi_arv_arr_flag = '1' else
 						axi_awaddr when axi_awv_awr_flag = '1' else
 						(others => '0');

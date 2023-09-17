@@ -249,6 +249,8 @@ architecture Behavioral of packet_builder is
 		M_AXI_RREADY	: out std_logic
 	);
   end component;
+
+
     signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
     --  WRITE CHANNEL
     signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
