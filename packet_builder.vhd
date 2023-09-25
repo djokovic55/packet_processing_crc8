@@ -4,7 +4,6 @@ use ieee.std_logic_1164.all;
 
 entity packet_builder is
     generic(
-        C_M_AXI_BURST_LEN	: integer	:= 16;
         C_M_AXI_ADDR_WIDTH	: integer	:= 32;
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
@@ -129,33 +128,34 @@ architecture Behavioral of packet_builder is
 
   component master_axi_cont is
 	generic (
-		C_M_AXI_BURST_LEN	: integer	:= 16;
+		-- Width of Address Bus
 		C_M_AXI_ADDR_WIDTH	: integer	:= 32;
+		-- Width of Data Bus
 		C_M_AXI_DATA_WIDTH	: integer	:= 32
 	);
 	port (
-    -- SECTION PORTS TO MAIN PACKET_BUILDER
 		-- Users to add ports here
     AXI_BASE_ADDRESS_I  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+		AXI_BURST_LEN : in std_logic_vector(7 downto 0);
+
     --  WRITE CHANNEL
-    AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
+    AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
-    AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
+    AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
 
     -- READ CHANNEL
-    AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added to base address
     AXI_READ_INIT_I : in  std_logic;    --starts read transaction
+    AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added to base address
     AXI_READ_DATA_O : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
     AXI_READ_VLD_O  : out std_logic;    -- axi_read_data_o is valid
     AXI_READ_RDY_I  : in std_logic;    -- axi_read_data_o is valid
     AXI_READ_LAST_O : out std_logic;    -- axi_read_data_o is valid
 		-- User ports ends
-		-- Do not modify the ports beyond this line
 
-    -- SECTION INTERCONNECT PORTS 
+		-- Do not modify the ports beyond this line
 		--------------------------------------------------------------------------------
 		-- Global Clock Signal.
 		--------------------------------------------------------------------------------
@@ -250,30 +250,131 @@ architecture Behavioral of packet_builder is
 	);
   end component;
 
+  component fifo is
+  generic (
+    DATA_WIDTH : natural := 8;
+    FIFO_DEPTH : integer := 19
+    );
+  port (
+    reset : in std_logic;
+    clk      : in std_logic;
+ 
+    -- FIFO Write Interface
+    wr_en_i   : in  std_logic;
+    wr_data_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+    full_o    : out std_logic;
+ 
+    -- FIFO Read Interface
+    rd_en_i   : in  std_logic;
+    rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+    empty_o   : out std_logic
+    );
+  end component;
 
-    signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
-    --  WRITE CHANNEL
-    signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
-    signal axi_write_init_s    : std_logic;  -- start write transactions    
-    signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-    signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
-    signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
-    signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
-    -- READ CHANNEL
+  component piso is 
+  port( 
+        clk: in std_logic; 
+        reset : in std_logic; --active high reset
+        start_piso : in std_logic;
+        -- shift : in std_logic;
+        d : in std_logic_vector(31 downto 0);
+        crc_stall : out std_logic;
+        q : out std_logic;
 
-    signal axi_read_address_s : std_logic_vector(31 downto 0);  -- address added to base address
-    signal axi_read_init_s : std_logic;    --starts read transaction
-    signal axi_read_data_s : std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
-    signal axi_read_vld_s  : std_logic;    -- axi_read_data_o is valid
-    signal axi_read_rdy_s  : std_logic;    -- axi_read_data_o is valid
-    signal axi_read_last_s : std_logic;    -- axi_read_data_o is valid
+        burst_len : in std_logic_vector(7 downto 0);
+        vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0)
+        ); 
+  end component;
 
-    signal busy_reg, busy_next : std_logic;    -- axi_read_data_o is valid
+  component crc8 is 
+  port( 
+        clk: in std_logic; 
+        reset : in std_logic; --active high reset
+        crc_stall : in std_logic;
+        size_data : in std_logic_vector(15 downto 0);  --the size of input stream in bits.
+        data_in : in std_logic; --serial input
+        crc_out : out std_logic_vector(7 downto 0); --8 bit crc checksum
+        crc_ready : out std_logic --high when the calculation is done.
+        ); 
+  end component;
+
+  component hamming_12_8 is 
+    Port ( 
+      data_in : in  STD_LOGIC_VECTOR(7 downto 0);
+      parity_out : out  STD_LOGIC_VECTOR(3 downto 0)
+    );
+  end component;
+  --------------------------------------------------------------------------------
+  -- Module connection signals
+  --------------------------------------------------------------------------------
+  -- Fifo in - READ
+  signal fifo_in_wr_en_s   : std_logic;
+  signal fifo_in_wr_data_s : std_logic_vector(7 downto 0);
+  signal fifo_in_full_s    : std_logic;
+
+  signal fifo_in_rd_en_s   : std_logic;
+  signal fifo_in_rd_data_s : std_logic_vector(7 downto 0);
+  signal fifo_in_empty_s   : std_logic;
+  --------------------------------------------------------------------------------
+
+  -- Fifo in - WRITE
+  signal fifo_out_wr_en_s   : std_logic;
+  signal fifo_out_wr_data_s : std_logic_vector(7 downto 0);
+  signal fifo_out_full_s    : std_logic;
+
+  signal fifo_out_rd_en_s   : std_logic;
+  signal fifo_out_rd_data_s : std_logic_vector(7 downto 0);
+  signal fifo_out_empty_s   : std_logic;
+  --------------------------------------------------------------------------------
+
+  -- Piso 
+  signal start_piso_s : std_logic;
+  signal piso_d_s : std_logic_vector(31 downto 0);
+  signal piso_q_s : std_logic;
+
+  signal burst_len_s : std_logic_vector(7 downto 0);
+  signal vld_bytes_last_pulse_cnt_s : std_logic_vector(1 downto 0);
+  --------------------------------------------------------------------------------
+  -- crc8
+  signal crc_stall_s : std_logic;
+  signal crc_size_data_s : std_logic_vector(15 downto 0); 
+  signal crc_data_in_s : std_logic;
+  signal crc_out_s : std_logic_vector(7 downto 0);
+  signal crc_ready_s : std_logic; 
+  --------------------------------------------------------------------------------
+  -- hamming
+  signal hamming_data_in_s : STD_LOGIC_VECTOR(7 downto 0);
+  signal hamming_parity_out_s : STD_LOGIC_VECTOR(3 downto 0);
+  --------------------------------------------------------------------------------
+
+
+  -- AXI4
+  signal axi_burst_len_s  : std_logic_vector(7 downto 0);  
+  signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+  --  WRITE CHANNEL
+  signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
+  signal axi_write_init_s    : std_logic;  -- start write transactions    
+  signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
+  signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
+  signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
+  -- READ CHANNEL
+
+  signal axi_read_address_s : std_logic_vector(31 downto 0);  -- address added to base address
+  signal axi_read_init_s : std_logic;    --starts read transaction
+  signal axi_read_data_s : std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
+  signal axi_read_vld_s  : std_logic;    -- axi_read_data_o is valid
+  signal axi_read_rdy_s  : std_logic;    -- axi_read_data_o is valid
+  signal axi_read_last_s : std_logic;    -- axi_read_data_o is valid
+
+  signal busy_reg, busy_next : std_logic;    -- axi_read_data_o is valid
 
 
 begin
   -- [ ] packet_builder1 implementation
   -- [x] master AXI cont added
+  -- burst len configuration
+  axi_burst_len_s <= (others => '0');
 	axi_base_address_s <= (others => '0');
 	axi_write_address_s <= (others => '0');
 	axi_write_init_s <= '0';
@@ -285,6 +386,7 @@ begin
 	axi_read_init_s <= '0';
 	axi_read_data_s <= (others => '0');
 	axi_read_rdy_s <= '0';
+
 
 
 	seq_logic : process(M_AXI_ACLK)
@@ -309,15 +411,75 @@ begin
 
 	busy_o <= busy_reg;
 
+  --------------------------------------------------------------------------------
+  -- Module instantiations
+  --------------------------------------------------------------------------------
+  fifo_in: fifo
+  port map(
+
+    clk => M_AXI_ACLK,      
+    reset => M_AXI_ARESETN, 
+    wr_en_i => fifo_in_wr_en_s,   
+    wr_data_i => fifo_in_wr_data_s, 
+    full_o => fifo_in_full_s,    
+    rd_en_i => fifo_in_rd_en_s,   
+    rd_data_o => fifo_in_rd_data_s, 
+    empty_o => fifo_in_empty_s   
+  );
+
+  fifo_out: fifo
+  port map(
+
+    clk => M_AXI_ACLK,      
+    reset => M_AXI_ARESETN, 
+    wr_en_i => fifo_out_wr_en_s,   
+    wr_data_i => fifo_out_wr_data_s, 
+    full_o => fifo_out_full_s,    
+    rd_en_i => fifo_out_rd_en_s,   
+    rd_data_o => fifo_out_rd_data_s, 
+    empty_o => fifo_out_empty_s   
+  );
+
+  piso_reg: piso
+  port map(
+    clk => M_AXI_ACLK,      
+    reset => M_AXI_ARESETN, 
+    start_piso => start_piso_s,
+    d => piso_d_s,
+    crc_stall => crc_stall_s,
+    q => piso_q_s,
+
+    burst_len => burst_len_s,
+    vld_bytes_last_pulse_cnt => vld_bytes_last_pulse_cnt_s
+  );
+
+  crc8_calc: crc8
+  port map(
+
+    clk => M_AXI_ACLK,      
+    reset => M_AXI_ARESETN, 
+    crc_stall => crc_stall_s, 
+    size_data => crc_size_data_s, 
+    data_in => crc_data_in_s, 
+    crc_out => crc_out_s, 
+    crc_ready => crc_ready_s 
+  );
+  hamming_calc: hamming_12_8
+  port map (
+    data_in => hamming_data_in_s,
+    parity_out => hamming_parity_out_s
+  );
+
+
   master_axi_cont_ctrl: master_axi_cont
   generic map(
-      C_M_AXI_BURST_LEN	=> C_M_AXI_BURST_LEN,
       C_M_AXI_ADDR_WIDTH => C_M_AXI_ADDR_WIDTH,
       C_M_AXI_DATA_WIDTH => C_M_AXI_DATA_WIDTH
   )
   port map(
     --[x] Connect with actual packet_builder1 signals
 
+    AXI_BURST_LEN  => axi_burst_len_s, 
     AXI_BASE_ADDRESS_I  => axi_base_address_s, 
     AXI_WRITE_ADDRESS_I => axi_write_address_s, 
     AXI_WRITE_INIT_I    => axi_write_init_s, 

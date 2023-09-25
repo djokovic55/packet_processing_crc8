@@ -411,7 +411,6 @@ architecture rtl of top is
 
   component controller is
     generic(
-        C_M_AXI_BURST_LEN	: integer	:= 16;
         C_M_AXI_ADDR_WIDTH	: integer	:= 32;
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
@@ -520,7 +519,6 @@ architecture rtl of top is
 
   component packet_builder is
     generic(
-        C_M_AXI_BURST_LEN	: integer	:= 16;
         C_M_AXI_ADDR_WIDTH	: integer	:= 32;
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
@@ -642,7 +640,6 @@ architecture rtl of top is
 
   component packet_parser is
     generic(
-        C_M_AXI_BURST_LEN	: integer	:= 16;
         C_M_AXI_ADDR_WIDTH	: integer	:= 32;
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
@@ -1705,8 +1702,7 @@ begin
   generic map (
 
     C_M_AXI_DATA_WIDTH => DATA_WIDTH,
-    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
-    C_M_AXI_BURST_LEN => 1
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH
   ) 
   port map(
         ext_irq => ext_irq_s,
@@ -1763,8 +1759,7 @@ begin
   generic map (
 
     C_M_AXI_DATA_WIDTH => DATA_WIDTH,
-    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
-    C_M_AXI_BURST_LEN => BURST_LEN
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH
   ) 
   port map(
 
@@ -1819,8 +1814,7 @@ begin
   generic map (
 
     C_M_AXI_DATA_WIDTH => DATA_WIDTH,
-    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
-    C_M_AXI_BURST_LEN => BURST_LEN
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH
   ) 
   port map(
 
@@ -1875,8 +1869,7 @@ begin
   generic map (
 
     C_M_AXI_DATA_WIDTH => DATA_WIDTH,
-    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH,
-    C_M_AXI_BURST_LEN => BURST_LEN
+    C_M_AXI_ADDR_WIDTH => ADDR_WIDTH
   ) 
   port map(
 

@@ -6,7 +6,6 @@ use ieee.std_logic_1164.all;
 
 entity packet_parser is
     generic(
-        C_M_AXI_BURST_LEN	: integer	:= 16;
         C_M_AXI_ADDR_WIDTH	: integer	:= 32;
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
@@ -130,33 +129,34 @@ architecture Behavioral of packet_parser is
 
   component master_axi_cont is
 	generic (
-		C_M_AXI_BURST_LEN	: integer	:= 16;
+		-- Width of Address Bus
 		C_M_AXI_ADDR_WIDTH	: integer	:= 32;
+		-- Width of Data Bus
 		C_M_AXI_DATA_WIDTH	: integer	:= 32
 	);
 	port (
-    -- SECTION PORTS TO MAIN packet_parser
 		-- Users to add ports here
     AXI_BASE_ADDRESS_I  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+		AXI_BURST_LEN : in std_logic_vector(7 downto 0);
+
     --  WRITE CHANNEL
-    AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
+    AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
-    AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
+    AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
 
     -- READ CHANNEL
-    AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added to base address
     AXI_READ_INIT_I : in  std_logic;    --starts read transaction
+    AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added to base address
     AXI_READ_DATA_O : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
     AXI_READ_VLD_O  : out std_logic;    -- axi_read_data_o is valid
     AXI_READ_RDY_I  : in std_logic;    -- axi_read_data_o is valid
     AXI_READ_LAST_O : out std_logic;    -- axi_read_data_o is valid
 		-- User ports ends
-		-- Do not modify the ports beyond this line
 
-    -- SECTION INTERCONNECT PORTS 
+		-- Do not modify the ports beyond this line
 		--------------------------------------------------------------------------------
 		-- Global Clock Signal.
 		--------------------------------------------------------------------------------
@@ -251,6 +251,7 @@ architecture Behavioral of packet_parser is
 	);
   end component;
 
+  signal axi_burst_len_s  : std_logic_vector(7 downto 0);  
   signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
   --  WRITE CHANNEL
   signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
@@ -272,6 +273,7 @@ begin
   -- [ ] packet_parser implementation
   -- [x] master AXI cont added
   
+  axi_burst_len_s <= (others => '0');
 	axi_base_address_s <= (others => '0');
 	axi_write_address_s <= (others => '0');
 	axi_write_init_s <= '0';
@@ -289,12 +291,14 @@ begin
 
   master_axi_cont_ctrl: master_axi_cont
   generic map(
-      C_M_AXI_BURST_LEN	=> C_M_AXI_BURST_LEN,
       C_M_AXI_ADDR_WIDTH => C_M_AXI_ADDR_WIDTH,
       C_M_AXI_DATA_WIDTH => C_M_AXI_DATA_WIDTH
   )
   port map(
     --FIXME Connect with actual packet_parser signals
+
+    AXI_BURST_LEN  => axi_burst_len_s, 
+
     AXI_BASE_ADDRESS_I  => axi_base_address_s, 
     AXI_WRITE_ADDRESS_I => axi_write_address_s, 
     AXI_WRITE_INIT_I    => axi_write_init_s, 

@@ -5,16 +5,6 @@ use ieee.numeric_std.all;
 -- testing git option
 entity master_axi_cont is
 	generic (
-		-- Users to add parameters here
-
-		-- User parameters ends
-		-- Do not modify the parameters beyond this line
-
-		-- Base address of targeted slave
-		-- C_M_TARGET_SLAVE_BASE_ADDR	: std_logic_vector	:= x"00000000";
-		-- // FIXME Burst length must be configurable
-		-- Burst Length. Supports 1, 2, 4, 8, 16, 32, 64, 128, 256 burst lengths
-		C_M_AXI_BURST_LEN	: integer	:= 16;
 		-- Width of Address Bus
 		C_M_AXI_ADDR_WIDTH	: integer	:= 32;
 		-- Width of Data Bus
@@ -22,30 +12,27 @@ entity master_axi_cont is
 	);
 	port (
 		-- Users to add ports here
-
     AXI_BASE_ADDRESS_I  : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
+		AXI_BURST_LEN : in std_logic_vector(7 downto 0);
+
     --  WRITE CHANNEL
-    AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added
-                                        -- to base address
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
+    AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
-    AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to                                          -- accept data
+    AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
+
     -- READ CHANNEL
-
-    AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added
-                                                            -- to base address
-
     AXI_READ_INIT_I : in  std_logic;    --starts read transaction
+    AXI_READ_ADDRESS_I : in std_logic_vector(31 downto 0);  -- address added to base address
     AXI_READ_DATA_O : out std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
     AXI_READ_VLD_O  : out std_logic;    -- axi_read_data_o is valid
     AXI_READ_RDY_I  : in std_logic;    -- axi_read_data_o is valid
     AXI_READ_LAST_O : out std_logic;    -- axi_read_data_o is valid
-
 		-- User ports ends
-		-- Do not modify the ports beyond this line
 
+		-- Do not modify the ports beyond this line
 		--------------------------------------------------------------------------------
 		-- Global Clock Signal.
 		--------------------------------------------------------------------------------
@@ -168,7 +155,7 @@ architecture implementation of master_axi_cont is
 	
 	-- C_TRANSACTIONS_NUM is the width of the index counter for
 	-- number of beats in a burst write or burst read transaction.
-	 constant  C_TRANSACTIONS_NUM : integer := clogb2(C_M_AXI_BURST_LEN-1);
+	--  constant  C_TRANSACTIONS_NUM : integer := clogb2(C_M_AXI_BURST_LEN-1);
 
 	-- //SECTION AXI4FULL signals
 	--AXI4 internal temp signals
@@ -186,7 +173,7 @@ architecture implementation of master_axi_cont is
 	--read beat count in a burst
 	signal read_index	: std_logic_vector(7 downto 0);
 	--size of C_M_AXI_BURST_LEN length burst in bytes
-	signal burst_size_bytes	: std_logic_vector(C_TRANSACTIONS_NUM+2 downto 0);
+	-- signal burst_size_bytes	: std_logic_vector(C_TRANSACTIONS_NUM+2 downto 0);
 	--The burst counters are used to track the number of burst transfers of C_M_AXI_BURST_LEN burst length needed to transfer 2^C_MASTER_LENGTH bytes of data.
 	-- signal write_burst_counter	: std_logic_vector(C_NO_BURSTS_REQ downto 0);
 	-- signal read_burst_counter	: std_logic_vector(C_NO_BURSTS_REQ downto 0);
@@ -233,7 +220,7 @@ begin
 	--The AXI address is a concatenation of the target base address + active offset range
 	M_AXI_AWADDR	<= std_logic_vector( unsigned(AXI_BASE_ADDRESS_I) + unsigned(axi_awaddr) );
 	--Burst LENgth is number of transaction beats, minus 1
-	M_AXI_AWLEN	<= std_logic_vector( to_unsigned(C_M_AXI_BURST_LEN - 1, 8) );
+	M_AXI_AWLEN	<= AXI_BURST_LEN;
 	--Size should be C_M_AXI_DATA_WIDTH, in 2^SIZE bytes, otherwise narrow bursts are used
 	M_AXI_AWSIZE	<= std_logic_vector( to_unsigned(clogb2((C_M_AXI_DATA_WIDTH/8)-1), 3) );
 	--INCR burst type is usually used, except for keyhole bursts
@@ -258,7 +245,7 @@ begin
 	-----------------------------------------------------------------------------------------
 	M_AXI_ARADDR	<= std_logic_vector( unsigned( AXI_BASE_ADDRESS_I ) + unsigned( axi_araddr ) );
 	--Burst length is number of transaction beats, minus 1
-	M_AXI_ARLEN	<= std_logic_vector( to_unsigned(C_M_AXI_BURST_LEN - 1, 8) );
+	M_AXI_ARLEN	<= AXI_BURST_LEN;
 	--Size should be C_M_AXI_DATA_WIDTH, in 2^n bytes, otherwise narrow bursts are used
 	M_AXI_ARSIZE	<= std_logic_vector( to_unsigned( clogb2((C_M_AXI_DATA_WIDTH/8)-1),3 ));
 	--INCR burst type is usually used, except for keyhole bursts
@@ -271,7 +258,7 @@ begin
 	--Example design I/O
 	-- TXN_DONE	<= compare_done;
 	--Burst size in bytes
-	burst_size_bytes	<= std_logic_vector( to_unsigned((C_M_AXI_BURST_LEN * (C_M_AXI_DATA_WIDTH/8)),C_TRANSACTIONS_NUM+3) );
+	-- burst_size_bytes	<= std_logic_vector( to_unsigned((C_M_AXI_BURST_LEN * (C_M_AXI_DATA_WIDTH/8)),C_TRANSACTIONS_NUM+3) );
 	-----------------------------------------------------------------------------------------
 
 	-----------------------------------------------------------------------------------------
@@ -388,15 +375,13 @@ begin
 	        -- elsif (&(write_index[C_TRANSACTIONS_NUM-1:1])&& ~write_index[0] && wnext)
 	      else                                                                          
 					 -- IMPORTANT wlast needs write_index
-					 -- BUG changed that write_index is converted to unsigned, comparison is done with unsigned values
-					 -- BUG changed to C_M_AXI_BURST_LEN-1 because elaboration fails for -1 
-	        if ((((unsigned(write_index) = to_unsigned(C_M_AXI_BURST_LEN-1,C_TRANSACTIONS_NUM+1)) and C_M_AXI_BURST_LEN >= 2) and wnext = '1') or (C_M_AXI_BURST_LEN = 1)) then
+	        if ((((unsigned(write_index) = unsigned(AXI_BURST_LEN)) and unsigned(AXI_BURST_LEN) >= 1) and wnext = '1') or (unsigned(AXI_BURST_LEN) = 0)) then
 	          axi_wlast <= '1';                                                         
 	          -- Deassrt axi_wlast when the last write data has been                    
 	          -- accepted by the slave with a valid response                            
 	        elsif (wnext = '1') then                                                    
 	          axi_wlast <= '0';                                                         
-	        elsif (axi_wlast = '1' and C_M_AXI_BURST_LEN = 1) then                      
+	        elsif (axi_wlast = '1' and unsigned(AXI_BURST_LEN) = 0) then                      
 	          axi_wlast <= '0';                                                         
 	        end if;                                                                     
 	      end if;                                                                       
@@ -411,7 +396,7 @@ begin
 	      if (M_AXI_ARESETN = '1' or start_single_burst_write = '1' or init_write_txn_pulse = '1') then               
 	        write_index <= (others => '0');                                             
 	      else                                                                          
-	        if (wnext = '1' and (write_index /= std_logic_vector(to_unsigned(C_M_AXI_BURST_LEN-1,C_TRANSACTIONS_NUM+1)))) then                
+	        if (wnext = '1' and (unsigned(write_index) /= unsigned(AXI_BURST_LEN))) then                
 	          write_index <= std_logic_vector(unsigned(write_index) + 1);                                         
 	        end if;                                                                     
 	      end if;                                                                       
@@ -506,7 +491,7 @@ begin
 	      if (M_AXI_ARESETN = '1' or start_single_burst_read = '1' or init_read_txn_pulse = '1') then    
 	        read_index <= (others => '0');                                  
 	      else                                                              
-	        if (rnext = '1' and (read_index <= std_logic_vector(to_unsigned(C_M_AXI_BURST_LEN-1,C_TRANSACTIONS_NUM+1)))) then   
+	        if (rnext = '1' and (unsigned(read_index) <= unsigned(AXI_BURST_LEN))) then   
 	          read_index <= std_logic_vector(unsigned(read_index) + 1);                               
 	        end if;                                                         
 	      end if;                                                           
