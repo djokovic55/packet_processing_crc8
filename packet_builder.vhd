@@ -1,6 +1,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use IEEE.NUMERIC_STD.ALL;
 
 entity packet_builder is
     generic(
@@ -22,9 +23,9 @@ entity packet_builder is
         ins_ecc_err_i : in std_logic_vector(1 downto 0);
         ins_crc_err_i : in std_logic;
         ecc_val_i : in std_logic_vector(3 downto 0);
-        crc_val_i: in std_logic_vector(6 downto 0);
+        crc_val_i: in std_logic_vector(7 downto 0);
         sop_val_i: in std_logic_vector(3 downto 0);
-        data_sel_i: in std_logic_vector(3 downto 0);
+        data_sel_i: in std_logic_vector(2 downto 0);
         addr_out_i: in std_logic_vector(31 downto 0);
 
         -- User ports ends
@@ -142,6 +143,7 @@ architecture Behavioral of packet_builder is
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		AXI_WRITE_STRB_I    : in  std_logic_vector(3 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -252,7 +254,7 @@ architecture Behavioral of packet_builder is
 
   component fifo is
   generic (
-    DATA_WIDTH : natural := 8;
+    DATA_WIDTH : natural := 32;
     FIFO_DEPTH : integer := 19
     );
   port (
@@ -309,21 +311,21 @@ architecture Behavioral of packet_builder is
   --------------------------------------------------------------------------------
   -- Fifo in - READ
   signal fifo_in_wr_en_s   : std_logic;
-  signal fifo_in_wr_data_s : std_logic_vector(7 downto 0);
+  signal fifo_in_wr_data_s : std_logic_vector(31 downto 0);
   signal fifo_in_full_s    : std_logic;
 
   signal fifo_in_rd_en_s   : std_logic;
-  signal fifo_in_rd_data_s : std_logic_vector(7 downto 0);
+  signal fifo_in_rd_data_s : std_logic_vector(31 downto 0);
   signal fifo_in_empty_s   : std_logic;
   --------------------------------------------------------------------------------
 
   -- Fifo in - WRITE
   signal fifo_out_wr_en_s   : std_logic;
-  signal fifo_out_wr_data_s : std_logic_vector(7 downto 0);
+  signal fifo_out_wr_data_s : std_logic_vector(31 downto 0);
   signal fifo_out_full_s    : std_logic;
 
   signal fifo_out_rd_en_s   : std_logic;
-  signal fifo_out_rd_data_s : std_logic_vector(7 downto 0);
+  signal fifo_out_rd_data_s : std_logic_vector(31 downto 0);
   signal fifo_out_empty_s   : std_logic;
   --------------------------------------------------------------------------------
 
@@ -332,7 +334,7 @@ architecture Behavioral of packet_builder is
   signal piso_d_s : std_logic_vector(31 downto 0);
   signal piso_q_s : std_logic;
 
-  signal burst_len_s : std_logic_vector(7 downto 0);
+  signal read_burst_len_s : std_logic_vector(7 downto 0) := (others => '0');
   signal vld_bytes_last_pulse_cnt_s : std_logic_vector(1 downto 0);
   --------------------------------------------------------------------------------
   -- crc8
@@ -355,6 +357,7 @@ architecture Behavioral of packet_builder is
   signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
   signal axi_write_init_s    : std_logic;  -- start write transactions    
   signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal axi_write_strb_s    : std_logic_vector(3 downto 0);
   signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
   signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
   signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
@@ -369,47 +372,353 @@ architecture Behavioral of packet_builder is
 
   signal busy_reg, busy_next : std_logic;    -- axi_read_data_o is valid
 
+  type state_t is (IDLE, INMEM_READ, CRC_LOOP, BUILD_FIRST_PULSE, BUILD_PULSE, BUILD_LAST_PULSE, BUILD_LONG_LAST_PULSE, OUTMEM_WRITE, OUTMEM_WRITE_LAST);
+  signal state_reg, state_next : state_t;
+  signal crc_reg, crc_next : std_logic_vector(7 downto 0);
+  signal pulse_data_reg, pulse_data_next : std_logic_vector(31 downto 0);
+  signal pulse_cnt_reg, pulse_cnt_next : std_logic_vector(7 downto 0);
+
+  signal write_burst_len_s : std_logic_vector(7 downto 0) := (others => '0');
+  signal write_byte_cnt : std_logic_vector(4 downto 0) := (others => '0');
+  signal single_write_burst : std_logic;
+
+
+  signal header_s : std_logic_vector(15 downto 0);
+  signal ecc_s : std_logic_vector(3 downto 0);
+
+  constant INMEM_BASE_ADDR: unsigned := x"00000000";
+  constant OUTMEM_BASE_ADDR: unsigned := x"00010000";
+
 
 begin
   -- [ ] packet_builder1 implementation
   -- [x] master AXI cont added
-  -- burst len configuration
-  axi_burst_len_s <= (others => '0');
-	axi_base_address_s <= (others => '0');
-	axi_write_address_s <= (others => '0');
-	axi_write_init_s <= '0';
-	axi_write_data_s <= (others => '0');
-	axi_write_vld_s <= '0';
+  -- calculate read burst len and valid bytes in last pulse based on read_byte_cnt
+  read_burst_len_s(1 downto 0) <= byte_cnt_i(3 downto 2); 
+  vld_bytes_last_pulse_cnt_s <= std_logic_vector(unsigned(byte_cnt_i(1 downto 0)) + 1); 
 
+  -- calculate write burst len and valid bytes in last pulse based on write_read_cnt
+  write_byte_cnt <= std_logic_vector(to_unsigned(to_integer(unsigned(byte_cnt_i)) + 3, 5)); 
+  write_burst_len_s(2 downto 0) <= write_byte_cnt(4 downto 2);
+  vld_bytes_last_pulse_cnt_s <= std_logic_vector(unsigned(write_byte_cnt(1 downto 0)) + 1); 
 
-	axi_read_address_s <= (others => '0');
-	axi_read_init_s <= '0';
-	axi_read_data_s <= (others => '0');
-	axi_read_rdy_s <= '0';
+  single_write_burst <= '1' when write_burst_len_s = "00" else '0';
 
+  -- calculate ecc
+  hamming_data_in_s(7 downto 4) <= pkt_type_i;
+  hamming_data_in_s(3 downto 0) <= byte_cnt_i;
 
+  ecc_s <= hamming_parity_out_s when ecc_en_i = '1' else 
+           ecc_val_i;
 
-	seq_logic : process(M_AXI_ACLK)
-	begin
+  -- form header
+  header_s <= sop_val_i&pkt_type_i&byte_cnt_i&ecc_s;
+
+  pb_fsm_seq_proc: process(M_AXI_ACLK)
+  begin
       if(M_AXI_ACLK'event and M_AXI_ACLK = '1') then
         if M_AXI_ARESETN = '1' then
-					busy_reg <= '1';
-				else
-					busy_reg <= busy_next;
-				end if;
-			end if;
-	end process;
+          state_reg <= IDLE;
+          crc_reg <= (others => '0');
+          pulse_data_reg <= (others => '0');
+          pulse_cnt_reg <= (others => '0');
+        else
+          state_reg <= state_next;
+          crc_reg <= crc_next;
+          pulse_data_reg <= pulse_data_next;
+          pulse_cnt_reg <= pulse_cnt_next;
+        end if;
+      end if;
+  end process; 
 
-	comb_logic: process(busy_reg, start_i)
-	begin
-      if(start_i = '1') then
-				busy_next <= '0';
-			else
-				busy_next <= busy_reg;
-			end if;
-	end process;
 
-	busy_o <= busy_reg;
+
+  pb_fsm_comb_proc:process(state_reg, start_i, addr_in_i, read_burst_len_s, write_burst_len_s,
+                           pulse_cnt_reg, pulse_data_reg, crc_reg, crc_ready_s) is
+  begin
+
+    -- default values
+    state_next <= state_reg;
+    crc_next <= crc_reg;
+    pulse_cnt_next <= pulse_cnt_reg;
+    pulse_data_next <= pulse_data_reg;
+
+    -- AXI defaults
+    axi_base_address_s <= (others => '0');
+    axi_burst_len_s <= (others => '0');
+
+    axi_write_address_s <= (others => '0');
+    axi_write_data_s <= (others => '0');
+    axi_write_vld_s <= '0';
+    axi_write_strb_s <= (others => '0');
+    axi_write_init_s <= '0';
+
+    axi_read_address_s <= (others => '0');
+    axi_read_data_s <= (others => '0');
+    axi_read_rdy_s <= '0';
+    axi_read_init_s <= '0';
+
+    -- Builder default
+    busy_o <= '0';
+
+    -- FIFOs default
+    fifo_in_wr_data_s <= (others => '0');
+    fifo_in_wr_en_s <= '0';
+    fifo_in_rd_en_s <= '0';
+
+    fifo_out_wr_data_s <= (others => '0');
+    fifo_out_wr_en_s <= '0';
+    fifo_out_rd_en_s <= '0';
+
+    -- PISO default
+    start_piso_s <= '0';
+
+    case state_reg is
+      when IDLE =>
+        busy_o <= '1';
+
+        if(start_i = '1') then
+          ---------------------------------------- 
+          state_next <= INMEM_READ;
+          ---------------------------------------- 
+        else
+          ---------------------------------------- 
+          state_next <= IDLE;
+          ---------------------------------------- 
+        end if;
+      when INMEM_READ => 
+        axi_base_address_s <= std_logic_vector(INMEM_BASE_ADDR);
+        axi_read_address_s <= addr_in_i;
+        axi_burst_len_s <= read_burst_len_s;
+
+        axi_read_rdy_s <= '1';
+        axi_read_init_s <= '1';
+
+        if(axi_read_vld_s = '1') then
+          fifo_in_wr_en_s <= '1';
+          fifo_in_wr_data_s <= axi_read_data_s;
+          
+          if(axi_read_last_s = '1') then
+            if(crc_en_i = '1') then 
+
+              start_piso_s <= '1';
+              ---------------------------------------- 
+              state_next <= CRC_LOOP;
+              ---------------------------------------- 
+            else
+              crc_next <= crc_val_i;
+              ---------------------------------------- 
+              state_next <= BUILD_FIRST_PULSE;
+              ---------------------------------------- 
+            end if;
+          else
+            ---------------------------------------- 
+            state_next <= INMEM_READ;
+            ---------------------------------------- 
+          end if;
+        else
+          ---------------------------------------- 
+          state_next <= INMEM_READ;
+          ---------------------------------------- 
+        end if;
+
+      when CRC_LOOP => 
+
+        if(crc_ready_s = '1') then 
+          crc_next <= crc_out_s;
+          ---------------------------------------- 
+          state_next <= BUILD_FIRST_PULSE;
+          ---------------------------------------- 
+        else 
+          ---------------------------------------- 
+          state_next <= CRC_LOOP;
+          ---------------------------------------- 
+        end if;
+      when BUILD_FIRST_PULSE => 
+        -- defaults
+
+        if(unsigned(byte_cnt_i) > 0) then
+          -- first pulse in fifo out
+          fifo_out_wr_data_s <= header_s&fifo_in_rd_data_s(15 downto 0);
+          -- increment write pointer
+          fifo_out_wr_en_s <= '1';
+
+          -- store the rest of data for fifo out write iteration
+          pulse_data_next <= fifo_in_rd_data_s;
+          -- increment read pointer
+          fifo_in_rd_en_s <= '1';
+          -- increment pulse counter
+          pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
+
+          if(unsigned(pulse_cnt_reg) = unsigned(read_burst_len_s) - 1) then
+            ---------------------------------------- 
+            state_next <= BUILD_LAST_PULSE;
+            ---------------------------------------- 
+          else
+            ---------------------------------------- 
+            state_next <= BUILD_PULSE;
+            ---------------------------------------- 
+          end if;
+
+          ---------------------------------------- 
+          state_next <= OUTMEM_WRITE;
+          ---------------------------------------- 
+        else
+          fifo_out_wr_data_s <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
+          fifo_out_wr_en_s <= '1';
+          ---------------------------------------- 
+          state_next <= OUTMEM_WRITE;
+          ---------------------------------------- 
+
+        end if;
+      when BUILD_PULSE => 
+        fifo_out_wr_data_s(15 downto 0) <= pulse_data_reg(31 downto 16); 
+        fifo_out_wr_data_s(31 downto 16) <= fifo_in_rd_data_s(15 downto 0); 
+        fifo_out_wr_en_s <= '1';
+
+        pulse_data_next <= fifo_in_rd_data_s;
+        fifo_in_rd_en_s <= '1';
+
+        if(unsigned(pulse_cnt_reg) = unsigned(read_burst_len_s) - 1) then
+          ---------------------------------------- 
+          state_next <= BUILD_LAST_PULSE;
+          ---------------------------------------- 
+        else
+          ---------------------------------------- 
+          state_next <= BUILD_PULSE;
+          ---------------------------------------- 
+        end if;
+
+      when BUILD_LAST_PULSE => 
+
+        -- first half
+        fifo_out_wr_data_s(15 downto 0) <= pulse_data_reg(31 downto 16); 
+
+        case(vld_bytes_last_pulse_cnt_s) is
+          when "00" =>
+            -- second half
+            fifo_out_wr_data_s(23 downto 16) <= crc_reg; 
+            fifo_out_wr_data_s(31 downto 24) <= (others => '0'); 
+            -- no furter writes
+
+            -- pulse_data_next <= fifo_in_rd_data_s;
+            -- no further reads
+            ---------------------------------------- 
+            state_next <= OUTMEM_WRITE;
+            ---------------------------------------- 
+          when "01" =>
+            -- second half
+            fifo_out_wr_data_s(23 downto 16) <= fifo_in_rd_data_s(7 downto 0);
+            fifo_out_wr_data_s(31 downto 24) <= crc_reg; 
+            -- no furter writes
+
+            -- pulse_data_next <= fifo_in_rd_data_s;
+            -- no further reads
+            ---------------------------------------- 
+            state_next <= OUTMEM_WRITE;
+            ---------------------------------------- 
+          when  others =>
+            fifo_out_wr_data_s(23 downto 16) <= fifo_in_rd_data_s(7 downto 0);
+            fifo_out_wr_data_s(31 downto 24) <= fifo_in_rd_data_s(15 downto 8); 
+            fifo_out_wr_en_s <= '1';
+
+            pulse_data_next <= fifo_in_rd_data_s;
+
+            -- no further reads
+            ---------------------------------------- 
+            state_next <= BUILD_LONG_LAST_PULSE;
+            ---------------------------------------- 
+        end case;
+      when BUILD_LONG_LAST_PULSE => 
+        -- reset pulse counter because it will be used for write burst
+        pulse_cnt_next <= (others => '0');
+
+        case(vld_bytes_last_pulse_cnt_s) is 
+          when "10" =>
+            fifo_out_wr_data_s(7 downto 0) <= crc_reg; 
+            fifo_out_wr_data_s(31 downto 8) <= (others => '0'); 
+            
+          when others =>
+            fifo_out_wr_data_s(7 downto 0) <= pulse_data_reg(23 downto 16); 
+            fifo_out_wr_data_s(15 downto 8) <= crc_reg; 
+            fifo_out_wr_data_s(31 downto 16) <= (others => '0'); 
+        end case;
+        ---------------------------------------- 
+        state_next <= OUTMEM_WRITE;
+        ---------------------------------------- 
+      when OUTMEM_WRITE => 
+        -- set AW channel
+        axi_base_address_s <= std_logic_vector(OUTMEM_BASE_ADDR);
+        axi_write_address_s <= addr_out_i;
+        axi_burst_len_s <= write_burst_len_s;
+
+        -- set W channel
+        axi_write_data_s <= fifo_out_rd_data_s;
+        axi_write_strb_s <= "1111";
+        axi_write_vld_s <= '1';
+
+        -- start burst 
+        axi_write_init_s <= '1';
+
+        if(single_write_burst = '1') then
+          if(axi_write_rdy_s = '1') then
+            fifo_out_rd_en_s <= '1';
+            pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
+            if(unsigned(pulse_cnt_reg) = unsigned(axi_burst_len_s) - 1) then
+              ---------------------------------------- 
+              state_next <= OUTMEM_WRITE_LAST;
+              ---------------------------------------- 
+            else
+              ---------------------------------------- 
+              state_next <= OUTMEM_WRITE;
+              ---------------------------------------- 
+            end if;
+          else 
+            ---------------------------------------- 
+            state_next <= OUTMEM_WRITE;
+            ---------------------------------------- 
+          end if;
+        else 
+          if(axi_write_done_s = '1') then
+            ---------------------------------------- 
+            state_next <= IDLE;
+            ---------------------------------------- 
+          else
+            ---------------------------------------- 
+            state_next <= OUTMEM_WRITE;
+            ---------------------------------------- 
+          end if;
+        end if;
+
+      when OUTMEM_WRITE_LAST => 
+        -- set AW channel
+        axi_base_address_s <= std_logic_vector(OUTMEM_BASE_ADDR);
+        axi_write_address_s <= addr_out_i;
+        axi_burst_len_s <= write_burst_len_s;
+
+        -- set W channel
+        axi_write_data_s <= fifo_out_rd_data_s;
+        axi_write_strb_s <= "1111";
+        axi_write_vld_s <= '1';
+
+        case(vld_bytes_last_pulse_cnt_s) is 
+          when "00" =>
+            axi_write_strb_s <= "0001";
+          when "01" =>
+            axi_write_strb_s <= "0011";
+          when "10" =>
+            axi_write_strb_s <= "0111";
+          when others =>
+            axi_write_strb_s <= "1111";
+        end case;
+
+        ---------------------------------------- 
+        state_next <= IDLE;
+        ---------------------------------------- 
+
+
+    end case;
+  end process;
 
   --------------------------------------------------------------------------------
   -- Module instantiations
@@ -449,7 +758,7 @@ begin
     crc_stall => crc_stall_s,
     q => piso_q_s,
 
-    burst_len => burst_len_s,
+    burst_len => read_burst_len_s,
     vld_bytes_last_pulse_cnt => vld_bytes_last_pulse_cnt_s
   );
 
@@ -484,6 +793,7 @@ begin
     AXI_WRITE_ADDRESS_I => axi_write_address_s, 
     AXI_WRITE_INIT_I    => axi_write_init_s, 
     AXI_WRITE_DATA_I    => axi_write_data_s, 
+    AXI_WRITE_STRB_I    => axi_write_strb_s,
     AXI_WRITE_VLD_I     => axi_write_vld_s, 
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 

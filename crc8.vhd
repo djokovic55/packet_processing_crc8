@@ -24,31 +24,31 @@ begin
 
 process(clk,reset)
 begin
-    if(reset = '1') then
-        crc_temp <= (others => '0');
-        count <= (others => '0');
-        crc_ready <= '0';
-    elsif(rising_edge(clk)) then
-        if(crc_stall = '1') then
-            -- wait until data_in is prepared
-            crc_temp <= crc_temp;
-        else
-            -- crc calculation in the next four lines.
-            crc_temp(0) <= data_in xor crc_temp(7);
-            crc_temp(1) <= crc_temp(0) xor crc_temp(7);
-            crc_temp(2) <= crc_temp(1) xor crc_temp(7);
-            crc_temp(7 downto 3) <= crc_temp(6 downto 2);
-            
-            count <= count + 1; --keeps track of the number of rounds
-            if(count = size_data + 7) then --check when to finish the calculations
-                count <= (others => '0');
-                crc_ready <= '1';
-            end if; 
+    if(rising_edge(clk)) then
+        if(reset = '1') then
+            crc_temp <= (others => '0');
+            count <= (others => '0');
+            crc_ready <= '0';
+        elsif(crc_stall /= '1') then
+        -- IMPORTANT everything should stay stable if stall is active
+        --     -- wait until data_in is prepared
+        --     crc_temp <= crc_temp;
+        -- else
+        -- crc calculation in the next four lines.
+        crc_temp(0) <= data_in xor crc_temp(7);
+        crc_temp(1) <= crc_temp(0) xor crc_temp(7);
+        crc_temp(2) <= crc_temp(1) xor crc_temp(7);
+        crc_temp(7 downto 3) <= crc_temp(6 downto 2);
+        
+        count <= count + 1; --keeps track of the number of rounds
+        if(unsigned(count) = unsigned(size_data) + 7) then --check when to finish the calculations
+            count <= (others => '0');
+            crc_ready <= '1';
+        end if; 
         end if;
-
     end if; 
 end process;    
 
-crc_out <= crc_temp;
+crc_out <= std_logic_vector(crc_temp);
 
 end Behavioral;

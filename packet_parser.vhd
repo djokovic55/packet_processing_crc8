@@ -143,6 +143,7 @@ architecture Behavioral of packet_parser is
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		AXI_WRITE_STRB_I    : in  std_logic_vector(3 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -257,6 +258,7 @@ architecture Behavioral of packet_parser is
   signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
   signal axi_write_init_s    : std_logic;  -- start write transactions    
   signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal axi_write_strb_s    : std_logic_vector(3 downto 0);
   signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
   signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
   signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
@@ -304,6 +306,7 @@ begin
     AXI_WRITE_INIT_I    => axi_write_init_s, 
     AXI_WRITE_DATA_I    => axi_write_data_s, 
     AXI_WRITE_VLD_I     => axi_write_vld_s, 
+    AXI_WRITE_STRB_I    => axi_write_strb_s,
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 
     AXI_READ_ADDRESS_I => axi_read_address_s, 

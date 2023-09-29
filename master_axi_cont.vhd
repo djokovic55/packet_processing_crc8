@@ -19,6 +19,7 @@ entity master_axi_cont is
     AXI_WRITE_INIT_I    : in  std_logic;  -- start write transactions    
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+		AXI_WRITE_STRB_I    : in  std_logic_vector(3 downto 0);
     AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
@@ -231,8 +232,8 @@ begin
 	--WRITE DATA(W)
 	-----------------------------------------------------------------------------------------
 	M_AXI_WDATA	<= axi_wdata;
-	--All bursts are complete and aligned in this example
-	M_AXI_WSTRB	<= (others => '1');
+	-- Burst pulses must not be complete
+	M_AXI_WSTRB	<= AXI_WRITE_STRB_I;
 	M_AXI_WLAST	<= axi_wlast;
 	M_AXI_WVALID	<= axi_wvalid;
 	M_AXI_WDATA	<= axi_wdata;

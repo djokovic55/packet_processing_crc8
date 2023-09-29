@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
  
 entity fifo is
   generic (
-    DATA_WIDTH : natural := 8;
+    DATA_WIDTH : natural := 32;
     FIFO_DEPTH : integer := 19
     );
   port (

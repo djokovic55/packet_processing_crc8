@@ -50,8 +50,7 @@ begin
   end process; 
 
 
-
-  fsm_comb_proc:process(state_reg) is
+  fsm_comb_proc:process(state_reg, pulse_cnt_reg, shift_cnt_max_reg, start_piso) is
   begin
 
     -- default values
@@ -60,6 +59,7 @@ begin
     shift_cnt_max_next <= shift_cnt_max_reg;
     pulse_cnt_next <= pulse_cnt_reg;
     crc_stall <= '1';
+    shift_s <= '0';
 
     case state_reg is
       when IDLE =>
@@ -92,7 +92,7 @@ begin
 
         if(unsigned(shift_cnt_reg) = unsigned(shift_cnt_max_reg)) then
           if(unsigned(pulse_cnt_reg) = unsigned(burst_len) - 1) then
-            shift_cnt_max_next <= std_logic_vector((unsigned(vld_bytes_last_pulse_cnt)*8) + 7);
+            shift_cnt_max_next <= std_logic_vector(to_unsigned((to_integer((unsigned(vld_bytes_last_pulse_cnt)*8) + 7)), 5));
             ---------------------------------------- 
             state_next <= LAST_LOAD;
             ---------------------------------------- 
