@@ -572,8 +572,8 @@ begin
 				if(reg_data_s(0) = '1') then
 					pb0_ctrl1_s <= '0';
 				end if;
-			else 
-				pb0_ctrl1_s <= pb0_irq_i;
+			elsif(pb0_irq_i = '1') then 
+				pb0_ctrl1_s <= '1';
 			end if;
 		end if;
 	end process;
@@ -684,8 +684,8 @@ begin
 				if(reg_data_s(0) = '1') then
 					pb1_ctrl1_s <= '0';
 				end if;
-			else 
-				pb1_ctrl1_s <= pb1_irq_i;
+			elsif(pb1_irq_i = '1') then 
+				pb1_ctrl1_s <= '1';
 			end if;
 		end if;
 	end process;
@@ -801,8 +801,8 @@ begin
 				if(reg_data_s(0) = '1') then
 					pp_ctrl1_s <= '0';
 				end if;
-			else 
-				pp_ctrl1_s <= pp_irq_i; 
+			elsif(pp_irq_i = '1') then 
+				pp_ctrl1_s <= '1'; 
 			end if;
 		end if;
 	end process;

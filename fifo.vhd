@@ -18,6 +18,7 @@ entity fifo is
     full_o    : out std_logic;
  
     -- FIFO Read Interface
+    rd_pt_rst : in std_logic;
     rd_en_i   : in  std_logic;
     rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
     empty_o   : out std_logic
@@ -46,6 +47,8 @@ begin
         fifo_cnt_s <= 0;
         write_index_s   <= 0;
         read_index_s   <= 0;
+      elsif(rd_pt_rst = '1') then
+        read_index_s <= 0;
       else
  
         -- Keeps track of the total number of words in the FIFO

@@ -267,6 +267,7 @@ architecture Behavioral of packet_builder is
     full_o    : out std_logic;
  
     -- FIFO Read Interface
+    rd_pt_rst : in std_logic;
     rd_en_i   : in  std_logic;
     rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
     empty_o   : out std_logic
@@ -282,6 +283,7 @@ architecture Behavioral of packet_builder is
         d : in std_logic_vector(31 downto 0);
         crc_stall : out std_logic;
         q : out std_logic;
+        data_req : out std_logic;
 
         burst_len : in std_logic_vector(7 downto 0);
         vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0)
@@ -314,6 +316,7 @@ architecture Behavioral of packet_builder is
   signal fifo_in_wr_data_s : std_logic_vector(31 downto 0);
   signal fifo_in_full_s    : std_logic;
 
+  signal fifo_in_rd_pt_rst_s   : std_logic;
   signal fifo_in_rd_en_s   : std_logic;
   signal fifo_in_rd_data_s : std_logic_vector(31 downto 0);
   signal fifo_in_empty_s   : std_logic;
@@ -324,6 +327,7 @@ architecture Behavioral of packet_builder is
   signal fifo_out_wr_data_s : std_logic_vector(31 downto 0);
   signal fifo_out_full_s    : std_logic;
 
+  signal fifo_pt_rst_s   : std_logic;
   signal fifo_out_rd_en_s   : std_logic;
   signal fifo_out_rd_data_s : std_logic_vector(31 downto 0);
   signal fifo_out_empty_s   : std_logic;
@@ -333,9 +337,11 @@ architecture Behavioral of packet_builder is
   signal start_piso_s : std_logic;
   signal piso_d_s : std_logic_vector(31 downto 0);
   signal piso_q_s : std_logic;
+  signal piso_data_req_s : std_logic;
 
   signal read_burst_len_s : std_logic_vector(7 downto 0) := (others => '0');
   signal vld_bytes_last_pulse_cnt_s : std_logic_vector(1 downto 0);
+  signal piso_vld_bytes_last_pulse_cnt_s : std_logic_vector(1 downto 0);
   --------------------------------------------------------------------------------
   -- crc8
   signal crc_stall_s : std_logic;
@@ -394,13 +400,17 @@ begin
   -- [ ] packet_builder1 implementation
   -- [x] master AXI cont added
   -- calculate read burst len and valid bytes in last pulse based on read_byte_cnt
+  read_burst_len_s(7 downto 2) <= (others => '0'); 
   read_burst_len_s(1 downto 0) <= byte_cnt_i(3 downto 2); 
-  vld_bytes_last_pulse_cnt_s <= std_logic_vector(unsigned(byte_cnt_i(1 downto 0)) + 1); 
 
   -- calculate write burst len and valid bytes in last pulse based on write_read_cnt
   write_byte_cnt <= std_logic_vector(to_unsigned(to_integer(unsigned(byte_cnt_i)) + 3, 5)); 
+  write_burst_len_s(7 downto 3) <= (others => '0'); 
   write_burst_len_s(2 downto 0) <= write_byte_cnt(4 downto 2);
   vld_bytes_last_pulse_cnt_s <= std_logic_vector(unsigned(write_byte_cnt(1 downto 0)) + 1); 
+
+  -- IMPORTANT byte count from in(read) fifo is needed, which correspond only to data count without header and crc
+  piso_vld_bytes_last_pulse_cnt_s <= byte_cnt_i(1 downto 0); 
 
   single_write_burst <= '1' when write_burst_len_s = "00" else '0';
 
@@ -413,6 +423,10 @@ begin
 
   -- form header
   header_s <= sop_val_i&pkt_type_i&byte_cnt_i&ecc_s;
+
+  -- piso data
+  piso_d_s <= fifo_in_rd_data_s;
+
 
   pb_fsm_seq_proc: process(M_AXI_ACLK)
   begin
@@ -460,6 +474,7 @@ begin
 
     -- Builder default
     busy_o <= '0';
+    irq_o <= '0';
 
     -- FIFOs default
     fifo_in_wr_data_s <= (others => '0');
@@ -524,8 +539,13 @@ begin
 
       when CRC_LOOP => 
 
+        if(piso_data_req_s = '1') then
+          fifo_in_rd_en_s <= '1';
+        end if;
+
         if(crc_ready_s = '1') then 
           crc_next <= crc_out_s;
+          fifo_in_rd_pt_rst_s <= '1';
           ---------------------------------------- 
           state_next <= BUILD_FIRST_PULSE;
           ---------------------------------------- 
@@ -680,6 +700,8 @@ begin
           end if;
         else 
           if(axi_write_done_s = '1') then
+
+            irq_o <= '1';
             ---------------------------------------- 
             state_next <= IDLE;
             ---------------------------------------- 
@@ -712,9 +734,17 @@ begin
             axi_write_strb_s <= "1111";
         end case;
 
-        ---------------------------------------- 
-        state_next <= IDLE;
-        ---------------------------------------- 
+        if(axi_write_done_s = '1') then
+          irq_o <= '1';
+          ---------------------------------------- 
+          state_next <= IDLE;
+          ---------------------------------------- 
+        else
+          ---------------------------------------- 
+          state_next <= OUTMEM_WRITE_LAST;
+          ---------------------------------------- 
+        end if;
+
 
 
     end case;
@@ -731,6 +761,7 @@ begin
     wr_en_i => fifo_in_wr_en_s,   
     wr_data_i => fifo_in_wr_data_s, 
     full_o => fifo_in_full_s,    
+    rd_pt_rst => fifo_in_rd_pt_rst_s, 
     rd_en_i => fifo_in_rd_en_s,   
     rd_data_o => fifo_in_rd_data_s, 
     empty_o => fifo_in_empty_s   
@@ -744,6 +775,7 @@ begin
     wr_en_i => fifo_out_wr_en_s,   
     wr_data_i => fifo_out_wr_data_s, 
     full_o => fifo_out_full_s,    
+    rd_pt_rst => '0',
     rd_en_i => fifo_out_rd_en_s,   
     rd_data_o => fifo_out_rd_data_s, 
     empty_o => fifo_out_empty_s   
@@ -757,9 +789,11 @@ begin
     d => piso_d_s,
     crc_stall => crc_stall_s,
     q => piso_q_s,
+    data_req => piso_data_req_s,
+    
 
     burst_len => read_burst_len_s,
-    vld_bytes_last_pulse_cnt => vld_bytes_last_pulse_cnt_s
+    vld_bytes_last_pulse_cnt => piso_vld_bytes_last_pulse_cnt_s
   );
 
   crc8_calc: crc8

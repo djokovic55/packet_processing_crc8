@@ -653,6 +653,7 @@ architecture rtl of top is
         addr_hdr_i : in std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
         ignore_ecc_err_i : in std_logic;
         pkt_ecc_corr_o : out std_logic;
+        pkt_ecc_uncorr_o : out std_logic;
         pkt_crc_err_o : out std_logic;
         pkt_byte_cnt_o : out std_logic_vector(3 downto 0);
         pkt_type_o : out std_logic_vector(3 downto 0);
@@ -1880,6 +1881,7 @@ begin
         addr_hdr_i => pp_addr_hdr_s,
         ignore_ecc_err_i => pp_ignore_ecc_err_s,
         pkt_ecc_corr_o => pp_pkt_ecc_corr_s,
+        pkt_ecc_uncorr_o => pp_pkt_ecc_uncorr_s,
         pkt_crc_err_o => pp_pkt_crc_err_s,
         pkt_byte_cnt_o => pp_pkt_byte_cnt_s,
         pkt_type_o => pp_pkt_type_s,

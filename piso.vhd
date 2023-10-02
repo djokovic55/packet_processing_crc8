@@ -1,4 +1,3 @@
-
 library IEEE; 
 use IEEE.STD_LOGIC_1164.ALL; 
 use IEEE.NUMERIC_STD.ALL;
@@ -12,6 +11,7 @@ port(
         d : in std_logic_vector(31 downto 0);
         crc_stall : out std_logic;
         q : out std_logic;
+        data_req: out std_logic;
 
         burst_len : in std_logic_vector(7 downto 0);
         vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0)
@@ -60,6 +60,7 @@ begin
     pulse_cnt_next <= pulse_cnt_reg;
     crc_stall <= '1';
     shift_s <= '0';
+    data_req <= '0';
 
     case state_reg is
       when IDLE =>
@@ -79,8 +80,12 @@ begin
       when LOAD =>
         -- load new pulse of 4 bytes 
         shift_s <= '0';
+        -- prepare data for next shift cycle
+        data_req <= '1';
+
         -- crc_stall <= '1';
         pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
+
 
         ---------------------------------------- 
         state_next <= SHIFT;
