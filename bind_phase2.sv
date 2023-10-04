@@ -76,3 +76,48 @@ bind top.system_regs checker_regs chk_regs(
 	.pp_pkt_type(pp_pkt_type_i)
 
 );
+
+bind top.intcon checker_axi_slave chk_axi_slave_inmem(
+	.clk(clk),
+	.reset(reset), 
+
+	////////////////////////////////////////////////////////////////////////////////
+	// SLAVES
+	////////////////////////////////////////////////////////////////////////////////
+	// INTCON PORTS OF INMEM MODULE S1
+	////////////////////////////////////////////////////////////////////////////////
+	.awaddr(m_axi_int_awaddr_inmem),
+	.awlen(m_axi_int_awlen_inmem),
+	.awsize(m_axi_int_awsize_inmem),
+	.awburst(m_axi_int_awburst_inmem),
+	.awvalid(m_axi_int_awvalid_inmem),
+	.awready(m_axi_int_awready_inmem),
+
+	// WRITE DATA CHANNEL
+	.wdata(m_axi_int_wdata_inmem),
+	.wstrb(m_axi_int_wstrb_inmem),
+	.wlast(m_axi_int_wlast_inmem),
+	.wvalid(m_axi_int_wvalid_inmem),
+	.wready(m_axi_int_wready_inmem),
+
+	// WRITE RESPONSE CHANNEL
+	.bresp(m_axi_int_bresp_inmem),
+	.bvalid(m_axi_int_bvalid_inmem),
+	.bready(m_axi_int_bready_inmem),
+
+	// READ ADDRESS CHANNEL
+	.araddr(m_axi_int_araddr_inmem),
+	.arlen(m_axi_int_arlen_inmem),
+	.arsize(m_axi_int_arsize_inmem),
+	.arburst(m_axi_int_arburst_inmem),
+	.arvalid(m_axi_int_arvalid_inmem),
+	.arready(m_axi_int_arready_inmem),
+
+	// READ DATA CHANNEL
+	.rdata(m_axi_int_rdata_inmem),
+	.rresp(m_axi_int_rresp_inmem),
+	.rlast(m_axi_int_rlast_inmem),
+	.rvalid(m_axi_int_rvalid_inmem),
+	.rready(m_axi_int_rready_inmem)
+	////////////////////////////////////////////////////////////////////////////////
+);

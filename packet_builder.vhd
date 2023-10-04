@@ -336,6 +336,7 @@ architecture Behavioral of packet_builder is
   -- Piso 
   signal start_piso_s : std_logic;
   signal piso_d_s : std_logic_vector(31 downto 0);
+	-- BUG signal is not connected to crc module, piso out data and crc in data are not connected
   signal piso_q_s : std_logic;
   signal piso_data_req_s : std_logic;
 
@@ -345,6 +346,7 @@ architecture Behavioral of packet_builder is
   --------------------------------------------------------------------------------
   -- crc8
   signal crc_stall_s : std_logic;
+	-- BUG signal has never been assigned
   signal crc_size_data_s : std_logic_vector(15 downto 0); 
   signal crc_data_in_s : std_logic;
   signal crc_out_s : std_logic_vector(7 downto 0);
@@ -412,7 +414,7 @@ begin
   -- IMPORTANT byte count from in(read) fifo is needed, which correspond only to data count without header and crc
   piso_vld_bytes_last_pulse_cnt_s <= byte_cnt_i(1 downto 0); 
 
-  single_write_burst <= '1' when write_burst_len_s = "00" else '0';
+  single_write_burst <= '1' when write_burst_len_s = x"00" else '0';
 
   -- calculate ecc
   hamming_data_in_s(7 downto 4) <= pkt_type_i;
@@ -448,7 +450,9 @@ begin
 
 
   pb_fsm_comb_proc:process(state_reg, start_i, addr_in_i, read_burst_len_s, write_burst_len_s,
-                           pulse_cnt_reg, pulse_data_reg, crc_reg, crc_ready_s) is
+                           pulse_cnt_reg, pulse_data_reg, crc_reg, crc_ready_s, crc_en_i, crc_val_i,
+													 piso_data_req_s, crc_out_s, byte_cnt_i, header_s, fifo_in_rd_data_s, vld_bytes_last_pulse_cnt_s, addr_out_i, fifo_out_rd_data_s, single_write_burst, axi_write_rdy_s, axi_burst_len_s, axi_write_done_s, addr_out_i,
+													 axi_read_vld_s, axi_read_data_s, axi_read_last_s) is
   begin
 
     -- default values

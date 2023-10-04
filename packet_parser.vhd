@@ -438,8 +438,11 @@ begin
 
 
 
-  pp_fsm_comb_proc:process(state_reg, start_i, addr_hdr_i, burst_len_s, burst_len_with_crc_s,
-                           crc_reg, crc_ready_s, header_reg) is
+  pp_fsm_comb_proc:process(state_reg, header_reg, pkt_ecc_corr_o_reg, pkt_ecc_uncorr_o_reg, pkt_crc_err_o_reg, pkt_byte_cnt_o_reg, pkt_type_o_reg, 
+													 axi_read_data_s, axi_read_vld_s, axi_read_last_s, hamming_parity_out_s, 
+													 ignore_ecc_err_i, 
+													 start_i, addr_hdr_i, burst_len_s, burst_len_with_crc_s,
+                           crc_reg, crc_ready_s) is
   begin
     -- top interface 
     -- [x] pkt_type, pkt_byte_cnt and other outputs logic
@@ -451,7 +454,7 @@ begin
     
     -- busy_o_next <= busy_o_reg;
     -- irq_o_next <= irq_o_reg;
-    irq_o <= '1';
+    irq_o <= '0';
 
     pkt_ecc_corr_o_next <= pkt_ecc_corr_o_reg;
     pkt_ecc_uncorr_o_next <= pkt_ecc_uncorr_o_reg;
@@ -577,9 +580,19 @@ begin
           fifo_in_wr_data_s <= axi_read_data_s;
           
           if(axi_read_last_s = '1') then
-              -- IMPORTANT parse crc8
 
-              crc_next <= axi_read_data_s((to_integer(unsigned(crc_pos_s))*8) + 7 downto (to_integer(unsigned(crc_pos_s))*8));
+              -- IMPORTANT parse crc8
+						  case crc_pos_s is
+								when "00" =>
+              		crc_next <= axi_read_data_s(7 downto 0);
+								when "01" =>
+              		crc_next <= axi_read_data_s(15 downto 8);
+								when "10" =>
+              		crc_next <= axi_read_data_s(23 downto 16);
+								when others =>
+              		crc_next <= axi_read_data_s(31 downto 24);
+							end case;
+
               start_piso_s <= '1';
               ---------------------------------------- 
               state_next <= CRC_LOOP;

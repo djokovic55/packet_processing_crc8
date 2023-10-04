@@ -52,8 +52,10 @@ checker  checker_axi_slave(
 	awready_c: cover property(awready);
 
 	wvalid_c: cover property(wvalid);
+
 	wready_c: cover property(wready);
 	wvalid_and_wready_c: cover property(wvalid && wready);
+	write_data_trans_c: cover property(wlast && wvalid && wdata == 32'hff);
 
 	// NOTE Read transaction
 
@@ -66,15 +68,6 @@ checker  checker_axi_slave(
 	rvalid_c: cover property(rvalid);
 	rready_c: cover property(rready);
 	rvalid_and_rready_c: cover property(rvalid && rready);
-
-
-
-
-
-
-
-
-
 
 endchecker
 

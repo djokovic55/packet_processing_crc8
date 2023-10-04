@@ -391,7 +391,7 @@ architecture arch_imp of slave_axi_lite_regs_cont is
   -- and the slave is ready to accept the read address.
   slv_reg_rden <= axi_arready and S_AXI_ARVALID and (not axi_rvalid) ;
 
-  process (sys_cfg_i, pb0_sts_i, pb1_sts_i, pp_sts_i, 
+  process (sys_cfg_i, pb0_sts_i, pb1_sts_i, pp_sts_i, axi_araddr,
            pb0_ctrl0_i, pb0_ctrl1_i, pb0_ctrl2_i, pb0_ctrl3_i, pb0_ctrl4_i, 
            pb1_ctrl0_i, pb1_ctrl1_i, pb1_ctrl2_i, pb1_ctrl3_i, pb1_ctrl4_i, 
            pp_ctrl0_i, pp_ctrl1_i, pp_ctrl2_i, pp_ctrl3_i)

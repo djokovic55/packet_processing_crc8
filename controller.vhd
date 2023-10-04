@@ -390,22 +390,34 @@ begin
   
           when IDLE =>
           
-            axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
+            axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
 					  pb_status_cnt_next <= (others => '0');
 					  setup_cnt_next <= (others => '0');
 
             if(int_irq(0) = '1') then
               clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_CTRL1);
+							axi_write_data_next <= x"00000001";
+              axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_CTRL1);
+
+							axi_write_init_next <= '1';
             	---------------------------------------- 
             	state_next <= INTR_CLEAR;
             	---------------------------------------- 
             elsif(int_irq(1) = '1') then
               clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB1_CTRL1);
+							axi_write_data_next <= x"00000001";
+              axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB1_CTRL1);
+
+							axi_write_init_next <= '1';
             	---------------------------------------- 
             	state_next <= INTR_CLEAR;
             	---------------------------------------- 
             elsif(int_irq(2) = '1') then
               clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PP_CTRL1);
+							axi_write_data_next <= x"00000001";
+              axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PP_CTRL1);
+
+							axi_write_init_next <= '1';
             	---------------------------------------- 
             	state_next <= INTR_CLEAR;
             	---------------------------------------- 
