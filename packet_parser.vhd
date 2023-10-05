@@ -10,7 +10,6 @@ entity packet_parser is
     port (
 
         -- INTERRUPT PORTS
-        -- FIXME interface with regs
         start_i : in std_logic;
         busy_o : out std_logic;
         irq_o : out std_logic;
@@ -268,33 +267,21 @@ architecture Behavioral of packet_parser is
     );
   end component;
 
-  component piso is 
+  component crc_top is 
   port( 
-        clk: in std_logic; 
-        reset : in std_logic; --active high reset
-        start_piso : in std_logic;
-        -- shift : in std_logic;
-        d : in std_logic_vector(31 downto 0);
-        crc_stall : out std_logic;
-        q : out std_logic;
-        data_req : out std_logic;
+    clk: in std_logic; 
+    reset : in std_logic; --active high reset
+    
+    start_crc : in std_logic;
+    pulse_cnt_max : in std_logic_vector(1 downto 0);
+    vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0);
 
-        burst_len : in std_logic_vector(7 downto 0);
-        vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0)
-        ); 
-  end component;
-
-  component crc8 is 
-  port( 
-        clk: in std_logic; 
-        reset : in std_logic; --active high reset
-        crc_stall : in std_logic;
-        size_data : in std_logic_vector(15 downto 0);  --the size of input stream in bits.
-        data_in : in std_logic; --serial input
-        crc_out : out std_logic_vector(7 downto 0); --8 bit crc checksum
-        crc_ready : out std_logic --high when the calculation is done.
-        ); 
-  end component;
+    data_in : in std_logic_vector(31 downto 0);
+    data_req: out std_logic;
+    crc_out : out std_logic_vector(7 downto 0);
+    crc_ready : out std_logic
+    ); 
+  end component crc_top; 
 
   component hamming_12_8 is 
     Port ( 
@@ -303,24 +290,27 @@ architecture Behavioral of packet_parser is
     );
   end component;
 
+  -- Axi4
   signal axi_burst_len_s  : std_logic_vector(7 downto 0);  
-  signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- base address    
-  --  WRITE CHANNEL
-  signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
-  signal axi_write_init_s    : std_logic;  -- start write transactions    
+  signal axi_base_address_s  : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+
+  -- write channel
+  signal axi_write_address_s : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
+  signal axi_write_init_s    : std_logic;
   signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
   signal axi_write_strb_s    : std_logic_vector(3 downto 0);
-  signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
-  signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
-  signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
-  -- READ CHANNEL
+  signal axi_write_vld_s     : std_logic;
+  signal axi_write_rdy_s     : std_logic;
+  signal axi_write_done_s    : std_logic;
 
-  signal axi_read_address_s : std_logic_vector(31 downto 0);  -- address added to base address
-  signal axi_read_init_s : std_logic;    --starts read transaction
-  signal axi_read_data_s : std_logic_vector(31 downto 0);  -- data read from                                                             -- ddr
-  signal axi_read_vld_s  : std_logic;    -- axi_read_data_o is valid
-  signal axi_read_rdy_s  : std_logic;    -- axi_read_data_o is valid
-  signal axi_read_last_s : std_logic;    -- axi_read_data_o is valid
+  -- read channel
+  signal axi_read_address_s : std_logic_vector(31 downto 0);
+  signal axi_read_init_s : std_logic;
+  signal axi_read_data_s : std_logic_vector(31 downto 0);
+  signal axi_read_vld_s  : std_logic;
+  signal axi_read_rdy_s  : std_logic;
+  signal axi_read_last_s : std_logic;
+  --------------------------------------------------------------------------------
 
   constant INMEM_BASE_ADDR: unsigned := x"00000000";
   type state_t is (IDLE, HEADER_READ, INMEM_READ, CRC_LOOP);
@@ -332,7 +322,6 @@ architecture Behavioral of packet_parser is
 
   -- register output signals
   signal busy_o_reg, busy_o_next  : std_logic;
-  -- signal irq_o_reg, irq_o_next  : std_logic;
   signal pkt_ecc_corr_o_reg, pkt_ecc_corr_o_next  : std_logic;
   signal pkt_ecc_uncorr_o_reg, pkt_ecc_uncorr_o_next  : std_logic;
   signal pkt_crc_err_o_reg, pkt_crc_err_o_next  : std_logic;
@@ -350,29 +339,24 @@ architecture Behavioral of packet_parser is
   signal fifo_in_empty_s   : std_logic;
   --------------------------------------------------------------------------------
 
-  -- Piso 
-  signal start_piso_s : std_logic;
-  signal piso_d_s : std_logic_vector(31 downto 0);
-  signal piso_q_s : std_logic;
-  signal piso_data_req_s : std_logic;
+  -- crc8 signals
+  signal start_crc_s : std_logic;
+  signal shift_data_in_s : std_logic_vector(31 downto 0);
+  signal shift_data_req_s : std_logic;
 
-  signal burst_len_s : std_logic_vector(7 downto 0) := (others => '0');
-  signal burst_len_with_crc_s: std_logic_vector(7 downto 0) := (others => '0');
-  signal piso_vld_bytes_last_pulse_cnt_s : std_logic_vector(1 downto 0);
-  --------------------------------------------------------------------------------
-  -- crc8
-  signal crc_stall_s : std_logic;
-  signal crc_size_data_s : std_logic_vector(15 downto 0); 
-  signal crc_data_in_s : std_logic;
   signal crc_out_s : std_logic_vector(7 downto 0);
   signal crc_ready_s : std_logic; 
 
+  signal read_burst_len_s : std_logic_vector(7 downto 0) := (others => '0');
+
   signal crc_pos_s : std_logic_vector(1 downto 0);
   signal crc_err_s : std_logic;
+
+  signal burst_len_with_crc_s: std_logic_vector(7 downto 0) := (others => '0');
   --------------------------------------------------------------------------------
   -- hamming
-  signal hamming_data_in_s : STD_LOGIC_VECTOR(7 downto 0);
-  signal hamming_parity_out_s : STD_LOGIC_VECTOR(3 downto 0);
+  signal hamming_data_in_s : std_logic_vector(7 downto 0);
+  signal hamming_parity_out_s : std_logic_vector(3 downto 0);
   signal ecc_err : std_logic;
   --------------------------------------------------------------------------------
 
@@ -388,21 +372,13 @@ begin
   pkt_type_o <= pkt_type_o_reg;
 
   -- piso data
-  piso_d_s <= fifo_in_rd_data_s;
+  shift_data_in_s <= fifo_in_rd_data_s;
 
   -- calculate burst len and valid bytes in last pulse based on byte_cnt + 1 (crc8)
   byte_cnt_with_crc_s <= std_logic_vector(to_unsigned(to_integer(unsigned(pkt_byte_cnt_o_reg)) + 1, 5)); 
   burst_len_with_crc_s(7 downto 3) <= (others => '0');
   burst_len_with_crc_s(2 downto 0) <= byte_cnt_with_crc_s(4 downto 2);
   crc_pos_s <= std_logic_vector(unsigned(byte_cnt_with_crc_s(1 downto 0))); 
-
-
-  -- without crc, used in piso to calculate crc
-  burst_len_s(7 downto 4) <= (others => '0');
-  burst_len_s(1 downto 0) <= pkt_byte_cnt_o_reg(3 downto 2);
-  piso_vld_bytes_last_pulse_cnt_s <= std_logic_vector(unsigned(pkt_byte_cnt_o_reg(1 downto 0))); 
-
-
 
   pp_fsm_seq_proc: process(M_AXI_ACLK)
   begin
@@ -412,8 +388,6 @@ begin
           crc_reg <= (others => '0');
           header_reg <= (others => '0');
 
-          -- busy_o_reg <= '0';
-          -- irq_o_reg <= '0';
           pkt_ecc_corr_o_reg <= '0';
           pkt_ecc_uncorr_o_reg <= '0';
           pkt_crc_err_o_reg <= '0';
@@ -424,8 +398,6 @@ begin
           crc_reg <= crc_next;
           header_reg <= header_next;
 
-          -- busy_o_reg <= busy_o_next;
-          -- irq_o_reg <= irq_o_next;
           pkt_ecc_corr_o_reg <= pkt_ecc_corr_o_next;
           pkt_ecc_uncorr_o_reg <= pkt_ecc_uncorr_o_next;
           pkt_crc_err_o_reg <= pkt_crc_err_o_next;
@@ -438,11 +410,10 @@ begin
 
 
 
-  pp_fsm_comb_proc:process(state_reg, header_reg, pkt_ecc_corr_o_reg, pkt_ecc_uncorr_o_reg, pkt_crc_err_o_reg, pkt_byte_cnt_o_reg, pkt_type_o_reg, 
-													 axi_read_data_s, axi_read_vld_s, axi_read_last_s, hamming_parity_out_s, 
-													 ignore_ecc_err_i, 
-													 start_i, addr_hdr_i, burst_len_s, burst_len_with_crc_s,
-                           crc_reg, crc_ready_s) is
+  pp_fsm_comb_proc:process(state_reg, header_reg, pkt_ecc_corr_o_reg, pkt_ecc_uncorr_o_reg, 
+                           pkt_crc_err_o_reg, pkt_byte_cnt_o_reg, pkt_type_o_reg, axi_read_data_s, 
+                           axi_read_vld_s, axi_read_last_s, hamming_parity_out_s, ignore_ecc_err_i, 
+													 start_i, addr_hdr_i, burst_len_with_crc_s, crc_reg, crc_ready_s) is
   begin
     -- top interface 
     -- [x] pkt_type, pkt_byte_cnt and other outputs logic
@@ -452,10 +423,9 @@ begin
     crc_next <= crc_reg;
     header_next <= header_reg;
     
-    -- busy_o_next <= busy_o_reg;
-    -- irq_o_next <= irq_o_reg;
     irq_o <= '0';
 
+    -- output regs
     pkt_ecc_corr_o_next <= pkt_ecc_corr_o_reg;
     pkt_ecc_uncorr_o_next <= pkt_ecc_uncorr_o_reg;
     pkt_crc_err_o_next <= pkt_crc_err_o_reg;
@@ -485,8 +455,8 @@ begin
     fifo_in_wr_en_s <= '0';
     fifo_in_rd_en_s <= '0';
 
-    -- PISO default
-    start_piso_s <= '0';
+    -- Crc default
+    start_crc_s <= '0';
 
     -- ECC default
     hamming_data_in_s <= (others => '0');
@@ -523,19 +493,15 @@ begin
 
         if(axi_read_vld_s = '1' and axi_read_last_s = '1') then
           -- header won't be stored in fifo, then in its register
-          -- fifo_in_wr_en_s <= '1';
-          -- fifo_in_wr_data_s <= axi_read_data_s;
           header_next <= axi_read_data_s(15 downto 0);
-
-          -- IMPORTANT check received and calculated ecc code
-
           -- parse packet type
           hamming_data_in_s(7 downto 4) <= axi_read_data_s(11 downto 8);
           -- parse byte count
           hamming_data_in_s(3 downto 0) <= axi_read_data_s(7 downto 4);
           pkt_byte_cnt_o_next <= axi_read_data_s(7 downto 4);
 
-          if(unsigned(axi_read_data_s(3 downto 0)) /= unsigned(hamming_parity_out_s)) then
+          -- IMPORTANT check received and calculated ecc code
+          if(unsigned(axi_read_data_s(3 downto 0)) = unsigned(hamming_parity_out_s)) then
             -- KEY here must be decided whether the is corr or uncorr ecc error
             ecc_err <= '0';
             -- [ ] set output signals about corr and uncorr error
@@ -593,7 +559,7 @@ begin
               		crc_next <= axi_read_data_s(31 downto 24);
 							end case;
 
-              start_piso_s <= '1';
+              start_crc_s <= '1';
               ---------------------------------------- 
               state_next <= CRC_LOOP;
               ---------------------------------------- 
@@ -610,7 +576,7 @@ begin
 
       when CRC_LOOP => 
 
-        if(piso_data_req_s = '1') then
+        if(shift_data_req_s= '1') then
           fifo_in_rd_en_s <= '1';
         end if;
 
@@ -652,32 +618,20 @@ begin
     empty_o => fifo_in_empty_s   
   );
 
-  piso_reg: piso
+  crc_calc: crc_top
   port map(
     clk => M_AXI_ACLK,      
     reset => M_AXI_ARESETN, 
-    start_piso => start_piso_s,
-    d => piso_d_s,
-    crc_stall => crc_stall_s,
-    q => piso_q_s,
-    data_req => piso_data_req_s,
-    
+    start_crc => start_crc_s,
+    pulse_cnt_max => pkt_byte_cnt_o_reg(3 downto 2),
+    vld_bytes_last_pulse_cnt => pkt_byte_cnt_o_reg(1 downto 0),
 
-    burst_len => burst_len_s,
-    vld_bytes_last_pulse_cnt => piso_vld_bytes_last_pulse_cnt_s
-  );
-
-  crc8_calc: crc8
-  port map(
-
-    clk => M_AXI_ACLK,      
-    reset => M_AXI_ARESETN, 
-    crc_stall => crc_stall_s, 
-    size_data => crc_size_data_s, 
-    data_in => crc_data_in_s, 
+    data_in => shift_data_in_s,
+    data_req => shift_data_req_s,
     crc_out => crc_out_s, 
-    crc_ready => crc_ready_s 
+    crc_ready => crc_ready_s
   );
+
   hamming_calc: hamming_12_8
   port map (
     data_in => hamming_data_in_s,
@@ -689,7 +643,6 @@ begin
       C_M_AXI_DATA_WIDTH => C_M_AXI_DATA_WIDTH
   )
   port map(
-    --FIXME Connect with actual packet_parser signals
 
     AXI_BURST_LEN  => axi_burst_len_s, 
 
