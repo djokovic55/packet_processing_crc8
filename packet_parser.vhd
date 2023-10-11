@@ -283,12 +283,12 @@ architecture Behavioral of packet_parser is
     ); 
   end component crc_top; 
 
-  component hamming_12_8 is 
+component hamming_check is
     Port ( 
-      data_in : in  STD_LOGIC_VECTOR(7 downto 0);
-      parity_out : out  STD_LOGIC_VECTOR(3 downto 0)
-    );
-  end component;
+           data_in : in  std_logic_vector(7 downto 0);
+           parity_in : in  std_logic_vector(3 downto 0);
+           parity_check_out : out std_logic_vector(3 downto 0));
+end component hamming_check;
 
   -- Axi4
   signal axi_burst_len_s  : std_logic_vector(7 downto 0);  
@@ -356,9 +356,12 @@ architecture Behavioral of packet_parser is
   --------------------------------------------------------------------------------
   -- hamming
   signal hamming_data_in_s : std_logic_vector(7 downto 0);
-  signal hamming_parity_out_s : std_logic_vector(3 downto 0);
-  signal ecc_err : std_logic;
+  signal hamming_parity_in_s : std_logic_vector(3 downto 0);
+  signal hamming_msb_parity_bit_s : std_logic;
+  signal hamming_parity_check_out_s : std_logic_vector(3 downto 0);
   --------------------------------------------------------------------------------
+  -- header data
+  -- signal pkt_byte_cnt
 
 begin
   -- [ ] packet_parser implementation
@@ -412,7 +415,7 @@ begin
 
   pp_fsm_comb_proc:process(state_reg, header_reg, pkt_ecc_corr_o_reg, pkt_ecc_uncorr_o_reg, 
                            pkt_crc_err_o_reg, pkt_byte_cnt_o_reg, pkt_type_o_reg, axi_read_data_s, 
-                           axi_read_vld_s, axi_read_last_s, hamming_parity_out_s, ignore_ecc_err_i, 
+                           axi_read_vld_s, axi_read_last_s, hamming_parity_in_s, ignore_ecc_err_i, 
 													 start_i, addr_hdr_i, burst_len_with_crc_s, crc_reg, crc_ready_s) is
   begin
     -- top interface 
@@ -460,7 +463,8 @@ begin
 
     -- ECC default
     hamming_data_in_s <= (others => '0');
-    ecc_err <= '0';
+    hamming_parity_in_s <= (others => '0');
+    hamming_msb_parity_bit_s <= '0';
 
     case state_reg is
       when IDLE =>
@@ -498,34 +502,61 @@ begin
           hamming_data_in_s(7 downto 4) <= axi_read_data_s(11 downto 8);
           -- parse byte count
           hamming_data_in_s(3 downto 0) <= axi_read_data_s(7 downto 4);
-          pkt_byte_cnt_o_next <= axi_read_data_s(7 downto 4);
+          -- parse parity bits
+          hamming_parity_in_s <= axi_read_data_s(3 downto 0);
+          -- parse msb parity bit
+          hamming_msb_parity_bit_s <= axi_read_data_s(12);
 
-          -- IMPORTANT check received and calculated ecc code
-          if(unsigned(axi_read_data_s(3 downto 0)) = unsigned(hamming_parity_out_s)) then
-            -- KEY here must be decided whether the is corr or uncorr ecc error
-            ecc_err <= '0';
-            -- [ ] set output signals about corr and uncorr error
-            -- pkt_ecc_uncorr_o_next <= '1';
-            -- pkt_ecc_corr_o_next <= '1';
+
+          -- KEY informations which must be correct
+          pkt_byte_cnt_o_next <= axi_read_data_s(7 downto 4);
+          pkt_type_o_next <= axi_read_data_s(11 downto 8);
+
+          -- IMPORTANT check for single or double ecc errors
+          if(unsigned(hamming_parity_check_out_s) = "0000") then
+            -- no error
+            pkt_ecc_uncorr_o_next <= '0';
+            pkt_ecc_corr_o_next <= '0';
             ---------------------------------------- 
             state_next <= INMEM_READ;
             ---------------------------------------- 
           else
-            ecc_err <= '1';
             -- check if error can be ignored and preceed to inmmem read or finish task
-            if(ignore_ecc_err_i = '1') then
-              ---------------------------------------- 
-              state_next <= INMEM_READ;
-              ---------------------------------------- 
-            else
-              irq_o <= '1';
-              ---------------------------------------- 
-              state_next <= IDLE;
-              ---------------------------------------- 
+            if(hamming_msb_parity_bit_s = '1') then
+              -- IMPORTANT single ecc error correction logic
+              case(hamming_parity_check_out_s) is 
+                when "0011" => --m0
+                  pkt_byte_cnt_o_next(0) <= not(axi_read_data_s(4));
+                when "0101" => --m1
+                  pkt_byte_cnt_o_next(1) <= not(axi_read_data_s(5));
+                when "0110" => --m2
+                  pkt_byte_cnt_o_next(2) <= not(axi_read_data_s(6));
+                when "0111" => --m3
+                  pkt_byte_cnt_o_next(3) <= not(axi_read_data_s(7));
+                when "1001" => --m4
+                  pkt_type_o_next(0) <= not(axi_read_data_s(8));
+                when "1010" => --m5
+                  pkt_type_o_next(1) <= not(axi_read_data_s(9));
+                when "1011" => --m6
+                  pkt_type_o_next(2) <= not(axi_read_data_s(10));
+                when "1100" => --m7
+                  pkt_type_o_next(3) <= not(axi_read_data_s(11));
+                when others => -- parity bits which does not need to be corrected
+              end case;
+            else 
+              -- double ecc error
+              if(ignore_ecc_err_i = '1') then
+                ---------------------------------------- 
+                state_next <= INMEM_READ;
+                ---------------------------------------- 
+              else
+                irq_o <= '1';
+                ---------------------------------------- 
+                state_next <= IDLE;
+                ---------------------------------------- 
+              end if;
             end if;
           end if;
-
-
         else
           ---------------------------------------- 
           state_next <= HEADER_READ;
@@ -536,6 +567,7 @@ begin
         axi_base_address_s <= std_logic_vector(INMEM_BASE_ADDR);
         -- IMPORTANT 2 bytes of header are already read, so continue reading from first data byte to and including crc byte
         axi_read_address_s <= std_logic_vector(unsigned(addr_hdr_i) + 2);
+        -- IMPORTANT axi burst len depends on byte_cnt, therefore inmem read phase will fail if this information is incorrect
         axi_burst_len_s <= burst_len_with_crc_s;
 
         axi_read_rdy_s <= '1';
@@ -632,10 +664,11 @@ begin
     crc_ready => crc_ready_s
   );
 
-  hamming_calc: hamming_12_8
+  hamming_chk: hamming_check
   port map (
     data_in => hamming_data_in_s,
-    parity_out => hamming_parity_out_s
+    parity_in => hamming_parity_in_s,
+    parity_check_out => hamming_parity_check_out_s 
   );
   master_axi_cont_ctrl: master_axi_cont
   generic map(

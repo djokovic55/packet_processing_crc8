@@ -22,8 +22,8 @@ entity top is
 				pb_ins_crc_err_i : in std_logic;
 				pb_ecc_val_i : in std_logic_vector(3 downto 0);
 				pb_crc_val_i: in std_logic_vector(7 downto 0);
-				pb_sop_val_i: in std_logic_vector(3 downto 0);
-				pb_data_sel_i: in std_logic_vector(2 downto 0);
+				pb_sop_val_i: in std_logic_vector(2 downto 0);
+				pb_data_sel_i: in std_logic_vector(3 downto 0);
 				pb_addr_out_i: in std_logic_vector(DATA_WIDTH-1 downto 0);
 
 				pp_irq_i : in std_logic;
@@ -537,8 +537,8 @@ architecture rtl of top is
         ins_crc_err_i : in std_logic;
         ecc_val_i : in std_logic_vector(3 downto 0);
         crc_val_i: in std_logic_vector(7 downto 0);
-        sop_val_i: in std_logic_vector(3 downto 0);
-        data_sel_i: in std_logic_vector(2 downto 0);
+        sop_val_i: in std_logic_vector(2 downto 0);
+        data_sel_i: in std_logic_vector(3 downto 0);
         addr_out_i: in std_logic_vector(31 downto 0);
 
         -- User ports ends
@@ -886,8 +886,8 @@ architecture rtl of top is
 		pb0_ins_crc_err_o : out std_logic;
 		pb0_ecc_val_o : out std_logic_vector(3 downto 0);
 		pb0_crc_val_o: out std_logic_vector(7 downto 0);
-		pb0_sop_val_o: out std_logic_vector(3 downto 0);
-		pb0_data_sel_o: out std_logic_vector(2 downto 0);
+		pb0_sop_val_o: out std_logic_vector(2 downto 0);
+		pb0_data_sel_o: out std_logic_vector(3 downto 0);
 		pb0_addr_out_o: out std_logic_vector(31 downto 0);
 
 		-- [x] interface with builder1
@@ -903,8 +903,8 @@ architecture rtl of top is
 		pb1_ins_crc_err_o : out std_logic;
 		pb1_ecc_val_o : out std_logic_vector(3 downto 0);
 		pb1_crc_val_o: out std_logic_vector(7 downto 0);
-		pb1_sop_val_o: out std_logic_vector(3 downto 0);
-		pb1_data_sel_o: out std_logic_vector(2 downto 0);
+		pb1_sop_val_o: out std_logic_vector(2 downto 0);
+		pb1_data_sel_o: out std_logic_vector(3 downto 0);
 		pb1_addr_out_o: out std_logic_vector(31 downto 0);
 		-- [x] interface with parser
 
@@ -1394,8 +1394,8 @@ architecture rtl of top is
   signal pb0_ins_crc_err_s : std_logic;
   signal pb0_ecc_val_s : std_logic_vector(3 downto 0);
   signal pb0_crc_val_s: std_logic_vector(7 downto 0);
-  signal pb0_sop_val_s: std_logic_vector(3 downto 0);
-  signal pb0_data_sel_s: std_logic_vector(2 downto 0);
+  signal pb0_sop_val_s: std_logic_vector(2 downto 0);
+  signal pb0_data_sel_s: std_logic_vector(3 downto 0);
   signal pb0_addr_out_s: std_logic_vector(31 downto 0);
 
   --------------------------------------------------------------------------------
@@ -1414,8 +1414,8 @@ architecture rtl of top is
   signal pb1_ins_crc_err_s : std_logic;
   signal pb1_ecc_val_s : std_logic_vector(3 downto 0);
   signal pb1_crc_val_s: std_logic_vector(7 downto 0);
-  signal pb1_sop_val_s: std_logic_vector(3 downto 0);
-  signal pb1_data_sel_s: std_logic_vector(2 downto 0);
+  signal pb1_sop_val_s: std_logic_vector(2 downto 0);
+  signal pb1_data_sel_s: std_logic_vector(3 downto 0);
   signal pb1_addr_out_s: std_logic_vector(31 downto 0);
 
   --------------------------------------------------------------------------------
@@ -1451,8 +1451,8 @@ begin
 	ext_pb_ctrl3_s(12) <= pb_ins_crc_err_i; 
 	ext_pb_ctrl3_s(16 downto 13) <= pb_ecc_val_i; 
 	ext_pb_ctrl3_s(24 downto 17) <= pb_crc_val_i; 
-	ext_pb_ctrl3_s(28 downto 25) <= pb_sop_val_i; 
-	ext_pb_ctrl3_s(31 downto 29) <= pb_data_sel_i; 
+	ext_pb_ctrl3_s(27 downto 25) <= pb_sop_val_i; 
+	ext_pb_ctrl3_s(31 downto 28) <= pb_data_sel_i; 
 
   -- byte access
 	ext_pb_ctrl4_s <= pb_addr_out_i; 

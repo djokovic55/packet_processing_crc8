@@ -32,8 +32,8 @@ entity regs is
 		pb0_ins_crc_err_o : out std_logic;
 		pb0_ecc_val_o : out std_logic_vector(3 downto 0);
 		pb0_crc_val_o: out std_logic_vector(7 downto 0);
-		pb0_sop_val_o: out std_logic_vector(3 downto 0);
-		pb0_data_sel_o: out std_logic_vector(2 downto 0);
+		pb0_sop_val_o: out std_logic_vector(2 downto 0);
+		pb0_data_sel_o: out std_logic_vector(3 downto 0);
 		pb0_addr_out_o: out std_logic_vector(31 downto 0);
 
 		-- [x] interface with builder1
@@ -49,8 +49,8 @@ entity regs is
 		pb1_ins_crc_err_o : out std_logic;
 		pb1_ecc_val_o : out std_logic_vector(3 downto 0);
 		pb1_crc_val_o: out std_logic_vector(7 downto 0);
-		pb1_sop_val_o: out std_logic_vector(3 downto 0);
-		pb1_data_sel_o: out std_logic_vector(2 downto 0);
+		pb1_sop_val_o: out std_logic_vector(2 downto 0);
+		pb1_data_sel_o: out std_logic_vector(3 downto 0);
 		pb1_addr_out_o: out std_logic_vector(31 downto 0);
 		-- [x] interface with parser
 
@@ -472,8 +472,8 @@ begin
 	pb0_ins_crc_err_o <= pb0_ctrl3_s(12); -- 1
 	pb0_ecc_val_o <= pb0_ctrl3_s(16 downto 13); -- 4
 	pb0_crc_val_o <= pb0_ctrl3_s(24 downto 17); -- 8
-	pb0_sop_val_o <= pb0_ctrl3_s(28 downto 25); -- 4
-	pb0_data_sel_o <= pb0_ctrl3_s(31 downto 29); -- 3
+	pb0_sop_val_o <= pb0_ctrl3_s(27 downto 25); -- 3
+	pb0_data_sel_o <= pb0_ctrl3_s(31 downto 28); -- 4
 
   -- byte access
 	pb0_addr_out_o <= pb0_ctrl4_s; 
@@ -497,8 +497,8 @@ begin
 	pb1_ins_crc_err_o <= pb1_ctrl3_s(12); 
 	pb1_ecc_val_o <= pb1_ctrl3_s(16 downto 13); 
 	pb1_crc_val_o <= pb1_ctrl3_s(24 downto 17); 
-	pb1_sop_val_o <= pb1_ctrl3_s(28 downto 25); 
-	pb1_data_sel_o <= pb1_ctrl3_s(31 downto 29); 
+	pb1_sop_val_o <= pb1_ctrl3_s(27 downto 25); 
+	pb1_data_sel_o <= pb1_ctrl3_s(31 downto 28); 
 
   -- byte access
 	pb1_addr_out_o <= pb1_ctrl4_s; 
