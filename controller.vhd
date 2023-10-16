@@ -307,7 +307,7 @@ architecture Behavioral of controller is
     constant EXT_DROP_CNT: unsigned := x"1C";
 
 begin
-  -- [ ] main controller implementation
+  -- [x] main controller implementation
   -- [x] master AXI cont added
   
 
@@ -390,7 +390,7 @@ begin
   
           when IDLE =>
           
-            axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+            axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
 					  pb_status_cnt_next <= (others => '0');
 					  setup_cnt_next <= (others => '0');
 

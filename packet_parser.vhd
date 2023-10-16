@@ -352,7 +352,7 @@ end component hamming_check;
   signal crc_pos_s : std_logic_vector(1 downto 0);
   signal crc_err_s : std_logic;
 
-  signal burst_len_with_crc_s: std_logic_vector(7 downto 0) := (others => '0');
+  signal burst_len_with_crc_s: std_logic_vector(7 downto 0);
   --------------------------------------------------------------------------------
   -- hamming
   signal hamming_data_in_s : std_logic_vector(7 downto 0);
@@ -382,6 +382,9 @@ begin
   burst_len_with_crc_s(7 downto 3) <= (others => '0');
   burst_len_with_crc_s(2 downto 0) <= byte_cnt_with_crc_s(4 downto 2);
   crc_pos_s <= std_logic_vector(unsigned(byte_cnt_with_crc_s(1 downto 0))); 
+
+	-- fifo
+	fifo_in_rd_pt_rst_s <= '0';  
 
   pp_fsm_seq_proc: process(M_AXI_ACLK)
   begin
@@ -416,7 +419,8 @@ begin
   pp_fsm_comb_proc:process(state_reg, header_reg, pkt_ecc_corr_o_reg, pkt_ecc_uncorr_o_reg, 
                            pkt_crc_err_o_reg, pkt_byte_cnt_o_reg, pkt_type_o_reg, axi_read_data_s, 
                            axi_read_vld_s, axi_read_last_s, hamming_parity_in_s, ignore_ecc_err_i, 
-													 start_i, addr_hdr_i, burst_len_with_crc_s, crc_reg, crc_ready_s) is
+													 start_i, addr_hdr_i, burst_len_with_crc_s, crc_reg, crc_ready_s, crc_pos_s, crc_out_s,
+													 hamming_parity_check_out_s, hamming_msb_parity_bit_s, shift_data_req_s) is
   begin
     -- top interface 
     -- [x] pkt_type, pkt_byte_cnt and other outputs logic
@@ -608,7 +612,7 @@ begin
 
       when CRC_LOOP => 
 
-        if(shift_data_req_s= '1') then
+        if(shift_data_req_s = '1') then
           fifo_in_rd_en_s <= '1';
         end if;
 

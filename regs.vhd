@@ -550,7 +550,7 @@ begin
 		end if;
 	end process;
 
-	-- RW
+	-- RW start reg
 	pb0_ctrl0: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -558,6 +558,8 @@ begin
 				pb0_ctrl0_s <= '0';
 			elsif pb0_ctrl0_wr_s = '1' then
 				pb0_ctrl0_s <= reg_data_s(0);
+			else
+				pb0_ctrl0_s <= '0'; -- negate to generate pulse
 			end if;
 		end if;
 	end process;
@@ -662,7 +664,7 @@ begin
 		end if;
 	end process;
 
-	-- RW 
+	-- RW start reg
 	pb1_ctrl0: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -670,6 +672,9 @@ begin
 				pb1_ctrl0_s <= '0';
 			elsif pb1_ctrl0_wr_s = '1' then
 				pb1_ctrl0_s <= reg_data_s(0);
+			else
+				pb1_ctrl0_s <= '0'; -- negate to generate pulse
+
 			end if;
 		end if;
 	end process;
@@ -779,7 +784,7 @@ begin
 		end if;
 	end process;
 
-	-- RW 
+	-- RW start reg
 	pp_ctrl0: process(S_AXI_ACLK)
   begin
 		if S_AXI_ACLK'event and S_AXI_ACLK = '1' then
@@ -787,6 +792,8 @@ begin
 				pp_ctrl0_s <= '0';
 			elsif pp_ctrl0_wr_s = '1' then
 				pp_ctrl0_s <= reg_data_s(0);
+			else
+				pp_ctrl0_s <= '0'; -- negate to generate pulse
 			end if;
 		end if;
 	end process;

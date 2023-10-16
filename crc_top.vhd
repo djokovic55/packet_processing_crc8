@@ -53,8 +53,12 @@ begin
     if (rising_edge(clk)) then
       if(reset = '1') then
         crc_reg <= (others => '0');
-      else
+			elsif(start_crc = '1') then
+        crc_reg <= (others => '0');
+      elsif(shift_s = '1') then
         crc_reg <= crc_out_s;
+			else 
+				crc_reg <= crc_reg;
       end if;
     end if;
   end process;
@@ -108,6 +112,7 @@ begin
       when IDLE =>
         -- shift_cnt_max_next <= std_logic_vector(to_unsigned(31, 5));
         pulse_cnt_next <= (others => '0');
+				shift_cnt_next <= (others => '0');
 
         if(start_crc = '1') then
           if(to_integer(unsigned(pulse_cnt_max)) > 0) then
@@ -137,14 +142,16 @@ begin
         ---------------------------------------- 
       when SHIFT =>
         shift_s <= '1';
-        shift_cnt_next <= std_logic_vector(unsigned(shift_cnt_reg));
+        shift_cnt_next <= std_logic_vector(unsigned(shift_cnt_reg) + 1);
 
         if(to_integer(unsigned(shift_cnt_reg)) = 3) then
           if(unsigned(pulse_cnt_reg) = unsigned(pulse_cnt_max)) then
+						shift_cnt_next <= (others => '0');
             ---------------------------------------- 
             state_next <= LAST_LOAD;
             ---------------------------------------- 
           else
+						shift_cnt_next <= (others => '0');
             ---------------------------------------- 
             state_next <= LOAD;
             ---------------------------------------- 

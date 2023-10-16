@@ -266,6 +266,7 @@ begin
 	-- //SECTION Transaction initiation pulse
 	-----------------------------------------------------------------------------------------
 
+	-- FIX Edge detection logic excluded
 	-- //IMPORTANT When transaction starts it resets the whole logic for the start of the new transaction 
 	init_write_txn_pulse <= ( not init_write_txn_ff2)  and  init_write_txn_ff;
 	init_read_txn_pulse <= ( not init_read_txn_ff2 )  and  init_read_txn_ff ;
@@ -300,6 +301,7 @@ begin
       end if;
     end if;
   end process;
+
 	-----------------------------------------------------------------------------------------
 	-- //SECTION Write Address Channel
 	-----------------------------------------------------------------------------------------

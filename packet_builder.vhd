@@ -331,7 +331,7 @@ architecture Behavioral of packet_builder is
   signal crc_out_s : std_logic_vector(7 downto 0);
   signal crc_ready_s : std_logic; 
 
-  signal read_burst_len_s : std_logic_vector(7 downto 0) := (others => '0');
+  signal read_burst_len_s : std_logic_vector(7 downto 0);
   signal piso_vld_bytes_last_pulse_cnt_s : std_logic_vector(1 downto 0);
 
   --------------------------------------------------------------------------------
@@ -374,21 +374,21 @@ architecture Behavioral of packet_builder is
   signal pulse_cnt_reg, pulse_cnt_next : std_logic_vector(7 downto 0);
 
   -- Build op0 signals
-  signal write_burst_len_op0_s : std_logic_vector(7 downto 0) := (others => '0');
-  signal write_byte_cnt_op0_s : std_logic_vector(4 downto 0) := (others => '0');
+  signal write_burst_len_op0_s : std_logic_vector(7 downto 0);
+  signal write_byte_cnt_op0_s : std_logic_vector(4 downto 0);
   signal temp0_op0_s : std_logic_vector(4 downto 0);
   signal temp1_op0_s : std_logic_vector(4 downto 0);
   -- no need for vld_bytes_last_pulse signals because in every pulse there must be at least one, which is only needed
   signal written_pulse_bytes_next, written_pulse_bytes_reg  : std_logic_vector(1 downto 0);
 
   -- Build op1 signals
-  signal write_byte_cnt_op1_s : std_logic_vector(4 downto 0) := (others => '0');
-  signal write_burst_len_op1_s : std_logic_vector(7 downto 0) := (others => '0');
+  signal write_byte_cnt_op1_s : std_logic_vector(4 downto 0);
+  signal write_burst_len_op1_s : std_logic_vector(7 downto 0);
   signal vld_bytes_last_pulse_cnt_op1_s : std_logic_vector(1 downto 0);
 
   -- Build op2 signals
-  signal write_byte_cnt_op2_s : std_logic_vector(4 downto 0) := (others => '0');
-  signal write_burst_len_op2_s : std_logic_vector(7 downto 0) := (others => '0');
+  signal write_byte_cnt_op2_s : std_logic_vector(4 downto 0);
+  signal write_burst_len_op2_s : std_logic_vector(7 downto 0);
   signal vld_bytes_last_pulse_cnt_op2_s : std_logic_vector(1 downto 0);
 
   signal write_burst_len_reg : std_logic_vector(7 downto 0);
@@ -496,7 +496,7 @@ begin
 													 shift_data_req_s, crc_out_s, byte_cnt_i, header_s, fifo_in_rd_data_s, 
                            vld_bytes_last_pulse_cnt_reg, addr_out_i, fifo_out_rd_data_s, single_write_burst, 
                            axi_write_rdy_s, axi_burst_len_s, axi_write_done_s, addr_out_i,
-													 axi_read_vld_s, axi_read_data_s, axi_read_last_s) is
+													 axi_read_vld_s, axi_read_data_s, axi_read_last_s, data_sel_i) is
   begin
 
     -- default values
@@ -543,6 +543,7 @@ begin
     case state_reg is
       when IDLE =>
         busy_o <= '1';
+				pulse_cnt_next <= (others => '0');
 
         if(start_i = '1') then
           ---------------------------------------- 
@@ -684,165 +685,167 @@ begin
 
         fifo_out_wr_en_s <= '1';
         -- reset counter for write outmem phase
-        pulse_cnt_next <= (others => '0');
+pulse_cnt_next <= (others => '0');
 
-        ---------------------------------------- 
-        state_next <= OUTMEM_WRITE;
-        ---------------------------------------- 
+---------------------------------------- 
+state_next <= OUTMEM_WRITE;
+---------------------------------------- 
 
-        case(vld_bytes_last_pulse_cnt_reg) is
-          when "00" =>
-            fifo_out_wr_data_next(7 downto 0) <= crc_reg; 
-          when "01" =>
-            fifo_out_wr_data_next(7 downto 0) <= pulse_data_reg(23 downto 16); 
-            fifo_out_wr_data_next(15 downto 8) <= crc_reg;
-          when "10" =>
-            fifo_out_wr_data_next(15 downto 0) <= pulse_data_reg(31 downto 16); 
-            fifo_out_wr_data_next(23 downto 16) <= crc_reg;
-          when  others =>
-            fifo_out_wr_data_next(15 downto 0) <= pulse_data_reg(31 downto 16); 
-            fifo_out_wr_data_next(23 downto 16) <= fifo_in_rd_data_s(7 downto 0);
-            fifo_out_wr_data_next(31 downto 24) <= crc_reg; 
-        end case;
+case(vld_bytes_last_pulse_cnt_reg) is
+	when "00" =>
+		fifo_out_wr_data_next(7 downto 0) <= crc_reg; 
+	when "01" =>
+		fifo_out_wr_data_next(7 downto 0) <= pulse_data_reg(23 downto 16); 
+		fifo_out_wr_data_next(15 downto 8) <= crc_reg;
+	when "10" =>
+		fifo_out_wr_data_next(15 downto 0) <= pulse_data_reg(31 downto 16); 
+		fifo_out_wr_data_next(23 downto 16) <= crc_reg;
+	when  others =>
+		fifo_out_wr_data_next(15 downto 0) <= pulse_data_reg(31 downto 16); 
+		fifo_out_wr_data_next(23 downto 16) <= fifo_in_rd_data_s(7 downto 0);
+		fifo_out_wr_data_next(31 downto 24) <= crc_reg; 
+end case;
 
-      when BUILD_FIRST_PULSE_OP0 =>
+when BUILD_FIRST_PULSE_OP0 =>
 
-        if(unsigned(write_burst_len_reg) > 0) then 
+if(unsigned(write_burst_len_reg) > 0) then 
 
-          fifo_out_wr_data_next(23 downto 0) <= header_s&fifo_in_rd_data_s(7 downto 0);
-          -- increment write pointer
-          fifo_out_wr_en_s <= '1';
+	fifo_out_wr_data_next(23 downto 0) <= header_s&fifo_in_rd_data_s(7 downto 0);
+	-- increment write pointer
+	fifo_out_wr_en_s <= '1';
 
-          -- store the rest of data for next fifo out write transaction iteration
-          pulse_data_next <= fifo_in_rd_data_s;
-          -- increment read pointer
-          fifo_in_rd_en_s <= '1';
-          -- increment pulse counter
-          pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
-         
-          ---------------------------------------- 
-          state_next <= BUILD_PULSE_OP2;
-          ---------------------------------------- 
-        else
-          fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
-          fifo_out_wr_en_s <= '1';
-          ---------------------------------------- 
-          state_next <= OUTMEM_WRITE;
-          ---------------------------------------- 
-        end if;
+	-- store the rest of data for next fifo out write transaction iteration
+	pulse_data_next <= fifo_in_rd_data_s;
+	-- increment read pointer
+	fifo_in_rd_en_s <= '1';
+	-- increment pulse counter
+	pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
+ 
+	---------------------------------------- 
+	state_next <= BUILD_PULSE_OP0;
+	---------------------------------------- 
+else
+	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
+	fifo_out_wr_en_s <= '1';
+	---------------------------------------- 
+	state_next <= OUTMEM_WRITE;
+	---------------------------------------- 
+end if;
 
-      when BUILD_PULSE_OP0 =>
+when BUILD_PULSE_OP0 =>
 
-        fifo_in_rd_en_s <= '1';
-        written_pulse_bytes_next <= std_logic_vector(unsigned(written_pulse_bytes_reg) + 1);
-        pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
+fifo_in_rd_en_s <= '1';
+written_pulse_bytes_next <= std_logic_vector(unsigned(written_pulse_bytes_reg) + 1);
+pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
 
-        case(written_pulse_bytes_reg) is
-          when "00" =>
-            fifo_out_wr_data_next(7 downto 0) <= fifo_in_rd_data_s(7 downto 0);
-          when "01" =>
-            fifo_out_wr_data_next(15 downto 8) <= fifo_in_rd_data_s(7 downto 0);
-          when "10" =>
-            fifo_out_wr_data_next(23 downto 16) <= fifo_in_rd_data_s(7 downto 0);
-          when others =>
-            fifo_out_wr_data_next(31 downto 24) <= fifo_in_rd_data_s(7 downto 0);
-        end case;
+case(written_pulse_bytes_reg) is
+	when "00" =>
+		fifo_out_wr_data_next(7 downto 0) <= fifo_in_rd_data_s(7 downto 0);
+	when "01" =>
+		fifo_out_wr_data_next(15 downto 8) <= fifo_in_rd_data_s(7 downto 0);
+	when "10" =>
+		fifo_out_wr_data_next(23 downto 16) <= fifo_in_rd_data_s(7 downto 0);
+	when others =>
+		fifo_out_wr_data_next(31 downto 24) <= fifo_in_rd_data_s(7 downto 0);
+end case;
 
-        if(unsigned(written_pulse_bytes_reg) = 3) then
-          fifo_out_wr_en_s <= '1';
-        end if;
+if(unsigned(written_pulse_bytes_reg) = 3) then
+	fifo_out_wr_en_s <= '1';
+end if;
 
 
-        if(unsigned(pulse_cnt_reg) = unsigned(write_burst_len_reg)) then
-          ---------------------------------------- 
-          state_next <= BUILD_LAST_PULSE_OP0;
-          ---------------------------------------- 
-        else
-          ---------------------------------------- 
-          state_next <= BUILD_PULSE_OP0;
-          ---------------------------------------- 
-        end if;
+if(unsigned(pulse_cnt_reg) = unsigned(write_burst_len_reg)) then
+	---------------------------------------- 
+	state_next <= BUILD_LAST_PULSE_OP0;
+	---------------------------------------- 
+else
+	---------------------------------------- 
+	state_next <= BUILD_PULSE_OP0;
+	---------------------------------------- 
+end if;
 
-      when BUILD_LAST_PULSE_OP0 =>
-        fifo_out_wr_en_s <= '1';
+when BUILD_LAST_PULSE_OP0 =>
+fifo_out_wr_en_s <= '1';
+-- reset counter for write outmem phase
+pulse_cnt_next <= (others => '0');
 
-        case(written_pulse_bytes_reg) is
-          when "00" =>
-            fifo_out_wr_data_next(7 downto 0) <= crc_reg;
-          when "01" =>
-            fifo_out_wr_data_next(15 downto 8) <= crc_reg;
-          when "10" =>
-            fifo_out_wr_data_next(23 downto 16) <= crc_reg;
-          when others =>
-            fifo_out_wr_data_next(31 downto 24) <= crc_reg;
-        end case;
+case(written_pulse_bytes_reg) is
+	when "00" =>
+		fifo_out_wr_data_next(7 downto 0) <= crc_reg;
+	when "01" =>
+		fifo_out_wr_data_next(15 downto 8) <= crc_reg;
+	when "10" =>
+		fifo_out_wr_data_next(23 downto 16) <= crc_reg;
+	when others =>
+		fifo_out_wr_data_next(31 downto 24) <= crc_reg;
+end case;
 
-        ---------------------------------------- 
-        state_next <= OUTMEM_WRITE;
-        ---------------------------------------- 
+---------------------------------------- 
+state_next <= OUTMEM_WRITE;
+---------------------------------------- 
 
-      when BUILD_FIRST_PULSE_OP1 =>
-        -- defaults
+when BUILD_FIRST_PULSE_OP1 =>
+-- defaults
 
-        if(unsigned(byte_cnt_i) > 0) then
-          -- first pulse in fifo out
-          fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(15 downto 0);
-          -- increment write pointer
-          fifo_out_wr_en_s <= '1';
+if(unsigned(byte_cnt_i) > 0) then
+	-- first pulse in fifo out
+	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(15 downto 0);
+	-- increment write pointer
+	fifo_out_wr_en_s <= '1';
 
-          -- store the rest of data for next fifo out write transaction iteration
-          pulse_data_next <= fifo_in_rd_data_s;
-          -- increment read pointer
-          fifo_in_rd_en_s <= '1';
-          -- increment pulse counter
-          pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
+	-- store the rest of data for next fifo out write transaction iteration
+	pulse_data_next <= fifo_in_rd_data_s;
+	-- increment read pointer
+	fifo_in_rd_en_s <= '1';
+	-- increment pulse counter
+	pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
 
-          if(unsigned(pulse_cnt_reg) /= unsigned(write_burst_len_reg) - 1) then
-            ---------------------------------------- 
-            state_next <= BUILD_PULSE_OP1;
-            ---------------------------------------- 
-          else
-            ---------------------------------------- 
-            state_next <= BUILD_LAST_PULSE_OP1;
-            ---------------------------------------- 
-          end if;
-        else
-          fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
-          fifo_out_wr_en_s <= '1';
-          ---------------------------------------- 
-          state_next <= OUTMEM_WRITE;
-          ---------------------------------------- 
-        end if;
+	if(unsigned(pulse_cnt_reg) /= unsigned(write_burst_len_reg) - 1) then
+		---------------------------------------- 
+		state_next <= BUILD_PULSE_OP1;
+		---------------------------------------- 
+	else
+		---------------------------------------- 
+		state_next <= BUILD_LAST_PULSE_OP1;
+		---------------------------------------- 
+	end if;
+else
+	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
+	fifo_out_wr_en_s <= '1';
+	---------------------------------------- 
+	state_next <= OUTMEM_WRITE;
+	---------------------------------------- 
+end if;
 
-      when BUILD_PULSE_OP1 =>
-        fifo_in_rd_en_s <= '1';
-        written_pulse_bytes_next <= std_logic_vector(unsigned(written_pulse_bytes_reg) + 2);
-        pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
+when BUILD_PULSE_OP1 =>
+fifo_in_rd_en_s <= '1';
+written_pulse_bytes_next <= std_logic_vector(unsigned(written_pulse_bytes_reg) + 2);
+pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
 
-        case(written_pulse_bytes_reg) is
-          when "00" => 
-            fifo_out_wr_data_next(15 downto 0) <= fifo_in_rd_data_s(15 downto 0);
-          when others =>
-            fifo_out_wr_data_next(31 downto 16) <= fifo_in_rd_data_s(15 downto 0);
-        end case;
+case(written_pulse_bytes_reg) is
+	when "00" => 
+		fifo_out_wr_data_next(15 downto 0) <= fifo_in_rd_data_s(15 downto 0);
+	when others =>
+		fifo_out_wr_data_next(31 downto 16) <= fifo_in_rd_data_s(15 downto 0);
+end case;
 
-        if(unsigned(written_pulse_bytes_reg) = 2) then
-          fifo_out_wr_en_s <= '1';
-        end if;
+if(unsigned(written_pulse_bytes_reg) = 2) then
+	fifo_out_wr_en_s <= '1';
+end if;
 
-        if(unsigned(pulse_cnt_reg) = unsigned(write_burst_len_reg) - 1) then
-          ---------------------------------------- 
-          state_next <= BUILD_LAST_PULSE_OP1;
-          ---------------------------------------- 
-        else
-          ---------------------------------------- 
-          state_next <= BUILD_PULSE_OP1;
-          ---------------------------------------- 
-        end if;
+if(unsigned(pulse_cnt_reg) = unsigned(write_burst_len_reg) - 1) then
+	---------------------------------------- 
+	state_next <= BUILD_LAST_PULSE_OP1;
+	---------------------------------------- 
+else
+	---------------------------------------- 
+	state_next <= BUILD_PULSE_OP1;
+	---------------------------------------- 
+end if;
 
-      when BUILD_LAST_PULSE_OP1 =>
-        fifo_out_wr_en_s <= '1';
-        -- reset counter for write outmem phase
+when BUILD_LAST_PULSE_OP1 =>
+fifo_out_wr_en_s <= '1';
+-- reset counter for write outmem phase
         pulse_cnt_next <= (others => '0');
 
         case(vld_bytes_last_pulse_cnt_reg) is

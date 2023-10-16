@@ -21,7 +21,7 @@ architecture Behavioral of int_fsm is
 
     type state_t is (AVAILABLE, BUSY_READ, BUSY_WRITE);
 
-    signal state_reg, state_next : state_t := AVAILABLE;
+    signal state_reg, state_next : state_t;
     signal busy_internal : std_logic;
 
 begin

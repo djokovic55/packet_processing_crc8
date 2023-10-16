@@ -12,7 +12,7 @@ end hamming_12_8;
 architecture Behavioral of hamming_12_8 is
     signal parity_out_s : std_logic_vector(3 downto 0);
 begin
-    process(data_in)
+    process(data_in, parity_out_s)
     begin
         -- calculate the parity bits
         parity_out_s(0) <= data_in(0) xor data_in(1) xor data_in(3) xor data_in(4) xor data_in(6);

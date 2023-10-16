@@ -28,7 +28,7 @@ end fifo;
 architecture rtl of fifo is
  
   type t_FIFO_DATA is array (0 to FIFO_DEPTH-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
-  signal fifo_data_s : t_FIFO_DATA := (others => (others => '0'));
+  signal fifo_data_s : t_FIFO_DATA;
  
   signal write_index_s   : std_logic_vector(4 downto 0);
   signal read_index_s   : std_logic_vector(4 downto 0);
@@ -47,6 +47,7 @@ begin
         fifo_cnt_s   <= (others => '0');
         write_index_s   <= (others => '0');
         read_index_s   <= (others => '0');
+  			fifo_data_s <= (others => (others => '0'));
       elsif(rd_pt_rst = '1') then
         read_index_s   <= (others => '0');
       else
