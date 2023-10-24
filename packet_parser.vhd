@@ -305,7 +305,7 @@ end component hamming_check;
 
   -- read channel
   signal axi_read_address_s : std_logic_vector(31 downto 0);
-  signal axi_read_init_s : std_logic;
+  signal axi_read_init_next, axi_read_init_reg : std_logic;
   signal axi_read_data_s : std_logic_vector(31 downto 0);
   signal axi_read_vld_s  : std_logic;
   signal axi_read_rdy_s  : std_logic;
@@ -399,6 +399,7 @@ begin
           pkt_crc_err_o_reg <= '0';
           pkt_byte_cnt_o_reg <= (others => '0');
           pkt_type_o_reg <= (others => '0');
+          axi_read_init_reg <= '0';
         else
           state_reg <= state_next;
           crc_reg <= crc_next;
@@ -409,6 +410,8 @@ begin
           pkt_crc_err_o_reg <= pkt_crc_err_o_next;
           pkt_byte_cnt_o_reg <= pkt_byte_cnt_o_next;
           pkt_type_o_reg <= pkt_type_o_next;
+
+          axi_read_init_reg <= axi_read_init_next;
 
         end if;
       end if;
@@ -452,7 +455,7 @@ begin
     axi_read_address_s <= (others => '0');
     axi_read_data_s <= (others => '0');
     axi_read_rdy_s <= '0';
-    axi_read_init_s <= '0';
+    axi_read_init_next <= '0';
 
     -- Builder default
     busy_o <= '0';
@@ -482,6 +485,7 @@ begin
         busy_o <= '1';
 
         if(start_i = '1') then
+					axi_read_init_next <= '1';
           ---------------------------------------- 
           state_next <= HEADER_READ;
           ---------------------------------------- 
@@ -497,7 +501,6 @@ begin
         axi_burst_len_s <= (others => '0');
 
         axi_read_rdy_s <= '1';
-        axi_read_init_s <= '1';
 
         if(axi_read_vld_s = '1' and axi_read_last_s = '1') then
           -- header won't be stored in fifo, then in its register
@@ -521,6 +524,7 @@ begin
             -- no error
             pkt_ecc_uncorr_o_next <= '0';
             pkt_ecc_corr_o_next <= '0';
+						axi_read_init_next <= '1';
             ---------------------------------------- 
             state_next <= INMEM_READ;
             ---------------------------------------- 
@@ -550,6 +554,7 @@ begin
             else 
               -- double ecc error
               if(ignore_ecc_err_i = '1') then
+								axi_read_init_next <= '1';
                 ---------------------------------------- 
                 state_next <= INMEM_READ;
                 ---------------------------------------- 
@@ -575,7 +580,6 @@ begin
         axi_burst_len_s <= burst_len_with_crc_s;
 
         axi_read_rdy_s <= '1';
-        axi_read_init_s <= '1';
 
         if(axi_read_vld_s = '1') then
           fifo_in_wr_en_s <= '1';
@@ -692,7 +696,7 @@ begin
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 
     AXI_READ_ADDRESS_I => axi_read_address_s, 
-    AXI_READ_INIT_I => axi_read_init_s, 
+    AXI_READ_INIT_I => axi_read_init_reg, 
     AXI_READ_DATA_O => axi_read_data_s, 
     AXI_READ_VLD_O  => axi_read_vld_s, 
     AXI_READ_RDY_I  => axi_read_rdy_s, 

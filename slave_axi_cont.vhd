@@ -380,8 +380,8 @@ begin
 	        axi_arburst <= S_AXI_ARBURST;
 	        axi_arlen <= S_AXI_ARLEN;
 	      elsif((axi_arlen_cntr <= axi_arlen) and axi_rvalid = '1' and S_AXI_RREADY = '1') then     
-	axi_arlen_cntr <= std_logic_vector (unsigned(axi_arlen_cntr) + 1);
-	axi_rlast <= '0';      
+					axi_arlen_cntr <= std_logic_vector (unsigned(axi_arlen_cntr) + 1);
+					axi_rlast <= '0';      
 
 	case (axi_arburst) is
 			when "00" =>  -- fixed burst
@@ -401,10 +401,10 @@ begin
 					end if;
 			when others => --reserved (incremental burst for example)
 					axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1);--for arsize = 4 bytes (010)
-axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');
-	end case;         
--- BUG last should be generated on len-1 data count
-elsif((unsigned(axi_arlen_cntr) = unsigned(axi_arlen) - 1) and axi_rlast = '0' and axi_arv_arr_flag = '1') then  
+				axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');
+			end case;         
+				-- BUG last should be generated on len-1 data count
+				elsif(((unsigned(axi_arlen_cntr) = unsigned(axi_arlen) - 1) or (unsigned(axi_arlen) = 0)) and axi_rlast = '0' and axi_arv_arr_flag = '1') then  
 	        axi_rlast <= '1';
 	      elsif (S_AXI_RREADY = '1') then  
 	        axi_rlast <= '0';

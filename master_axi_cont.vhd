@@ -378,7 +378,7 @@ begin
 	        -- elsif (&(write_index[C_TRANSACTIONS_NUM-1:1])&& ~write_index[0] && wnext)
 	      else                                                                          
 					 -- IMPORTANT wlast needs write_index
-	        if ((((unsigned(write_index) = unsigned(AXI_BURST_LEN)) and unsigned(AXI_BURST_LEN) >= 1) and wnext = '1') or (unsigned(AXI_BURST_LEN) = 0)) then
+	        if ((((unsigned(write_index) = unsigned(AXI_BURST_LEN)-1) and unsigned(AXI_BURST_LEN) >= 1) and wnext = '1') or (unsigned(AXI_BURST_LEN) = 0)) then
 	          axi_wlast <= '1';                                                         
 	          -- Deassrt axi_wlast when the last write data has been                    
 	          -- accepted by the slave with a valid response                            
@@ -556,7 +556,7 @@ begin
   process(M_AXI_ACLK)
   begin
     if (rising_edge (M_AXI_ACLK)) then
-      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then
+      if (M_AXI_ARESETN = '1' or init_read_txn_pulse = '1') then
         burst_read_active <= '0';
 
       --The burst_write_active is asserted when a write burst transaction is initiated                      

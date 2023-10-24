@@ -614,7 +614,7 @@ begin
               axi_write_vld_s <= '1';
 
               if(axi_write_done_s = '1') then
-                axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
+                axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
                 axi_write_address_next <= clear_intr_addr_reg;
                 
 								-- start new trans one cycle earlier
