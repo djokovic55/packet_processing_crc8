@@ -357,8 +357,8 @@ begin
 	    end if;
 	  end if;         
 	end process; 
-	-- Implement axi_araddr latching
 
+	-- Implement axi_araddr latching
 	--This process is used to latch the address when both 
 	--S_AXI_ARVALID and S_AXI_RVALID are valid. 
 	process (S_AXI_ACLK)
@@ -383,26 +383,27 @@ begin
 					axi_arlen_cntr <= std_logic_vector (unsigned(axi_arlen_cntr) + 1);
 					axi_rlast <= '0';      
 
-	case (axi_arburst) is
-			when "00" =>  -- fixed burst
-					-- The read address for all the beats in the transaction are fixed
-					axi_araddr     <= axi_araddr;      ----for arsize = 4 bytes (010)
-			when "01" =>  --incremental burst
-					-- The read address for all the beats in the transaction are increments by awsize
-					axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1); --araddr aligned to 4 byte boundary
-					axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');  ----for awsize = 4 bytes (010)
-			when "10" =>  --Wrapping burst
-					-- The read address wraps when the address reaches wrap boundary 
-					if (ar_wrap_en = '1') then   
-							axi_araddr <= std_logic_vector (unsigned(axi_araddr) - (to_unsigned(ar_wrap_size,C_S_AXI_ADDR_WIDTH)));
-					else 
-							axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1); --araddr aligned to 4 byte boundary
-							axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');  ----for awsize = 4 bytes (010)
-					end if;
-			when others => --reserved (incremental burst for example)
-					axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1);--for arsize = 4 bytes (010)
-				axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');
-			end case;         
+				case (axi_arburst) is
+						when "00" =>  -- fixed burst
+								-- The read address for all the beats in the transaction are fixed
+								axi_araddr     <= axi_araddr;      ----for arsize = 4 bytes (010)
+						when "01" =>  --incremental burst
+								-- The read address for all the beats in the transaction are increments by awsize
+								axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1); --araddr aligned to 4 byte boundary
+								axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');  ----for awsize = 4 bytes (010)
+						when "10" =>  --Wrapping burst
+								-- The read address wraps when the address reaches wrap boundary 
+								if (ar_wrap_en = '1') then   
+										axi_araddr <= std_logic_vector (unsigned(axi_araddr) - (to_unsigned(ar_wrap_size,C_S_AXI_ADDR_WIDTH)));
+								else 
+										axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1); --araddr aligned to 4 byte boundary
+										axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');  ----for awsize = 4 bytes (010)
+								end if;
+						when others => --reserved (incremental burst for example)
+								axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1);--for arsize = 4 bytes (010)
+							axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');
+						end case;         
+
 				-- BUG last should be generated on len-1 data count
 				elsif(((unsigned(axi_arlen_cntr) = unsigned(axi_arlen) - 1) or (unsigned(axi_arlen) = 0)) and axi_rlast = '0' and axi_arv_arr_flag = '1') then  
 	        axi_rlast <= '1';

@@ -7,6 +7,9 @@ int_w_cont:
 phase2:
 	jg do_phase2.tcl
 
+pb:
+	jg do_pb.tcl
+
 .PHONY: clean
 clean:
 	rm -rf jgproject
