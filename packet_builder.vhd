@@ -519,7 +519,6 @@ begin
     axi_write_init_s <= '0';
 
     axi_read_address_s <= (others => '0');
-    axi_read_data_s <= (others => '0');
     axi_read_rdy_s <= '0';
     axi_read_init_s <= '0';
 
@@ -533,7 +532,7 @@ begin
     fifo_in_rd_en_s <= '0';
     fifo_in_rd_pt_rst_s <= '0';
 
-    fifo_out_wr_data_next <= (others => '0');
+    fifo_out_wr_data_next <= fifo_out_wr_data_reg;
     fifo_out_wr_en_s <= '0';
     fifo_out_rd_en_s <= '0';
 
@@ -711,15 +710,14 @@ when BUILD_FIRST_PULSE_OP0 =>
 if(unsigned(write_burst_len_reg) > 0) then 
 
 	fifo_out_wr_data_next(23 downto 0) <= header_s&fifo_in_rd_data_s(7 downto 0);
-	-- increment write pointer
-	fifo_out_wr_en_s <= '1';
 
-	-- store the rest of data for next fifo out write transaction iteration
-	pulse_data_next <= fifo_in_rd_data_s;
+	-- 3 bytes written, 1 remaining
+	written_pulse_bytes_next <= std_logic_vector(unsigned(written_pulse_bytes_reg) + 3);
 	-- increment read pointer
 	fifo_in_rd_en_s <= '1';
 	-- increment pulse counter
 	pulse_cnt_next <= std_logic_vector(unsigned(pulse_cnt_reg) + 1);
+
  
 	---------------------------------------- 
 	state_next <= BUILD_PULSE_OP0;
