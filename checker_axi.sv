@@ -46,12 +46,11 @@ checker  checker_axi(
 
 	default disable iff reset;
 
-	reg [7 : 0] handshake_cnt_w, handshake_cnt_r;
-  int max_wait = 4;
+	reg [4 : 0] handshake_cnt_w, handshake_cnt_r;
 
 	//SECTION Aux code
 
-	always @(posedge clk or posedge reset) begin
+	always @(posedge clk) begin
 		if(reset) begin
 			handshake_cnt_w <= 1'b0;
 		end
@@ -87,25 +86,18 @@ checker  checker_axi(
     valid && !ready |=> $stable(control);
   endproperty
 
-  property exit_from_reset(areset, valid);
-    ##1 (areset || $rose(areset)) |-> !valid;
-  endproperty
-
   property valid_before_handshake(valid, ready);
     valid && !ready |=> valid;
   endproperty
 
   property handshake_max_wait(valid, ready, timeout);
-    valid && !ready |-> ##[1:timeout] ready;
+    valid && !ready |-> ##[0:timeout] ready;
   endproperty
 
-  property last_data_w(xlast, axlen);
-		  $changed(handshake_cnt_w) && ((axlen-1) == handshake_cnt_w) |=> xlast;
+  property data_last (xvalid, handshake_cnt, axlen, xlast);
+		  xvalid && (handshake_cnt == axlen) |-> xlast;
   endproperty
 
-  property last_data_r(xlast, axlen);
-    $changed(handshake_cnt_r) && ((axlen-1) == handshake_cnt_r) |=> xlast;
-  endproperty
   //FIXME awready prop are not defined
 
   //NOTE Cover
@@ -124,73 +116,63 @@ checker  checker_axi(
 
   //SECTION AW channel prop
 
-  aw_stable_awaddr: assert property (stable_before_handshake(awvalid, awready, awaddr));
-  aw_stable_awlen: assert property (stable_before_handshake(awvalid, awready, awlen));
-  aw_stable_awsize: assert property (stable_before_handshake(awvalid, awready, awsize));
-  aw_stable_awburst: assert property (stable_before_handshake(awvalid, awready, awburst));
-
-  // aw_exit_reset: assert property (exit_from_reset(reset, awvalid));
-  aw_awvalid_until_awready: assert property (valid_before_handshake(awvalid, awready));
-
-  // awready_max_wait: assert property handshake_max_wait(awvalid, awready, max_wait);
+  ast_aw_stable_awaddr: assert property (stable_before_handshake(awvalid, awready, awaddr));
+  ast_aw_stable_awlen: assert property (stable_before_handshake(awvalid, awready, awlen));
+  ast_aw_stable_awsize: assert property (stable_before_handshake(awvalid, awready, awsize));
+  ast_aw_stable_awburst: assert property (stable_before_handshake(awvalid, awready, awburst));
+  ast_aw_awvalid_until_awready: assert property (valid_before_handshake(awvalid, awready));
+  ast_awready_max_wait: assert property (handshake_max_wait(awvalid, awready, 1'b1));
 
 
-  awvalid_before_awready: cover property (valid_before_ready(awvalid, awready));
-  // awready_before_awvalid: cover property (ready_before_valid(awvalid, awready));
-  awready_with_awvalid: cover property (valid_with_ready(awvalid, awready));
-
-	// BUG unable to cover reset
-	// reset_cover: cover property($rose(reset) ##5 $rose(reset));
-  
+  // cov_awvalid_before_awready: cover property (valid_before_ready(awvalid, awready));
+  // cov_awready_before_awvalid: cover property (ready_before_valid(awvalid, awready));
+  // cov_awready_with_awvalid: cover property (valid_with_ready(awvalid, awready));
 
   //SECTION W channel prop
 
 	// IMPORTANT will be removed until the main master logic is implemented
-  // w_stable_wdata: assert property (stable_before_handshake(wvalid, wready, wdata));
-  w_stable_wstrb: assert property (stable_before_handshake(wvalid, wready, wstrb));
-  w_data_wlast: assert property (last_data_w(wlast, awlen));
-  w_data_wlast_c: cover property (wlast);
+  ast_w_stable_wdata: assert property (stable_before_handshake(wvalid, wready, wdata));
+  ast_w_stable_wstrb: assert property (stable_before_handshake(wvalid, wready, wstrb));
+  ast_w_data_wlast: assert property (data_last(wvalid, handshake_cnt_w, awlen, wlast));
 
-  // w_exit_reset: assert property (exit_from_reset(reset, wvalid));
-		//IMPORTANT fails beacuse wvalid does not falls after wlast
+  cov_w_data_wlast_c: cover property (wlast);
 
-  // w_wvalid_until_wready: assert property (valid_before_handshake(wvalid, wready));
+	//IMPORTANT fails beacuse wvalid does not falls after wlast
+  ast_w_wvalid_until_wready: assert property (valid_before_handshake(wvalid, wready));
 
   //SECTION B channel prop
+	ast_b_no_slave_error: assert property(bvalid && bready |-> bresp == 2'b00);
+	
 
   //SECTION AR channel prop
 
-  ar_stable_araddr: assert property (stable_before_handshake(arvalid, arready, araddr));
-  ar_stable_arlen: assert property (stable_before_handshake(arvalid, arready, arlen));
-  ar_stable_arsize: assert property (stable_before_handshake(arvalid, arready, arsize));
-  ar_stable_arburst: assert property (stable_before_handshake(arvalid, arready, arburst));
+  ast_ar_stable_araddr: assert property (stable_before_handshake(arvalid, arready, araddr));
+  ast_ar_stable_arlen: assert property (stable_before_handshake(arvalid, arready, arlen));
+  ast_ar_stable_arsize: assert property (stable_before_handshake(arvalid, arready, arsize));
+  ast_ar_stable_arburst: assert property (stable_before_handshake(arvalid, arready, arburst));
 
-  // ar_exit_reset: assert property (exit_from_reset(reset, arvalid));
-  ar_arvalid_until_arready: assert property (valid_before_handshake(arvalid, arready));
+  ast_ar_arvalid_until_arready: assert property (valid_before_handshake(arvalid, arready));
+  ast_arready_max_wait: assert property (handshake_max_wait(arvalid, arready, 1'b1));
 
-  // arready_max_wait: assert property handshake_max_wait(arvalid, arready, max_wait);
+  // cov_arvalid_c: cover property (arvalid);
 
-  arvalid_c: cover property (arvalid);
-
-  arvalid_before_arready: cover property (valid_before_ready(arvalid, arready));
-  // arready_before_arvalid: cover property (ready_before_valid(arvalid, arready));
-  arready_with_arvalid: cover property (valid_with_ready(arvalid, arready));
+  // cov_arvalid_before_arready: cover property (valid_before_ready(arvalid, arready));
+  // cov_arready_before_arvalid: cover property (ready_before_valid(arvalid, arready));
+  // cov_arready_with_arvalid: cover property (valid_with_ready(arvalid, arready));
 
 
   //SECTION R channel prop
 
-  r_stable_rdata: assert property (stable_before_handshake(rvalid, rready, rdata));
-  //r_stable_rstrb: assert property (stable_before_handshake(rvalid, rready, rstrb));
+  // ast_r_stable_rdata: assert property (stable_before_handshake(rvalid, rready, rdata));
+  ast_r_data_rlast: assert property (data_last(rvalid, handshake_cnt_r, arlen, rlast));
 
-  r_data_rlast: assert property (last_data_r(rlast, arlen));
+	// FIXME Cannot be proved because rready is always true
+  // ast_r_rvalid_until_rready: assert property (valid_before_handshake(rvalid, rready));
 
-  // r_exit_reset: assert property (exit_from_reset(reset, rvalid));
+	ast_r_no_slave_error: assert property(rvalid && rready |-> rresp == 2'b00);
 
-		// FIXME Cannot be proved because rready is always true
-  // r_rvalid_until_rready: assert property (valid_before_handshake(rvalid, rready));
-
-  r_rvalid: cover property (rvalid);
-  r_rready: cover property (rready);
+  // cov_r_rvalid: cover property (rvalid);
+  // cov_r_rready: cover property (rready);
 
   // rvalid_not_rready: cover property (rvalid && !rready);
 

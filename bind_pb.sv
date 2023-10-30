@@ -49,3 +49,38 @@ bind packet_builder checker_pb chk_pb(
   .s_axi_rready(m_axi_rready)
 
 );
+
+bind packet_builder checker_axi chk_axi_pb(
+	.clk(m_axi_aclk),
+	.reset(m_axi_aresetn), 
+
+	.awaddr(m_axi_awaddr),
+	.awlen(m_axi_awlen),
+	.awsize(m_axi_awsize),
+	.awburst(m_axi_awburst),
+	.awvalid(m_axi_awvalid),
+	.awready(m_axi_awready),
+
+	.wdata(m_axi_wdata),
+	.wstrb(m_axi_wstrb),
+	.wlast(m_axi_wlast),
+	.wvalid(m_axi_wvalid),
+	.wready(m_axi_wready),
+
+	.bresp(m_axi_bresp),
+	.bvalid(m_axi_bvalid),
+	.bready(m_axi_bready),
+
+	.araddr(m_axi_araddr),
+	.arlen(m_axi_arlen),
+	.arsize(m_axi_arsize),
+	.arburst(m_axi_arburst),
+	.arvalid(m_axi_arvalid),
+	.arready(m_axi_arready),
+
+	.rdata(m_axi_rdata),
+	.rresp(m_axi_rresp),
+	.rlast(m_axi_rlast),
+	.rvalid(m_axi_rvalid),
+	.rready(m_axi_rready)
+);
