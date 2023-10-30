@@ -84,3 +84,23 @@ bind packet_builder checker_axi chk_axi_pb(
 	.rvalid(m_axi_rvalid),
 	.rready(m_axi_rready)
 );
+
+bind packet_builder checker_sb chk_sb(
+  .clk(m_axi_aclk),
+  .reset(m_axi_aresetn),
+
+  .byte_cnt(byte_cnt_i),
+  .data_sel(data_sel_i),
+
+  .wdata(m_axi_wdata),
+  .wvalid(m_axi_wvalid),
+  .wlast(m_axi_wlast),
+  .wready(m_axi_wready), 
+
+  .rdata(m_axi_rdata),
+  .rlast(m_axi_rlast),
+  .rvalid(m_axi_rvalid),
+  .rready(m_axi_rready)
+);
+
+

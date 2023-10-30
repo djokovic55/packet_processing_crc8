@@ -2,7 +2,7 @@
 clear -all
 
 # verif
-analyze -sv09 checker_pb.sv checker_axi.sv bind_pb.sv
+analyze -sv09 checker_pb.sv checker_axi.sv checker_data_integrity.sv bind_pb.sv
 
 # src
 analyze -vhdl master_axi_cont.vhd packet_builder.vhd 
