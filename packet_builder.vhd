@@ -634,6 +634,7 @@ begin
 
         if(unsigned(byte_cnt_i) > 0) then
           -- first pulse in fifo out
+					-- BUG little-endian scheme bug
           fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(15 downto 0);
           -- increment write pointer
           fifo_out_wr_en_s <= '1';
@@ -655,6 +656,7 @@ begin
             ---------------------------------------- 
           end if;
         else
+					-- BUG little-endian scheme bug
           fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
           fifo_out_wr_en_s <= '1';
           ---------------------------------------- 
@@ -709,6 +711,7 @@ when BUILD_FIRST_PULSE_OP0 =>
 
 if(unsigned(write_burst_len_reg) > 0) then 
 
+	-- BUG little-endian scheme bug
 	fifo_out_wr_data_next(23 downto 0) <= header_s&fifo_in_rd_data_s(7 downto 0);
 
 	-- 3 bytes written, 1 remaining
@@ -723,6 +726,7 @@ if(unsigned(write_burst_len_reg) > 0) then
 	state_next <= BUILD_PULSE_OP0;
 	---------------------------------------- 
 else
+	-- BUG little-endian scheme bug
 	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
 	fifo_out_wr_en_s <= '1';
 	---------------------------------------- 
@@ -787,6 +791,7 @@ when BUILD_FIRST_PULSE_OP1 =>
 
 if(unsigned(byte_cnt_i) > 0) then
 	-- first pulse in fifo out
+	-- BUG little-endian scheme bug
 	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(15 downto 0);
 	-- increment write pointer
 	fifo_out_wr_en_s <= '1';
@@ -808,6 +813,7 @@ if(unsigned(byte_cnt_i) > 0) then
 		---------------------------------------- 
 	end if;
 else
+	-- BUG little-endian scheme bug
 	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
 	fifo_out_wr_en_s <= '1';
 	---------------------------------------- 
@@ -933,6 +939,7 @@ fifo_out_wr_en_s <= '1';
         end case;
 
         if(axi_write_done_s = '1') then
+					axi_write_vld_s <= '0';
           irq_o <= '1';
           ---------------------------------------- 
           state_next <= IDLE;

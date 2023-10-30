@@ -75,7 +75,7 @@ checker checker_pb(
   //SECTION Regs config logic
 	asm_max_byte_cnt: assume property(byte_cnt_i == 4'h8 );
 	asm_stable_max_byte_cnt: assume property($stable(byte_cnt_i));
-	asm_merging_option: assume property(data_sel_i == 4'h0);
+	asm_merging_option: assume property(data_sel_i == 4'h1);
 	asm_merg_op_stability: assume property($stable(data_sel_i));
 	asm_crc_en: assume property(crc_en_i == 1'b1);
 	asm_ecc_en: assume property(ecc_en_i == 1'b1);
@@ -215,7 +215,10 @@ checker checker_pb(
 			arlen_cntr <= 8'h0;
 		end
 		else begin
-			if((arlen_cntr < arlen) && rnext) 
+			//FIX missing reset condition
+			if(!arready && s_axi_arvalid && !axi_arv_arr_flag)
+				arlen_cntr <= 8'h0;
+			else if((arlen_cntr < arlen) && rnext) 
 				arlen_cntr <= arlen_cntr + 1'b1;
 		end
 	end 

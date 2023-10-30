@@ -315,6 +315,9 @@ begin
 	-- The address will be incremented on each accepted address transaction,
 	-- by burst_size_byte to point to the next address. 
 
+		-- IMPORTANT awvalid is asserted upon trans pulse init, and deasserted when trans is accepted
+		-- IMPORTANT no need for init write_txt_pulse to reset awvalid when it cannot be high because previous transaction must be over
+
 	  process(M_AXI_ACLK)                                            
 	  begin                                                                
 	    if (rising_edge (M_AXI_ACLK)) then                                 
@@ -378,7 +381,8 @@ begin
 	        -- elsif (&(write_index[C_TRANSACTIONS_NUM-1:1])&& ~write_index[0] && wnext)
 	      else                                                                          
 					 -- IMPORTANT wlast needs write_index
-	        if ((((unsigned(write_index) = unsigned(AXI_BURST_LEN)-1) and unsigned(AXI_BURST_LEN) >= 1) and wnext = '1') or (unsigned(AXI_BURST_LEN) = 0)) then
+					 -- FIX when burst_len == 0 wlast can be asserted only when transaction is active
+	        if (((((unsigned(write_index) = unsigned(AXI_BURST_LEN)-1) and unsigned(AXI_BURST_LEN) >= 1) and wnext = '1') or (unsigned(AXI_BURST_LEN) = 0)) and burst_write_active = '1') then
 	          axi_wlast <= '1';                                                         
 	          -- Deassrt axi_wlast when the last write data has been                    
 	          -- accepted by the slave with a valid response                            
@@ -426,6 +430,7 @@ begin
 	--slave for the entire write burst. This example will capture the error 
 	--into the ERROR output. 
 
+		-- FIX ready independent
 	  process(M_AXI_ACLK)                                             
 	  begin                                                                 
 	    if (rising_edge (M_AXI_ACLK)) then                                  
@@ -435,10 +440,13 @@ begin
 	        -- when M_AXI_BVALID is asserted by slave                       
 	      else                                                              
 				  -- //NOTE bready depends on bvalid
-	        if (M_AXI_BVALID = '1' and axi_bready = '0') then               
+	        -- if (M_AXI_BVALID = '1' and axi_bready = '0') then               
+	        if (axi_wlast = '1') then               
 	          axi_bready <= '1';                                            
 	          -- deassert after one clock cycle                             
-	        elsif (axi_bready = '1') then                                   
+	        -- elsif (axi_bready = '1') then                                   
+	          -- deassert after succesful handshake
+	         elsif (M_AXI_BVALID = '1' and axi_bready = '1') then                                   
 	          axi_bready <= '0';                                            
 	        end if;                                                         
 	      end if;                                                           

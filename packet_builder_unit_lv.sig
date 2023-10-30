@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wavelist version="3">
-  <insertion-point-position>36</insertion-point-position>
+  <insertion-point-position>15</insertion-point-position>
   <wave>
     <expr>M_AXI_ACLK</expr>
     <label/>
@@ -63,6 +63,26 @@
       <label/>
       <radix/>
     </wave>
+    <wave>
+      <expr>chk_pb.axi_arv_arr_flag</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>master_axi_cont_ctrl.init_read_txn_pulse</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>master_axi_cont_ctrl.start_single_burst_read</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>master_axi_cont_ctrl.burst_read_active</expr>
+      <label/>
+      <radix/>
+    </wave>
     <spacer/>
     <wave collapsed="true">
       <expr>M_AXI_RDATA</expr>
@@ -100,7 +120,6 @@
       <radix/>
     </wave>
   </group>
-  <spacer/>
   <group collapsed="true">
     <expr/>
     <label>CRC_CALC</label>
@@ -150,8 +169,7 @@
       <radix/>
     </wave>
   </group>
-  <spacer/>
-  <group collapsed="false">
+  <group collapsed="true">
     <expr/>
     <label>FIFO_IN</label>
     <group collapsed="false">
@@ -209,7 +227,6 @@
       <radix/>
     </wave>
   </group>
-  <spacer/>
   <group collapsed="false">
     <expr/>
     <label>BUILDER</label>
@@ -235,6 +252,16 @@
     </wave>
     <wave collapsed="true">
       <expr>write_burst_len_reg</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>fifo_out_wr_data_reg</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>crc_reg</expr>
       <label/>
       <radix/>
     </wave>
@@ -277,20 +304,195 @@
       </wave>
     </group>
   </group>
-  <spacer/>
-  <highlightlist>
-    <!--Users can remove the highlightlist block if they want to load the signal save file into older version of JasperGold-->
-    <highlight>
-      <expr>FIFO_IN</expr>
-      <color>builtin_blue</color>
-    </highlight>
-    <highlight>
-      <expr>state_reg</expr>
-      <color>builtin_red</color>
-    </highlight>
-    <highlight>
-      <expr>written_pulse_bytes_reg</expr>
-      <color>builtin_orange</color>
-    </highlight>
-  </highlightlist>
+  <group collapsed="true">
+    <expr/>
+    <label>AXI_WRITE</label>
+    <wave collapsed="true">
+      <expr>M_AXI_AWADDR</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>M_AXI_AWLEN</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>M_AXI_AWSIZE</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>M_AXI_AWBURST</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>M_AXI_AWVALID</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>chk_pb.awready</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>chk_pb.axi_awv_awr_flag</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>master_axi_cont_ctrl.init_write_txn_pulse</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>master_axi_cont_ctrl.start_single_burst_write</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>master_axi_cont_ctrl.burst_write_active</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <spacer/>
+    <wave collapsed="true">
+      <expr>M_AXI_WDATA</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>M_AXI_WSTRB</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>master_axi_cont_ctrl.axi_wlast</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>M_AXI_WVALID</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>chk_pb.wready</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <spacer/>
+    <wave collapsed="true">
+      <expr>chk_pb.bresp</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>chk_pb.bvalid</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>M_AXI_BREADY</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <highlightlist>
+      <!--Users can remove the highlightlist block if they want to load the signal save file into older version of JasperGold-->
+      <highlight>
+        <expr>FIFO_IN</expr>
+        <color>builtin_blue</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_ARADDR</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_ARREADY</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_ARVALID</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_AWADDR</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_AWVALID</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_BREADY</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_RDATA</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_RREADY</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_RRESP</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_WDATA</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_WSTRB</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>M_AXI_WVALID</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.awready</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.axi_awv_awr_flag</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.bresp</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.bvalid</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.rlast</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.rvalid</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.wready</expr>
+        <color>builtin_green</color>
+      </highlight>
+      <highlight>
+        <expr>master_axi_cont_ctrl.axi_wlast</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>state_reg</expr>
+        <color>builtin_red</color>
+      </highlight>
+      <highlight>
+        <expr>written_pulse_bytes_reg</expr>
+        <color>builtin_orange</color>
+      </highlight>
+    </highlightlist>
+  </group>
 </wavelist>
