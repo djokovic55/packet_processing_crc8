@@ -310,9 +310,12 @@ architecture Behavioral of packet_builder is
   signal fifo_in_rd_en_s   : std_logic;
   signal fifo_in_rd_data_s : std_logic_vector(31 downto 0);
   signal fifo_in_empty_s   : std_logic;
+
+  signal fifo_in_rst_s   : std_logic;
+
   --------------------------------------------------------------------------------
 
-  -- Fifo in - WRITE
+  -- Fifo out - WRITE
   signal fifo_out_wr_en_s   : std_logic;
   signal fifo_out_wr_data_next, fifo_out_wr_data_reg : std_logic_vector(31 downto 0);
   signal fifo_out_full_s    : std_logic;
@@ -321,6 +324,8 @@ architecture Behavioral of packet_builder is
   signal fifo_out_rd_en_s   : std_logic;
   signal fifo_out_rd_data_s : std_logic_vector(31 downto 0);
   signal fifo_out_empty_s   : std_logic;
+
+  signal fifo_out_rst_s   : std_logic;
   --------------------------------------------------------------------------------
 
   -- crc8 signals
@@ -531,10 +536,12 @@ begin
     fifo_in_wr_en_s <= '0';
     fifo_in_rd_en_s <= '0';
     fifo_in_rd_pt_rst_s <= '0';
+    fifo_in_rst_s <= '0';
 
     fifo_out_wr_data_next <= fifo_out_wr_data_reg;
     fifo_out_wr_en_s <= '0';
     fifo_out_rd_en_s <= '0';
+    fifo_out_rst_s <= '0';
 
     -- CRC calc default
     start_crc_s <= '0';
@@ -543,6 +550,10 @@ begin
       when IDLE =>
         busy_o <= '1';
 				pulse_cnt_next <= (others => '0');
+
+				-- reset FIFOs
+				fifo_in_rst_s <= '1';
+				fifo_out_rst_s <= '1';
 
         if(start_i = '1') then
           ---------------------------------------- 
@@ -634,8 +645,7 @@ begin
 
         if(unsigned(byte_cnt_i) > 0) then
           -- first pulse in fifo out
-					-- BUG little-endian scheme bug
-          fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(15 downto 0);
+          fifo_out_wr_data_next <= fifo_in_rd_data_s(15 downto 0)&header_s;
           -- increment write pointer
           fifo_out_wr_en_s <= '1';
 
@@ -656,8 +666,7 @@ begin
             ---------------------------------------- 
           end if;
         else
-					-- BUG little-endian scheme bug
-          fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
+          fifo_out_wr_data_next <= crc_reg&fifo_in_rd_data_s(7 downto 0)&header_s;
           fifo_out_wr_en_s <= '1';
           ---------------------------------------- 
           state_next <= OUTMEM_WRITE;
@@ -711,8 +720,7 @@ when BUILD_FIRST_PULSE_OP0 =>
 
 if(unsigned(write_burst_len_reg) > 0) then 
 
-	-- BUG little-endian scheme bug
-	fifo_out_wr_data_next(23 downto 0) <= header_s&fifo_in_rd_data_s(7 downto 0);
+	fifo_out_wr_data_next(23 downto 0) <= fifo_in_rd_data_s(7 downto 0)&header_s;
 
 	-- 3 bytes written, 1 remaining
 	written_pulse_bytes_next <= std_logic_vector(unsigned(written_pulse_bytes_reg) + 3);
@@ -726,8 +734,7 @@ if(unsigned(write_burst_len_reg) > 0) then
 	state_next <= BUILD_PULSE_OP0;
 	---------------------------------------- 
 else
-	-- BUG little-endian scheme bug
-	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
+	fifo_out_wr_data_next <= crc_reg&fifo_in_rd_data_s(7 downto 0)&header_s;
 	fifo_out_wr_en_s <= '1';
 	---------------------------------------- 
 	state_next <= OUTMEM_WRITE;
@@ -791,8 +798,7 @@ when BUILD_FIRST_PULSE_OP1 =>
 
 if(unsigned(byte_cnt_i) > 0) then
 	-- first pulse in fifo out
-	-- BUG little-endian scheme bug
-	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(15 downto 0);
+	fifo_out_wr_data_next <= fifo_in_rd_data_s(15 downto 0)&header_s;
 	-- increment write pointer
 	fifo_out_wr_en_s <= '1';
 
@@ -813,8 +819,7 @@ if(unsigned(byte_cnt_i) > 0) then
 		---------------------------------------- 
 	end if;
 else
-	-- BUG little-endian scheme bug
-	fifo_out_wr_data_next <= header_s&fifo_in_rd_data_s(7 downto 0)&crc_reg;
+	fifo_out_wr_data_next <= crc_reg&fifo_in_rd_data_s(7 downto 0)&header_s;
 	fifo_out_wr_en_s <= '1';
 	---------------------------------------- 
 	state_next <= OUTMEM_WRITE;
@@ -960,7 +965,7 @@ fifo_out_wr_en_s <= '1';
   port map(
 
     clk => M_AXI_ACLK,      
-    reset => M_AXI_ARESETN, 
+    reset => fifo_in_rst_s, 
     wr_en_i => fifo_in_wr_en_s,   
     wr_data_i => fifo_in_wr_data_s, 
     full_o => fifo_in_full_s,    
@@ -974,7 +979,7 @@ fifo_out_wr_en_s <= '1';
   port map(
 
     clk => M_AXI_ACLK,      
-    reset => M_AXI_ARESETN, 
+    reset => fifo_out_rst_s, 
     wr_en_i => fifo_out_wr_en_s,   
     wr_data_i => fifo_out_wr_data_next, 
     full_o => fifo_out_full_s,    

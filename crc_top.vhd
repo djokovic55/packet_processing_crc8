@@ -69,6 +69,7 @@ begin
     if (rising_edge(clk)) then
       if(reset = '1') then
         q_s <= (others => '0');
+				crc_data_in_s <= (others => '0');
       else
         if (shift_s = '0') then
           q_s <= data_in;

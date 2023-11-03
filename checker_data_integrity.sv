@@ -1,20 +1,20 @@
 
-checker checker_data_integrity(
-  clk,
-  reset,
+module checker_data_integrity(
+  input clk,
+  input reset,
 
-  byte_cnt,
-  data_sel,
+  input[3:0] byte_cnt,
+  input[3:0] data_sel,
 
-  wdata,
-  wvalid,
-  wlast,
-  wready, 
+  input[31:0] wdata,
+  input wvalid,
+  input wlast,
+  input wready, 
 
-  rdata,
-  rlast,
-  rvalid,
-  rready
+  input[31:0] rdata,
+  input rlast,
+  input rvalid,
+  input rready
 
 );
 
@@ -28,7 +28,7 @@ checker checker_data_integrity(
 
   // handshake flags
   logic wnext = wvalid && wready;
-  logic rnext = rvalid && rnext;
+  logic rnext = rvalid && rready;
 
   // write and read channel handshake counter
   always @(posedge clk) begin
@@ -54,15 +54,16 @@ checker checker_data_integrity(
   //////////////////////////////////////////////////////////////////////////////// 
 
   logic[3:0] chosen_byte;
+
   asm_chosen_byte_stable: assume property($stable(chosen_byte));
 
   asm_chosen_byte_op0: assume property(disable iff(reset && (data_sel != 4'h0))
     chosen_byte <= byte_cnt[3:2]);
 
   asm_chosen_byte_op1: assume property(disable iff(reset && (data_sel != 4'h1))
-    chosen_byte <= byte_cnt[3:2] && chosen_byte[0] == 1'b0);
+    chosen_byte[3:2] <= byte_cnt[3:2] && chosen_byte[1] == 1'b0);
   
-  asm_chosen_byte_op1: assume property(disable iff(reset && (data_sel != 4'h2))
+  asm_chosen_byte_op2: assume property(disable iff(reset && (data_sel != 4'h2))
     chosen_byte <= byte_cnt);
 
   reg[7:0] chosen_byte_data;
@@ -76,30 +77,27 @@ checker checker_data_integrity(
       chosen_byte_data <= '0; 
     end
     else begin
-      case(data_sel) 
-        OP0: begin
-          if(chosen_byte[3:2] == rpulse_cnt)
-            chosen_byte_data <= rdata[7:0];
-        end
-        OP1: begin
-          if(chosen_byte[3:2] == rpulse_cnt) begin
-            case(chosen_byte[0]) 
-              1'b0: chosen_byte_data <= rdata[7:0];
-              1'b1: chosen_byte_data <= rdata[15:8];
-            endcase
-          end
-        end
-        OP2: begin
-          if(chosen_byte[3:2] == rpulse_cnt) begin
-            case(chosen_byte[1:0]) 
-              2'b00: chosen_byte_data <= rdata[7:0];
-              2'b01: chosen_byte_data <= rdata[15:8];
-              2'b10: chosen_byte_data <= rdata[23:16];
-              2'b11: chosen_byte_data <= rdata[31:24];
-            endcase
-          end
-        end
-      endcase
+			if(chosen_byte[3:2] == rpulse_cnt && rnext) begin
+				case(data_sel) 
+					OP0: begin
+							chosen_byte_data <= rdata[7:0];
+					end
+					OP1: begin
+						case(chosen_byte[0]) 
+							1'b0: chosen_byte_data <= rdata[7:0];
+							1'b1: chosen_byte_data <= rdata[15:8];
+						endcase
+					end
+					OP2: begin
+						case(chosen_byte[1:0]) 
+							2'b00: chosen_byte_data <= rdata[7:0];
+							2'b01: chosen_byte_data <= rdata[15:8];
+							2'b10: chosen_byte_data <= rdata[23:16];
+							2'b11: chosen_byte_data <= rdata[31:24];
+						endcase
+					end
+				endcase
+			end
     end
   end
 
@@ -107,7 +105,7 @@ checker checker_data_integrity(
  // Packet OUT interface
  //////////////////////////////////////////////////////////////////////////////// 
 
-  logic received_byte; 
+  logic[4:0] received_byte; 
   always @(posedge clk) begin
     if(reset) begin
       received_byte <= '0;
@@ -122,6 +120,8 @@ checker checker_data_integrity(
 
   // Indication that chosen packet arrived at the output
   logic chosen_packet_arrived;
+  reg[7:0] received_byte_data;
+
 
   // store received data byte
   always @(posedge clk) begin
@@ -130,15 +130,21 @@ checker checker_data_integrity(
       chosen_packet_arrived <= 1'b0;
     end
     else begin
-      if(received_byte[4:2] == rpulse_cnt) begin
+			//default
+			chosen_packet_arrived <= 1'b0; //generate pulse
+	
+			// extract byte only when in OUTMEM_WRITE phase
+      if(received_byte[4:2] == rpulse_cnt && wnext) begin
 
         chosen_packet_arrived <= 1'b1;
+				if(chosen_packet_arrived)
+					chosen_packet_arrived <= 1'b0;
 
         case(received_byte[1:0]) 
-          2'b00: received_byte_data <= rdata[7:0];
-          2'b01: received_byte_data <= rdata[15:8];
-          2'b10: received_byte_data <= rdata[23:16];
-          2'b11: received_byte_data <= rdata[31:24];
+          2'b00: received_byte_data <= wdata[7:0];
+          2'b01: received_byte_data <= wdata[15:8];
+          2'b10: received_byte_data <= wdata[23:16];
+          2'b11: received_byte_data <= wdata[31:24];
         endcase
       end
     end
@@ -146,5 +152,6 @@ checker checker_data_integrity(
 
   ast_packet_integrity: assert property(chosen_packet_arrived |-> received_byte_data == chosen_byte_data);
 
+	chosen_byte_val: cover property(chosen_byte == 4'h4);
 
-endchecker
+endmodule
