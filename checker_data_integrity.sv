@@ -57,14 +57,23 @@ module checker_data_integrity(
 
   asm_chosen_byte_stable: assume property($stable(chosen_byte));
 
-  asm_chosen_byte_op0: assume property(disable iff(reset && (data_sel != 4'h0))
-    chosen_byte <= byte_cnt[3:2]);
+  // asm_chosen_byte_op0: assume property(disable iff(reset && (data_sel != 4'h0))
+    // chosen_byte <= byte_cnt[3:2]);
 
-  asm_chosen_byte_op1: assume property(disable iff(reset && (data_sel != 4'h1))
-    chosen_byte[3:2] <= byte_cnt[3:2] && chosen_byte[1] == 1'b0);
+  // asm_chosen_byte_op1: assume property(disable iff(reset && (data_sel != 4'h1))
+    // chosen_byte[3:2] <= byte_cnt[3:2] && chosen_byte[1] == 1'b0);
   
-  asm_chosen_byte_op2: assume property(disable iff(reset && (data_sel != 4'h2))
-    chosen_byte <= byte_cnt);
+  // asm_chosen_byte_op2: assume property(disable iff(reset && (data_sel != 4'h2))
+    // chosen_byte <= byte_cnt);
+
+  asm_chosen_byte_op0: assume property(disable iff(reset)
+    data_sel == 4'h0 |-> chosen_byte <= byte_cnt[3:2]);
+
+  asm_chosen_byte_op1: assume property(disable iff(reset)
+    data_sel == 4'h1 |-> chosen_byte <= byte_cnt && chosen_byte[1] == 1'b0);
+  
+  asm_chosen_byte_op2: assume property(disable iff(reset)
+    data_sel == 4'h2 |-> chosen_byte <= byte_cnt);
 
   reg[7:0] chosen_byte_data;
   const logic[3:0] OP0 = 4'h0;
@@ -134,7 +143,7 @@ module checker_data_integrity(
 			chosen_packet_arrived <= 1'b0; //generate pulse
 	
 			// extract byte only when in OUTMEM_WRITE phase
-      if(received_byte[4:2] == rpulse_cnt && wnext) begin
+      if(received_byte[4:2] == wpulse_cnt && wnext) begin
 
         chosen_packet_arrived <= 1'b1;
 				if(chosen_packet_arrived)

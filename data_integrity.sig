@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wavelist version="3">
-  <insertion-point-position>17</insertion-point-position>
+  <insertion-point-position>13</insertion-point-position>
   <wave>
     <expr>M_AXI_ACLK</expr>
     <label/>
@@ -17,17 +17,17 @@
     <radix/>
   </wave>
   <wave collapsed="true">
-    <expr>chk_pb.chk_data_integrity.chosen_byte_data</expr>
+    <expr>state_reg</expr>
     <label/>
-    <radix/>
+    <radix>state_reg</radix>
   </wave>
   <wave collapsed="true">
     <expr>chk_pb.chk_data_integrity.chosen_byte</expr>
     <label/>
-    <radix/>
+    <radix>hex</radix>
   </wave>
   <wave collapsed="true">
-    <expr>chk_pb.chk_data_integrity.received_byte_data</expr>
+    <expr>chk_pb.chk_data_integrity.chosen_byte_data</expr>
     <label/>
     <radix/>
   </wave>
@@ -36,23 +36,33 @@
     <label/>
     <radix>hex</radix>
   </wave>
+  <wave collapsed="true">
+    <expr>chk_pb.chk_data_integrity.received_byte_data</expr>
+    <label/>
+    <radix/>
+  </wave>
   <wave>
     <expr>chk_pb.chk_data_integrity.chosen_packet_arrived</expr>
     <label/>
     <radix/>
   </wave>
   <wave collapsed="true">
-    <expr>state_reg</expr>
+    <expr>data_sel_i</expr>
     <label/>
-    <radix>state_reg</radix>
+    <radix/>
   </wave>
   <wave collapsed="true">
-    <expr>data_sel_i</expr>
+    <expr>chk_pb.chk_data_integrity.wpulse_cnt</expr>
     <label/>
     <radix/>
   </wave>
   <wave>
     <expr>chk_pb.chk_data_integrity.wnext</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave collapsed="true">
+    <expr>chk_pb.chk_data_integrity.rpulse_cnt</expr>
     <label/>
     <radix/>
   </wave>
@@ -83,6 +93,11 @@
   </wave>
   <wave collapsed="true">
     <expr>byte_cnt_i</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave collapsed="true">
+    <expr>crc_reg</expr>
     <label/>
     <radix/>
   </wave>
