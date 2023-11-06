@@ -1,52 +1,52 @@
-checker checker_pb(
-  clk,
-  reset,
+module checker_pb(
+  input logic clk,
+  input logic reset,
 
-  start_i,
-  busy_o,
-  irq_o,
-  addr_in_i,
-  byte_cnt_i,
-  pkt_type_i,
-  ecc_en_i,
-  crc_en_i,
-  ins_ecc_err_i,
-  ins_crc_err_i,
-  ecc_val_i,
-  crc_val_i,
-  sop_val_i,
-  data_sel_i,
-  addr_out_i,
+  output logic start_i,
+  input logic busy_o,
+  input logic irq_o,
+  output logic[31:0] addr_in_i,
+  output logic[3:0] byte_cnt_i,
+  output logic[3:0] pkt_type_i,
+  output logic ecc_en_i,
+  output logic crc_en_i,
+  output logic ins_ecc_err_i,
+  output logic ins_crc_err_i,
+  output logic[3:0] ecc_val_i,
+  output logic[7:0] crc_val_i,
+  output logic[2:0] sop_val_i,
+  output logic[3:0] data_sel_i,
+  output logic[31:0] addr_out_i,
 
-  s_axi_awaddr,
-  s_axi_awlen,
-  s_axi_awsize,
-  s_axi_awburst,
-  s_axi_awvalid,
-  s_axi_awready, //TODO
+  input logic[31:0] s_axi_awaddr,
+  input logic[7:0] s_axi_awlen,
+  input logic[2:0] s_axi_awsize,
+  input logic[1:0] s_axi_awburst,
+  input logic s_axi_awvalid,
+  output logic s_axi_awready, //TODO
 
-  s_axi_wdata,
-  s_axi_wstrb,
-  s_axi_wlast,
-  s_axi_wvalid,
-  s_axi_wready, //TODO
+  input logic[31:0] s_axi_wdata,
+  input logic[3:0] s_axi_wstrb,
+  input logic s_axi_wlast,
+  input logic s_axi_wvalid,
+  output logic s_axi_wready, //TODO
 
-  s_axi_bresp, //TODO
-  s_axi_bvalid, //TODO
-  s_axi_bready,
+  output logic[1:0] s_axi_bresp, //TODO
+  output logic s_axi_bvalid, //TODO
+  input logic s_axi_bready,
   
-  s_axi_araddr,
-  s_axi_arlen,
-  s_axi_arsize,
-  s_axi_arburst,
-  s_axi_arvalid,
-  s_axi_arready, //TODO
+  input logic[31:0] s_axi_araddr,
+  input logic[7:0] s_axi_arlen,
+  input logic[2:0] s_axi_arsize,
+  input logic[1:0] s_axi_arburst,
+  input logic s_axi_arvalid,
+  output logic s_axi_arready, //TODO
 
-  s_axi_rdata,//TODO
-  s_axi_rresp,//TODO
-  s_axi_rlast,//TODO
-  s_axi_rvalid,//TODO
-  s_axi_rready
+  output logic[31:0] s_axi_rdata,//TODO
+  output logic[1:0] s_axi_rresp,//TODO
+  output logic s_axi_rlast,//TODO
+  output logic s_axi_rvalid,//TODO
+  input logic s_axi_rready
 
 );
 
@@ -73,12 +73,19 @@ checker checker_pb(
   cov_pb_start: cover property(start_i == 1'b1);
 
   //SECTION Regs config logic
-	asm_max_byte_cnt: assume property(byte_cnt_i == 4'h8 );
+	asm_max_byte_cnt: assume property(byte_cnt_i <= 4'hf);
+	asm_min_byte_cnt: assume property(byte_cnt_i >= 4'h0);
 	asm_stable_max_byte_cnt: assume property($stable(byte_cnt_i));
-	asm_merging_option: assume property(data_sel_i == 4'h1);
+
+	// asm_merging_option: assume property(data_sel_i inside {4'h0, 4'h1, 4'h2});
+	asm_merging_option: assume property(data_sel_i == 4'h2);
 	asm_merg_op_stability: assume property($stable(data_sel_i));
+
 	asm_crc_en: assume property(crc_en_i == 1'b1);
+	asm_crc_en_stability: assume property($stable(crc_en_i));
 	asm_ecc_en: assume property(ecc_en_i == 1'b1);
+	asm_ecc_en_stability: assume property($stable(ecc_en_i));
+
   // asm_start: assume property();
   asm_addr_in: assume property(addr_in_i == 32'hBABABABA);
   asm_pkt_type: assume property(pkt_type_i == 4'hA);
@@ -200,12 +207,12 @@ checker checker_pb(
 				rlast <= 1'b0;
 			end
 			//BUG rnext added
-			else if((((arlen_cntr == arlen - 1'b1) && rnext) || (arlen == 8'h0)) && rlast == 1'b0 && axi_arv_arr_flag == 1'b1)
+			else if(((arlen_cntr == arlen - 1'b1) || arlen == 8'h0) && rvalid == 1'b1 && axi_arv_arr_flag == 1'b1)
 				rlast <= 1'b1;
 			else if (rnext) 
 				rlast <= 1'b0;
-			else if(rlast == 1'b1 && arlen == 8'h0)
-				rlast <= 1'b0;
+			// else if(rlast == 1'b1 && arlen == 8'h0)
+				// rlast <= 1'b0;
 		end 
 	end
 
@@ -239,4 +246,25 @@ checker checker_pb(
 		end
 	end         
 
-endchecker
+  //////////////////////////////////////////////////////////////////////////////// 
+  // Data integrity checker
+  //////////////////////////////////////////////////////////////////////////////// 
+
+	checker_data_integrity chk_data_integrity(
+		.clk(clk),	
+		.reset(reset),
+		.byte_cnt(byte_cnt_i),
+		.data_sel(data_sel_i),
+
+		.wdata(s_axi_wdata),
+		.wvalid(s_axi_wvalid),
+		.wlast(s_axi_wlast),
+		.wready(s_axi_wready), 
+
+		.rdata(s_axi_rdata),
+		.rlast(s_axi_rlast),
+		.rvalid(s_axi_rvalid),
+		.rready(s_axi_rready)
+	);
+
+endmodule

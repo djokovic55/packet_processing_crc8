@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wavelist version="3">
-  <insertion-point-position>13</insertion-point-position>
+  <insertion-point-position>15</insertion-point-position>
   <wave>
     <expr>M_AXI_ACLK</expr>
     <label/>
@@ -46,28 +46,29 @@
     <label/>
     <radix/>
   </wave>
+  <spacer/>
+  <wave collapsed="true">
+    <expr>header_s</expr>
+    <label/>
+    <radix/>
+  </wave>
   <wave collapsed="true">
     <expr>data_sel_i</expr>
     <label/>
     <radix/>
   </wave>
   <wave collapsed="true">
-    <expr>chk_pb.chk_data_integrity.wpulse_cnt</expr>
+    <expr>byte_cnt_i</expr>
     <label/>
-    <radix/>
+    <radix>hex</radix>
   </wave>
-  <wave>
-    <expr>chk_pb.chk_data_integrity.wnext</expr>
+  <wave collapsed="true">
+    <expr>temp0_op1_s</expr>
     <label/>
     <radix/>
   </wave>
   <wave collapsed="true">
-    <expr>chk_pb.chk_data_integrity.rpulse_cnt</expr>
-    <label/>
-    <radix/>
-  </wave>
-  <wave>
-    <expr>chk_pb.chk_data_integrity.rnext</expr>
+    <expr>temp1_op1_s</expr>
     <label/>
     <radix/>
   </wave>
@@ -92,17 +93,26 @@
     <radix/>
   </wave>
   <wave collapsed="true">
-    <expr>byte_cnt_i</expr>
+    <expr>crc_reg</expr>
     <label/>
     <radix/>
   </wave>
   <wave collapsed="true">
-    <expr>crc_reg</expr>
+    <expr>vld_bytes_last_pulse_cnt_op1_s</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave collapsed="true">
+    <expr>write_byte_cnt_op1_s</expr>
     <label/>
     <radix/>
   </wave>
   <highlightlist>
     <!--Users can remove the highlightlist block if they want to load the signal save file into older version of JasperGold-->
+    <highlight>
+      <expr>data_sel_i</expr>
+      <color>builtin_blue</color>
+    </highlight>
     <highlight>
       <expr>chk_pb.chk_data_integrity.chosen_byte_data</expr>
       <color>#00ff00</color>

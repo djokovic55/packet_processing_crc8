@@ -366,30 +366,46 @@ begin
 	-- //IMPORTANT Forward movement occurs when the write channel is valid and ready
 
 	  wnext <= M_AXI_WREADY and axi_wvalid;                                       
-		axi_wvalid <= AXI_WRITE_VLD_I;
+		-- axi_wvalid <= AXI_WRITE_VLD_I;
 	                                                                                    
-	--WLAST generation on the MSB of a counter underflow                                
-	-- WVALID logic, similar to the axi_awvalid always block above                      
-	  process(M_AXI_ACLK)                                                               
-	  begin                                                                             
-	    if (rising_edge (M_AXI_ACLK)) then                                              
-	      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then                                                
+		-- WVALID logic, similar to the axi_awvalid always block above                      
+	  process(M_AXI_ACLK)                                            
+	  begin                                                                
+	    if (rising_edge (M_AXI_ACLK)) then                                 
+	      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then
+					axi_wvalid <= '0';                                            
+	      else                                                             
+	        if (axi_wvalid = '0' and start_single_burst_write = '1') then 
+	          axi_wvalid <= '1';                                          
+					-- single burst transaction
+					elsif (unsigned(AXI_BURST_LEN) = 0  and wnext = '1') then 
+	          axi_wvalid <= '1';                                          
+						if(wnext = '1') then
+							axi_wvalid <= '0';                                          
+						end if;
+	        elsif (wnext = '1' and axi_wlast = '1') then         
+	          axi_wvalid <= '0';                                          
+	        end if;                                                        
+	      end if;                                                          
+	    end if;                                                            
+	  end process;                                                         
+
+		--WLAST generation on the MSB of a counter underflow                                
+	  process(M_AXI_ACLK) 
+	  begin                                               
+	    if (rising_edge (M_AXI_ACLK)) then                
+	      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then 
 	        axi_wlast <= '0';                                                           
-	        -- axi_wlast is asserted when the write index                               
-	        -- count reaches the penultimate count to synchronize                       
-	        -- with the last write data when write_index is b1111                       
-	        -- elsif (&(write_index[C_TRANSACTIONS_NUM-1:1])&& ~write_index[0] && wnext)
 	      else                                                                          
-					 -- IMPORTANT wlast needs write_index
-					 -- FIX when burst_len == 0 wlast can be asserted only when transaction is active
-	        if (((((unsigned(write_index) = unsigned(AXI_BURST_LEN)-1) and unsigned(AXI_BURST_LEN) >= 1) and wnext = '1') or (unsigned(AXI_BURST_LEN) = 0)) and burst_write_active = '1') then
+					 -- IMPORTANT wlast is always low when single burst
+	        if ((unsigned(write_index) = unsigned(AXI_BURST_LEN)-1) and burst_write_active = '1' and wnext = '1') then
 	          axi_wlast <= '1';                                                         
 	          -- Deassrt axi_wlast when the last write data has been                    
 	          -- accepted by the slave with a valid response                            
-	        elsif (wnext = '1') then                                                    
+	        elsif (axi_wlast = '1' or unsigned(AXI_BURST_LEN) = 0) then 
 	          axi_wlast <= '0';                                                         
-	        elsif (axi_wlast = '1' and unsigned(AXI_BURST_LEN) = 0) then                      
-	          axi_wlast <= '0';                                                         
+	        -- elsif (axi_wlast = '1' and unsigned(AXI_BURST_LEN) = 0) then  
+	          -- axi_wlast <= '0';                                                         
 	        end if;                                                                     
 	      end if;                                                                       
 	    end if;                                                                         
@@ -400,11 +416,11 @@ begin
 	  process(M_AXI_ACLK)                                                               
 	  begin                                                                             
 	    if (rising_edge (M_AXI_ACLK)) then                                              
-	      if (M_AXI_ARESETN = '1' or start_single_burst_write = '1' or init_write_txn_pulse = '1') then               
-	        write_index <= (others => '0');                                             
+	      if (M_AXI_ARESETN = '1' or start_single_burst_write = '1' or init_write_txn_pulse = '1') then 
+	        write_index <= (others => '0');   
 	      else                                                                          
-	        if (wnext = '1' and (unsigned(write_index) /= unsigned(AXI_BURST_LEN))) then                
-	          write_index <= std_logic_vector(unsigned(write_index) + 1);                                         
+	        if (wnext = '1' and (unsigned(write_index) /= unsigned(AXI_BURST_LEN))) then 
+	          write_index <= std_logic_vector(unsigned(write_index) + 1); 
 	        end if;                                                                     
 	      end if;                                                                       
 	    end if;                                                                         
@@ -439,16 +455,17 @@ begin
 	        -- accept/acknowledge bresp with axi_bready by the master       
 	        -- when M_AXI_BVALID is asserted by slave                       
 	      else                                                              
-				  -- //NOTE bready depends on bvalid
-	        -- if (M_AXI_BVALID = '1' and axi_bready = '0') then               
-	        if (axi_wlast = '1') then               
+						-- //NOTE bready depends on bvalid
+						-- if (M_AXI_BVALID = '1' and axi_bready = '0') then               
+					 if (axi_wlast = '1') then               
 	          axi_bready <= '1';                                            
-	          -- deassert after one clock cycle                             
-	        -- elsif (axi_bready = '1') then                                   
-	          -- deassert after succesful handshake
-	         elsif (M_AXI_BVALID = '1' and axi_bready = '1') then                                   
-	          axi_bready <= '0';                                            
-	        end if;                                                         
+					 -- if single burst transaction 
+					 elsif (unsigned(AXI_BURST_LEN) = 0  and wnext = '1') then 
+	          axi_bready <= '1';                                            
+						-- deassert after succesful handshake
+					 elsif (M_AXI_BVALID = '1' and axi_bready = '1') then                                   
+						axi_bready <= '0';                                            
+					end if;                                                         
 	      end if;                                                           
 	    end if;                                                             
 	  end process;                                                          

@@ -55,7 +55,7 @@ checker  checker_axi(
 			handshake_cnt_w <= 1'b0;
 		end
 		else begin
-			if(wvalid && wready) begin
+			if(wvalid && wready && !wlast) begin
 				handshake_cnt_w <= handshake_cnt_w + 1'b1;
 			end
 			else if(wlast) begin
@@ -69,7 +69,7 @@ checker  checker_axi(
 			handshake_cnt_r <= 1'b0;
 		end
 		else begin
-			if(rvalid && rready) begin
+			if(rvalid && rready && !rlast) begin
 				handshake_cnt_r <= handshake_cnt_r + 1'b1;
 			end
 			else if(rlast) begin
@@ -95,7 +95,7 @@ checker  checker_axi(
   endproperty
 
   property data_last (xvalid, handshake_cnt, axlen, xlast);
-		  xvalid && (handshake_cnt == axlen) |-> xlast;
+		  xvalid && (handshake_cnt == axlen) && (axlen != '0) |-> xlast;
   endproperty
 
   //FIXME awready prop are not defined

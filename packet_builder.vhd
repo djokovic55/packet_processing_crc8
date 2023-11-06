@@ -381,8 +381,8 @@ architecture Behavioral of packet_builder is
   -- Build OP0 signals
   signal write_burst_len_op0_s : std_logic_vector(7 downto 0);
   signal write_byte_cnt_op0_s : std_logic_vector(4 downto 0);
-  signal temp0_op0_s : std_logic_vector(4 downto 0);
-  signal temp1_op0_s : std_logic_vector(4 downto 0);
+  signal temp0_op1_s : std_logic_vector(3 downto 0);
+  signal temp1_op1_s : std_logic_vector(3 downto 0);
   signal written_pulse_bytes_next, written_pulse_bytes_reg  : std_logic_vector(1 downto 0);
   -- no need for vld_bytes_last_pulse signals because in every pulse there must be at least one, which is only needed
   -- but to maintain same logic principle where vld_bytes_last_pulse represent crc position, it will be used 
@@ -391,7 +391,7 @@ architecture Behavioral of packet_builder is
 
 
   -- Build OP1 signals
-  signal write_byte_cnt_op1_s : std_logic_vector(4 downto 0);
+  signal write_byte_cnt_op1_s : std_logic_vector(3 downto 0);
   signal write_burst_len_op1_s : std_logic_vector(7 downto 0);
   signal vld_bytes_last_pulse_cnt_op1_s : std_logic_vector(1 downto 0);
   signal cycles_to_build_op1_reg : std_logic_vector(1 downto 0);
@@ -427,11 +427,12 @@ begin
   vld_bytes_last_pulse_cnt_op0_s <= std_logic_vector(unsigned(write_byte_cnt_op0_s(1 downto 0))); 
 
   -- SECTION calculate write burst len and valid bytes in last pulse based on write_read_cnt for OP1
-  temp0_op0_s <= std_logic_vector(to_unsigned((to_integer(unsigned(byte_cnt_i(3 downto 2)))*2) , 5)); 
-  temp1_op0_s <= std_logic_vector(to_unsigned(to_integer(unsigned(byte_cnt_i(0 downto 0))) + 3, 5)); 
-  write_byte_cnt_op1_s <= std_logic_vector(unsigned(temp0_op0_s) + unsigned(temp1_op0_s)); 
-  write_burst_len_op1_s(7 downto 3) <= (others => '0'); 
-  write_burst_len_op1_s(2 downto 0) <= write_byte_cnt_op1_s(4 downto 2);
+  temp0_op1_s <= std_logic_vector(to_unsigned((to_integer(unsigned(byte_cnt_i(3 downto 2)))*2) , 4)); 
+  temp1_op1_s <= "000"&(byte_cnt_i(1) or byte_cnt_i(0));
+
+  write_byte_cnt_op1_s <= std_logic_vector(unsigned(temp0_op1_s) + unsigned(temp1_op1_s) + 3); 
+  write_burst_len_op1_s(7 downto 2) <= (others => '0'); 
+  write_burst_len_op1_s(1 downto 0) <= write_byte_cnt_op1_s(3 downto 2);
   vld_bytes_last_pulse_cnt_op1_s <= std_logic_vector(unsigned(write_byte_cnt_op1_s(1 downto 0))); 
 
   -- SECTION calculate write burst len and valid bytes in last pulse based on write_read_cnt for OP2
@@ -466,6 +467,9 @@ begin
         cycles_to_build_op1_reg <= (others => '0');
         cycles_to_build_op2_reg <= (others => '0');
       else
+        cycles_to_build_op0_reg <= (others => '0');
+        cycles_to_build_op1_reg <= (others => '0');
+        cycles_to_build_op2_reg <= (others => '0');
         case(data_sel_i) is
           when "0000" => 
             if (unsigned(vld_bytes_last_pulse_cnt_reg) = 0) then
@@ -479,12 +483,9 @@ begin
             else 
               cycles_to_build_op1_reg <= read_burst_len_s(1 downto 0);
             end if;
+          when "0010" =>
+						cycles_to_build_op2_reg <= write_burst_len_op2_s(2 downto 0);
           when others =>
-            if (unsigned(vld_bytes_last_pulse_cnt_reg) = 0) then
-              cycles_to_build_op2_reg <= std_logic_vector(unsigned(read_burst_len_s(2 downto 0)) + 1);
-            else 
-              cycles_to_build_op2_reg <= read_burst_len_s(2 downto 0);
-            end if;
         end case;
       end if;
     end if;
@@ -588,6 +589,13 @@ begin
       when IDLE =>
         busy_o <= '1';
 				pulse_cnt_next <= (others => '0');
+
+				-- reset all registers
+				crc_next <= (others => '0');
+				pulse_cnt_next <= (others => '0');
+				pulse_data_next <= (others => '0');
+				fifo_out_wr_data_next <= (others => '0');
+				written_pulse_bytes_next <= (others => '0');
 
 				-- reset FIFOs
 				fifo_in_rst_s <= '1';

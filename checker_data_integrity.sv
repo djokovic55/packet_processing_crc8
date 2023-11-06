@@ -163,4 +163,13 @@ module checker_data_integrity(
 
 	chosen_byte_val: cover property(chosen_byte == 4'h4);
 
+	logic[3:0] free_byte_cnt;
+	asm_max_free_byte_cnt: assume property(free_byte_cnt <= 4'hf);
+	asm_min_free_byte_cnt: assume property(free_byte_cnt >= 4'h0);
+
+	cov_all_byte_cnts: cover property(byte_cnt == 4'h0 && chosen_packet_arrived);
+	cov_byte_cnts0: cover property(byte_cnt == 4'h0);
+ 	
+
+
 endmodule

@@ -13,4 +13,5 @@ elaborate -vhdl -top {packet_builder}
 clock m_axi_aclk
 reset m_axi_aresetn
 
+# visualize -confirm -vcd unstable_data_wlast_bugs.vcd -window visualize:0
 prove -bg -all
