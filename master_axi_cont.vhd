@@ -379,10 +379,7 @@ begin
 	          axi_wvalid <= '1';                                          
 					-- single burst transaction
 					elsif (unsigned(AXI_BURST_LEN) = 0  and wnext = '1') then 
-	          axi_wvalid <= '1';                                          
-						if(wnext = '1') then
-							axi_wvalid <= '0';                                          
-						end if;
+						axi_wvalid <= '0';                                          
 	        elsif (wnext = '1' and axi_wlast = '1') then         
 	          axi_wvalid <= '0';                                          
 	        end if;                                                        

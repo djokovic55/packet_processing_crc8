@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wavelist version="3">
-  <insertion-point-position>15</insertion-point-position>
+  <insertion-point-position>21</insertion-point-position>
   <wave>
     <expr>M_AXI_ACLK</expr>
     <label/>
@@ -43,6 +43,72 @@
   </wave>
   <wave>
     <expr>chk_pb.chk_data_integrity.chosen_packet_arrived</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <spacer/>
+  <wave>
+    <expr>axi_write_init_s</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>single_write_burst</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>axi_write_done_s</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>M_AXI_BVALID</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>M_AXI_BREADY</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>master_axi_cont_ctrl.wnext</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>master_axi_cont_ctrl.axi_wvalid</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>master_axi_cont_ctrl.M_AXI_WREADY</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>chk_pb.wready</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>chk_pb.s_axi_wready</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>chk_pb.bvalid</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>chk_pb.axi_awv_awr_flag</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>chk_pb.awready</expr>
     <label/>
     <radix/>
   </wave>

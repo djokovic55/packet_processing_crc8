@@ -622,7 +622,7 @@ begin
           fifo_in_wr_en_s <= '1';
           fifo_in_wr_data_s <= axi_read_data_s;
           
-          if(axi_read_last_s = '1') then
+          if(axi_read_last_s = '1' or unsigned(byte_cnt_i) = 0) then
             if(crc_en_i = '1') then 
 
               start_crc_s <= '1';

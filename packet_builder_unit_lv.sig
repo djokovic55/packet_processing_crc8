@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wavelist version="3">
-  <insertion-point-position>15</insertion-point-position>
+  <insertion-point-position>19</insertion-point-position>
   <wave>
     <expr>M_AXI_ACLK</expr>
     <label/>
@@ -227,7 +227,7 @@
       <radix/>
     </wave>
   </group>
-  <group collapsed="false">
+  <group collapsed="true">
     <expr/>
     <label>BUILDER</label>
     <wave collapsed="true">
@@ -266,7 +266,7 @@
       <radix/>
     </wave>
   </group>
-  <group collapsed="false">
+  <group collapsed="true">
     <expr/>
     <label>FIFO_OUT</label>
     <wave>
@@ -304,7 +304,7 @@
       </wave>
     </group>
   </group>
-  <group collapsed="true">
+  <group collapsed="false">
     <expr/>
     <label>AXI_WRITE</label>
     <wave collapsed="true">
@@ -334,6 +334,16 @@
     </wave>
     <wave>
       <expr>chk_pb.awready</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>master_axi_cont_ctrl.M_AXI_AWREADY</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave>
+      <expr>chk_pb.s_axi_awready</expr>
       <label/>
       <radix/>
     </wave>
@@ -482,6 +492,10 @@
         <color>builtin_green</color>
       </highlight>
       <highlight>
+        <expr>data_sel_i</expr>
+        <color>builtin_blue</color>
+      </highlight>
+      <highlight>
         <expr>master_axi_cont_ctrl.axi_wlast</expr>
         <color>builtin_red</color>
       </highlight>
@@ -492,6 +506,14 @@
       <highlight>
         <expr>written_pulse_bytes_reg</expr>
         <color>builtin_orange</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.chk_data_integrity.chosen_byte_data</expr>
+        <color>#00ff00</color>
+      </highlight>
+      <highlight>
+        <expr>chk_pb.chk_data_integrity.received_byte_data</expr>
+        <color>#ff5757</color>
       </highlight>
     </highlightlist>
   </group>

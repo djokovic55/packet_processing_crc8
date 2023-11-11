@@ -61,7 +61,7 @@ module checker_pb(
 
   reg[7:0] awlen, awlen_cntr;
   reg[7:0] arlen, arlen_cntr;
-  reg awready, wready;
+  logic awready, wready;
   reg bvalid;
   reg arready;
   logic[31:0] rdata;
@@ -71,14 +71,15 @@ module checker_pb(
   reg axi_awv_awr_flag, axi_arv_arr_flag;
   //SECTION Check and cover
   cov_pb_start: cover property(start_i == 1'b1);
+  cov_pb_start_byte_cnt0: cover property(start_i == 1'b1 && byte_cnt_i == 4'h0);
 
   //SECTION Regs config logic
-	asm_max_byte_cnt: assume property(byte_cnt_i <= 4'hf);
+	asm_max_byte_cnt: assume property(byte_cnt_i <= 4'hF);
 	asm_min_byte_cnt: assume property(byte_cnt_i >= 4'h0);
 	asm_stable_max_byte_cnt: assume property($stable(byte_cnt_i));
 
-	// asm_merging_option: assume property(data_sel_i inside {4'h0, 4'h1, 4'h2});
-	asm_merging_option: assume property(data_sel_i == 4'h2);
+	asm_merging_option: assume property(data_sel_i inside {4'h0, 4'h1, 4'h2});
+	// asm_merging_option: assume property(data_sel_i == 4'h2);
 	asm_merg_op_stability: assume property($stable(data_sel_i));
 
 	asm_crc_en: assume property(crc_en_i == 1'b1);
@@ -123,6 +124,8 @@ module checker_pb(
 			end
 			else if (s_axi_wlast == 1'b1 && wready == 1'b1) 
 				axi_awv_awr_flag  <= 1'b0;
+			else if (s_axi_awlen == '0 && wready == 1'b1) 
+				axi_awv_awr_flag  <= 1'b0;
 			else
 				awready <= 1'b0;
 		end
@@ -153,7 +156,10 @@ module checker_pb(
 			if(wready == 1'b0 && s_axi_wvalid == 1'b1 && axi_awv_awr_flag == 1'b1) begin
 				wready <= 1'b1;
 			end
-			else if(s_axi_wlast == 1'b1 && wready == 1'b1) begin 
+			else if(s_axi_wlast == 1'b1 && wready == 1'b1) 
+				wready <= 1'b0;
+			//single burst
+			else if(s_axi_awlen == '0 && wready == 1'b1) begin 
 				wready <= 1'b0;
 			end
 		end 
@@ -166,7 +172,7 @@ module checker_pb(
 			bresp  <= 2'b00; 
 		end
 		else begin
-			if (axi_awv_awr_flag == 1'b1 && wready == 1'b1 && s_axi_wvalid == 1'b1 && bvalid == 1'b0 && s_axi_wlast == 1'b1 ) begin
+			if (axi_awv_awr_flag == 1'b1 && wready == 1'b1 && s_axi_wvalid == 1'b1 && bvalid == 1'b0 && (s_axi_wlast == 1'b1 || s_axi_awlen == '0)) begin
 				bvalid <= 1'b1;
 				bresp  <= 2'b00; 
 			end
@@ -207,12 +213,10 @@ module checker_pb(
 				rlast <= 1'b0;
 			end
 			//BUG rnext added
-			else if(((arlen_cntr == arlen - 1'b1) || arlen == 8'h0) && rvalid == 1'b1 && axi_arv_arr_flag == 1'b1)
+			else if(((arlen_cntr == arlen - 1'b1)) && rnext == 1'b1 && axi_arv_arr_flag == 1'b1)
 				rlast <= 1'b1;
-			else if (rnext) 
+			else if (rlast == 1'b1 || arlen == '0) 
 				rlast <= 1'b0;
-			// else if(rlast == 1'b1 && arlen == 8'h0)
-				// rlast <= 1'b0;
 		end 
 	end
 

@@ -230,6 +230,9 @@ begin
 	      elsif (S_AXI_WLAST = '1' and axi_wready = '1') then 
 	      -- preparing to accept next address after current write burst tx completion
 	        axi_awv_awr_flag  <= '0';
+				-- single burst transaction
+	      elsif (unsigned(S_AXI_AWLEN) = 0 and axi_wready = '1') then 
+	        axi_awv_awr_flag  <= '0';
 	      else
 	        axi_awready <= '0';
 	      end if;
@@ -299,7 +302,8 @@ begin
 	        axi_wready <= '1';
 	        -- elsif (axi_awv_awr_flag = '0') then
 	      elsif (S_AXI_WLAST = '1' and axi_wready = '1') then 
-
+	        axi_wready <= '0';
+	      elsif (unsigned(S_AXI_AWLEN) = 0 and axi_wready = '1') then 
 	        axi_wready <= '0';
 	      end if;
 	    end if;
@@ -320,7 +324,7 @@ begin
 	      axi_bresp  <= "00"; --need to work more on the responses
 	      -- axi_buser <= (others => '0');
 	    else
-	      if (axi_awv_awr_flag = '1' and axi_wready = '1' and S_AXI_WVALID = '1' and axi_bvalid = '0' and S_AXI_WLAST = '1' ) then
+	      if (axi_awv_awr_flag = '1' and axi_wready = '1' and S_AXI_WVALID = '1' and axi_bvalid = '0' and (S_AXI_WLAST = '1' or unsigned(S_AXI_AWLEN) = 0)) then
 	        axi_bvalid <= '1';
 	        axi_bresp  <= "00"; 
 	      elsif (S_AXI_BREADY = '1' and axi_bvalid = '1') then  
