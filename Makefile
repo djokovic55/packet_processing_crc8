@@ -10,6 +10,9 @@ phase2:
 pb:
 	jg do_pb.tcl
 
+pp:
+	jg do_pp.tcl
+
 .PHONY: clean
 clean:
 	rm -rf jgproject

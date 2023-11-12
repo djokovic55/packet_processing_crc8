@@ -1,22 +1,17 @@
-bind packet_builder checker_pb chk_pb(
+bind packet_parser checker_pp chk_pp(
   .clk(m_axi_aclk),
   .reset(m_axi_aresetn),
 
   .start_i(start_i),
   .busy_o(busy_o),
   .irq_o(irq_o),
-  .addr_in_i(addr_in_i),
-  .byte_cnt_i(byte_cnt_i),
-  .pkt_type_i(pkt_type_i),
-  .ecc_en_i(ecc_en_i),
-  .crc_en_i(crc_en_i),
-  .ins_ecc_err_i(ins_ecc_err_i),
-  .ins_crc_err_i(ins_crc_err_i),
-  .ecc_val_i(ecc_val_i),
-  .crc_val_i(crc_val_i),
-  .sop_val_i(sop_val_i),
-  .data_sel_i(data_sel_i),
-  .addr_out_i(addr_out_i),
+  .addr_hdr_i(addr_hdr_i),
+  .ignore_ecc_err_i(ignore_ecc_err_i),
+  .pkt_ecc_corr_o(pkt_ecc_corr_o),
+  .pkt_ecc_uncorr_o(pkt_ecc_uncorr_o),
+  .pkt_crc_err_o(pkt_crc_err_o),
+  .pkt_byte_cnt_o(pkt_byte_cnt_o),
+  .pkt_type_o(pkt_type_o),
 
   .s_axi_awaddr(m_axi_awaddr),
   .s_axi_awlen(m_axi_awlen),
@@ -84,5 +79,3 @@ bind packet_builder checker_axi chk_axi_pb(
 	.rvalid(m_axi_rvalid),
 	.rready(m_axi_rready)
 );
-
-
