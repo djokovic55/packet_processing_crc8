@@ -585,7 +585,7 @@ begin
       else
         if (start_single_burst_read = '1')then
           burst_read_active <= '1';
-        elsif (M_AXI_RVALID = '1' and axi_rready = '1' and M_AXI_RLAST = '1') then
+        elsif (M_AXI_RVALID = '1' and axi_rready = '1' and (M_AXI_RLAST = '1' or unsigned(AXI_BURST_LEN) = 0)) then
           burst_read_active <= '0';
         end if;
       end if;

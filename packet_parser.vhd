@@ -453,7 +453,6 @@ begin
     axi_write_init_s <= '0';
 
     axi_read_address_s <= (others => '0');
-    axi_read_data_s <= (others => '0');
     axi_read_rdy_s <= '0';
     axi_read_init_next <= '0';
 
@@ -502,7 +501,7 @@ begin
 
         axi_read_rdy_s <= '1';
 
-        if(axi_read_vld_s = '1' and axi_read_last_s = '1') then
+        if(axi_read_vld_s = '1') then
           -- header won't be stored in fifo, then in its register
           header_next <= axi_read_data_s(15 downto 0);
           -- parse packet type
@@ -525,13 +524,17 @@ begin
             pkt_ecc_uncorr_o_next <= '0';
             pkt_ecc_corr_o_next <= '0';
 						axi_read_init_next <= '1';
+						-- missing check for P bit, at this points if it is asserted, the error is P bit
             ---------------------------------------- 
             state_next <= INMEM_READ;
             ---------------------------------------- 
           else
-            -- check if error can be ignored and preceed to inmmem read or finish task
+            -- check if error can be ignored and proceed to inmmem read or finish task
             if(hamming_msb_parity_bit_s = '1') then
+							-- IMPORTANT if P bit is asserted error is correctable, so the state machine should continue to next state
+							pkt_ecc_corr_o_next <= '1';
               -- IMPORTANT single ecc error correction logic
+							axi_read_init_next <= '1';
               case(hamming_parity_check_out_s) is 
                 when "0011" => --m0
                   pkt_byte_cnt_o_next(0) <= not(axi_read_data_s(4));
@@ -551,8 +554,14 @@ begin
                   pkt_type_o_next(3) <= not(axi_read_data_s(11));
                 when others => -- parity bits which does not need to be corrected
               end case;
+
+							-- BUG next state assignment was missing
+							---------------------------------------- 
+							state_next <= INMEM_READ;
+							---------------------------------------- 
             else 
               -- double ecc error
+							pkt_ecc_uncorr_o_next <= '1';
               if(ignore_ecc_err_i = '1') then
 								axi_read_init_next <= '1';
                 ---------------------------------------- 
@@ -585,7 +594,7 @@ begin
           fifo_in_wr_en_s <= '1';
           fifo_in_wr_data_s <= axi_read_data_s;
           
-          if(axi_read_last_s = '1') then
+          if(axi_read_last_s = '1' or unsigned(pkt_byte_cnt_o_reg) = 0) then
 
               -- IMPORTANT parse crc8
 						  case crc_pos_s is

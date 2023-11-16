@@ -1,18 +1,18 @@
 
-module checker_pb(
+module checker_pp(
   input logic clk,
   input logic reset,
 
-  input logic start_i,
-  output logic busy_o,
-  output logic irq_o,
-  input logic[31:0] addr_hdr_i,
-  input logic ignore_ecc_err_i,
-  output logic pkt_ecc_corr_o,
-  output logic pkt_ecc_uncorr_o,
-  output logic pkt_crc_err_o,
-  output logic[3:0] pkt_byte_cnt_o,
-  output logic[3:0] pkt_type_o,
+  output logic start_i,
+  input logic busy_o,
+  input logic irq_o,
+  output logic[31:0] addr_hdr_i,
+  output logic ignore_ecc_err_i,
+  input logic pkt_ecc_corr_o,
+  input logic pkt_ecc_uncorr_o,
+  input logic pkt_crc_err_o,
+  input logic[3:0] pkt_byte_cnt_o,
+  input logic[3:0] pkt_type_o,
 
   input logic[31:0] s_axi_awaddr,
   input logic[7:0] s_axi_awlen,
@@ -67,10 +67,13 @@ module checker_pb(
   reg axi_awv_awr_flag, axi_arv_arr_flag;
 
   asm_addr_hdr_i: assume property (addr_hdr_i == 32'hBABABABA);
-  asm_ignore_ecc_err: assume property (ignore_ecc_err_i == 1'b1);
+  asm_ignore_ecc_err: assume property (ignore_ecc_err_i == 1'b0);
 
   //SECTION Check and cover
   cov_pp_start: cover property(start_i == 1'b1);
+  cov_ecc_corr_err: cover property(pkt_ecc_corr_o == 1'b1);
+  cov_ecc_uncorr_err: cover property(pkt_ecc_uncorr_o == 1'b1);
+
 
   //SECTION Axi slave response logic
   asm_awready: assume property (aux_eq(s_axi_awready, awready));
@@ -79,7 +82,7 @@ module checker_pb(
   asm_bvalid: assume property (aux_eq(s_axi_bvalid, bvalid));
   asm_arready: assume property (aux_eq(s_axi_arready, arready));
 
-  asm_rdata: assume property (s_axi_rdata == 32'hDEADBEEF);
+  asm_rdata: assume property (s_axi_rdata == 32'hDEADAEEF);
   asm_rresp: assume property (aux_eq(s_axi_rresp, rresp));
   asm_rlast: assume property (aux_eq(s_axi_rlast, rlast));
   asm_rvalid: assume property (aux_eq(s_axi_rvalid, rvalid));
