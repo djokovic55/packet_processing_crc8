@@ -12,7 +12,7 @@ checker checker_pp(
 	pkt_ecc_uncorr_o,
 	pkt_crc_err_o,
 	pkt_byte_cnt_o,
-	pkt_type_o,
+	pkt_type_o
 );
 
 	default clocking @(posedge clk);

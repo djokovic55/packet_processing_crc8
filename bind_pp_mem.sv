@@ -1,7 +1,7 @@
 
 bind packet_parser data_memory pp_mem(
-  .m_axi_aclk(m_axi_aclk),
-  .m_axi_aresetn(m_axi_aresetn),
+  .s_axi_aclk(m_axi_aclk),
+  .s_axi_aresetn(m_axi_aresetn),
 
   .s_axi_awaddr(m_axi_awaddr),
   .s_axi_awlen(m_axi_awlen),
@@ -83,12 +83,12 @@ bind packet_parser checker_pp chk_pp(
   .pkt_ecc_uncorr_o(pkt_ecc_uncorr_o),
   .pkt_crc_err_o(pkt_crc_err_o),
   .pkt_byte_cnt_o(pkt_byte_cnt_o),
-  .pkt_type_o(pkt_type_o),
+  .pkt_type_o(pkt_type_o)
 );
 
 bind data_memory checker_inmem chk_inmem(
-  .clk(m_axi_aclk),
-  .reset(m_axi_aresetn),
+  .clk(s_axi_aclk),
+  .reset(s_axi_aresetn),
   .en_b_i(en_b_i),
   .data_b_i(data_b_i),
   .addr_b_i(addr_b_i),

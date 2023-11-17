@@ -4,10 +4,10 @@ checker checker_inmem(
   reset,
 
   // memory port B interface
-  en_b_i
-  data_b_i
-  addr_b_i
-  we_b_i
+  en_b_i,
+  data_b_i,
+  addr_b_i,
+  we_b_i,
   data_b_o
 
 );

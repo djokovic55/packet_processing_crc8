@@ -369,25 +369,43 @@ begin
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
 	    if S_AXI_ARESETN = '1' then
-	      axi_araddr <= (others => '0');
 	      axi_arburst <= (others => '0');
 	      axi_arlen <= (others => '0'); 
-	      axi_arlen_cntr <= (others => '0');
 	      axi_rlast <= '0';
 	      -- axi_ruser <= (others => '0');
 	    else
 	      if (axi_arready = '0' and S_AXI_ARVALID = '1' and axi_arv_arr_flag = '0') then
-	        -- address latching 
-	        axi_araddr <= S_AXI_ARADDR(C_S_AXI_ADDR_WIDTH - 1 downto 0); ---- start address of transfer
-	        axi_arlen_cntr <= (others => '0');
 	        axi_rlast <= '0';
 	        axi_arburst <= S_AXI_ARBURST;
 	        axi_arlen <= S_AXI_ARLEN;
-	      elsif((axi_arlen_cntr <= axi_arlen) and axi_rvalid = '1' and S_AXI_RREADY = '1') then     
-					axi_arlen_cntr <= std_logic_vector (unsigned(axi_arlen_cntr) + 1);
-					axi_rlast <= '0';      
 
-				case (axi_arburst) is
+				elsif((unsigned(axi_arlen_cntr) = unsigned(axi_arlen) - 1) and axi_rlast = '0' and axi_arv_arr_flag = '1' and axi_rvalid = '1' and S_AXI_RREADY = '1') then  
+	        axi_rlast <= '1';
+				-- rlast will remain asserted until rready
+	      elsif (axi_rlast = '1' and S_AXI_RREADY = '1') then  
+	        axi_rlast <= '0';
+	      elsif (unsigned(axi_arlen) = 0) then  
+	        axi_rlast <= '0';
+	      end if;
+	    end if;
+	  end if;
+	end  process;  
+
+	-- burst length counter
+	process (S_AXI_ACLK)
+	begin
+	  if rising_edge(S_AXI_ACLK) then 
+	    if S_AXI_ARESETN = '1' then
+				axi_arlen_cntr <= (others => '0');
+				axi_araddr <= (others => '0');
+			else
+
+				if(axi_arready = '0' and S_AXI_ARVALID = '1' and axi_arv_arr_flag = '0') then
+					axi_arlen_cntr <= (others => '0');
+	        axi_araddr <= S_AXI_ARADDR(C_S_AXI_ADDR_WIDTH - 1 downto 0); ---- start address of transfer
+				else if(axi_rvalid = '1' and S_AXI_RREADY = '1' and unsigned(axi_arlen) < unsigned(axi_arlen)) then
+					axi_arlen_cntr <= std_logic_vector(unsigned(axi_arlen_cntr) + 1);
+					case (axi_arburst) is
 						when "00" =>  -- fixed burst
 								-- The read address for all the beats in the transaction are fixed
 								axi_araddr     <= axi_araddr;      ----for arsize = 4 bytes (010)
@@ -406,17 +424,12 @@ begin
 						when others => --reserved (incremental burst for example)
 								axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1);--for arsize = 4 bytes (010)
 							axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');
-						end case;         
-
-				-- BUG last should be generated on len-1 data count
-				elsif(((unsigned(axi_arlen_cntr) = unsigned(axi_arlen) - 1) or (unsigned(axi_arlen) = 0)) and axi_rlast = '0' and axi_arv_arr_flag = '1') then  
-	        axi_rlast <= '1';
-	      elsif (S_AXI_RREADY = '1') then  
-	        axi_rlast <= '0';
-	      end if;
-	    end if;
-	  end if;
-	end  process;  
+					end case;         
+				end if;
+			end if;
+		end if;
+	end process;
+			
 	-- Implement axi_arvalid generation
 
 	-- axi_rvalid is asserted for one S_AXI_ACLK clock cycle when both 
@@ -437,7 +450,7 @@ begin
 	      if (axi_arv_arr_flag = '1' and axi_rvalid = '0') then
 	        axi_rvalid <= '1';
 	        axi_rresp  <= "00"; -- 'OKAY' response
-	      elsif (axi_rvalid = '1' and S_AXI_RREADY = '1') then
+	      elsif (axi_rvalid = '1' and S_AXI_RREADY = '1' and (unsigned(axi_arlen_cntr) = unsigned(axi_arlen))) then
 	        axi_rvalid <= '0';
 	      end  if;      
 	    end if;
