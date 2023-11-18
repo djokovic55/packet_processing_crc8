@@ -86,9 +86,16 @@ bind packet_parser checker_pp chk_pp(
   .pkt_type_o(pkt_type_o)
 );
 
-bind data_memory checker_inmem chk_inmem(
-  .clk(s_axi_aclk),
-  .reset(s_axi_aresetn),
+bind bram checker_inmem chk_bram(
+  .clk(clk),
+  .reset(reset),
+
+  .en_a_i(en_a_i),
+  .data_a_i(data_a_i),
+  .addr_a_i(addr_a_i),
+  .we_a_i(we_a_i),
+  .data_a_o(data_a_o),
+
   .en_b_i(en_b_i),
   .data_b_i(data_b_i),
   .addr_b_i(addr_b_i),

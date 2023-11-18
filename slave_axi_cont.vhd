@@ -403,7 +403,7 @@ begin
 				if(axi_arready = '0' and S_AXI_ARVALID = '1' and axi_arv_arr_flag = '0') then
 					axi_arlen_cntr <= (others => '0');
 	        axi_araddr <= S_AXI_ARADDR(C_S_AXI_ADDR_WIDTH - 1 downto 0); ---- start address of transfer
-				else if(axi_rvalid = '1' and S_AXI_RREADY = '1' and unsigned(axi_arlen) < unsigned(axi_arlen)) then
+				elsif(axi_rvalid = '1' and S_AXI_RREADY = '1' and unsigned(axi_arlen_cntr) < unsigned(axi_arlen)) then
 					axi_arlen_cntr <= std_logic_vector(unsigned(axi_arlen_cntr) + 1);
 					case (axi_arburst) is
 						when "00" =>  -- fixed burst
@@ -468,8 +468,9 @@ begin
 
 	DATA_O <= S_AXI_WDATA;
 
-	axi_rdata <= DATA_I when axi_rvalid = '1' else
-						(others => '0');
+	--FIX DATA
+	axi_rdata <= DATA_I when axi_rvalid = '1' else (others => '0');
+	-- axi_rdata <= x"DEADBEEF";
 
 	-- User logic ends
 

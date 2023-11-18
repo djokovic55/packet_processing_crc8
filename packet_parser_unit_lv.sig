@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wavelist version="3">
-  <insertion-point-position>28</insertion-point-position>
+  <insertion-point-position>27</insertion-point-position>
   <wave>
     <expr>M_AXI_ACLK</expr>
     <label/>
@@ -30,6 +30,11 @@
     <label>AXI_READ</label>
     <wave collapsed="true">
       <expr>M_AXI_ARADDR</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>pp_mem.slave_axi_cont_inmem.axi_araddr</expr>
       <label/>
       <radix/>
     </wave>
@@ -96,6 +101,30 @@
     </wave>
     <wave collapsed="true">
       <expr>M_AXI_RRESP</expr>
+      <label/>
+      <radix/>
+    </wave>
+  </group>
+  <group collapsed="false">
+    <expr/>
+    <label>BRAM</label>
+    <wave collapsed="true">
+      <expr>pp_mem.inmem_bram.ram_s(7)</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>pp_mem.inmem_bram.ram_s(8)</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>pp_mem.inmem_bram.ram_s(9)</expr>
+      <label/>
+      <radix/>
+    </wave>
+    <wave collapsed="true">
+      <expr>pp_mem.inmem_bram.ram_s(10)</expr>
       <label/>
       <radix/>
     </wave>

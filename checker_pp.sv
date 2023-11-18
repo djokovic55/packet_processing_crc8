@@ -24,7 +24,7 @@ checker checker_pp(
     sig == sig_aux;
   endproperty
 
-  asm_addr_hdr_i: assume property (addr_hdr_i == 32'hBABABABA);
+  // asm_addr_hdr_i: assume property (addr_hdr_i == 32'hf);
   asm_ignore_ecc_err: assume property (ignore_ecc_err_i == 1'b0);
 
   //SECTION Check and cover

@@ -162,7 +162,11 @@ checker  checker_axi(
 
 
   //SECTION R channel prop
+	cov_rdata_val1: cover property(rdata == 32'hBEEFBABA && araddr == 32'h13);
+	cov_rdata_val2: cover property(rdata == 32'hBEEFBABA && araddr == 32'hf);
+	cov_rdata_val3: cover property(araddr == 32'hf ##1 rdata == 32'hBEEFBABA);
 
+	// cov_radddr_val: cover property(araddr == 32'h7);
   // ast_r_stable_rdata: assert property (stable_before_handshake(rvalid, rready, rdata));
   ast_r_data_rlast: assert property (data_last(rvalid, handshake_cnt_r, arlen, rlast));
 
