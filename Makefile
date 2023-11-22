@@ -1,8 +1,8 @@
 main:
 	jg do.tcl
 
-int_w_cont:
-	jg do_intcon_w_controllers.tcl
+int:
+	jg do_int.tcl
 
 phase2:
 	jg do_phase2.tcl
