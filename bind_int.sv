@@ -1,6 +1,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
-// BIND Interconnect with master and slave controllers 
+// BIND Interconnect with master controllers 
 ////////////////////////////////////////////////////////////////////////////////
 
 bind interconnect master_axi_cont master_ctrl(
@@ -153,10 +153,172 @@ bind interconnect master_axi_cont master_pp(
 
 	// READ DATA CHANNEL
 	.m_axi_rdata(s_axi_int_rdata_pp),
-	.m_axi_rresp(s_axi_int_rresp_ctrl),
+	.m_axi_rresp(s_axi_int_rresp_pp),
 	.m_axi_rlast(s_axi_int_rlast_pp),
 	.m_axi_rvalid(s_axi_int_rvalid_pp),
 	.m_axi_rready(s_axi_int_rready_pp)
+);
+
+////////////////////////////////////////////////////////////////////////////////
+// BIND Interconnect with master controllers 
+////////////////////////////////////////////////////////////////////////////////
+
+bind interconnect slave_axi_cont slave_inmem(
+	.s_axi_aclk(clk),
+	.s_axi_aresetn(reset), 
+
+	.s_axi_awaddr(m_axi_int_awaddr_inmem),
+	.s_axi_awlen(m_axi_int_awlen_inmem),
+	.s_axi_awsize(m_axi_int_awsize_inmem),
+	.s_axi_awburst(m_axi_int_awburst_inmem),
+	.s_axi_awvalid(m_axi_int_awvalid_inmem),
+	.s_axi_awready(m_axi_int_awready_inmem),
+
+	// WRITE DATA CHANNEL
+	.s_axi_wdata(m_axi_int_wdata_inmem),
+	.s_axi_wstrb(m_axi_int_wstrb_inmem),
+	.s_axi_wlast(m_axi_int_wlast_inmem),
+	.s_axi_wvalid(m_axi_int_wvalid_inmem),
+	.s_axi_wready(m_axi_int_wready_inmem),
+
+	// WRITE RESPONSE CHANNEL
+	.s_axi_bresp(m_axi_int_bresp_inmem),
+	.s_axi_bvalid(m_axi_int_bvalid_inmem),
+	.s_axi_bready(m_axi_int_bready_inmem),
+
+	// READ ADDRESS CHANNEL
+	.s_axi_araddr(m_axi_int_araddr_inmem),
+	.s_axi_arlen(m_axi_int_arlen_inmem),
+	.s_axi_arsize(m_axi_int_arsize_inmem),
+	.s_axi_arburst(m_axi_int_arburst_inmem),
+	.s_axi_arvalid(m_axi_int_arvalid_inmem),
+	.s_axi_arready(m_axi_int_arready_inmem),
+
+	// READ DATA CHANNEL
+	.s_axi_rdata(m_axi_int_rdata_inmem),
+	.s_axi_rresp(m_axi_int_rresp_inmem),
+	.s_axi_rlast(m_axi_int_rlast_inmem),
+	.s_axi_rvalid(m_axi_int_rvalid_inmem),
+	.s_axi_rready(m_axi_int_rready_inmem)
+);
+
+bind interconnect slave_axi_cont slave_outmem(
+	.s_axi_aclk(clk),
+	.s_axi_aresetn(reset), 
+
+	.s_axi_awaddr(m_axi_int_awaddr_outmem),
+	.s_axi_awlen(m_axi_int_awlen_outmem),
+	.s_axi_awsize(m_axi_int_awsize_outmem),
+	.s_axi_awburst(m_axi_int_awburst_outmem),
+	.s_axi_awvalid(m_axi_int_awvalid_outmem),
+	.s_axi_awready(m_axi_int_awready_outmem),
+
+	// WRITE DATA CHANNEL
+	.s_axi_wdata(m_axi_int_wdata_outmem),
+	.s_axi_wstrb(m_axi_int_wstrb_outmem),
+	.s_axi_wlast(m_axi_int_wlast_outmem),
+	.s_axi_wvalid(m_axi_int_wvalid_outmem),
+	.s_axi_wready(m_axi_int_wready_outmem),
+
+	// WRITE RESPONSE CHANNEL
+	.s_axi_bresp(m_axi_int_bresp_outmem),
+	.s_axi_bvalid(m_axi_int_bvalid_outmem),
+	.s_axi_bready(m_axi_int_bready_outmem),
+
+	// READ ADDRESS CHANNEL
+	.s_axi_araddr(m_axi_int_araddr_outmem),
+	.s_axi_arlen(m_axi_int_arlen_outmem),
+	.s_axi_arsize(m_axi_int_arsize_outmem),
+	.s_axi_arburst(m_axi_int_arburst_outmem),
+	.s_axi_arvalid(m_axi_int_arvalid_outmem),
+	.s_axi_arready(m_axi_int_arready_outmem),
+
+	// READ DATA CHANNEL
+	.s_axi_rdata(m_axi_int_rdata_outmem),
+	.s_axi_rresp(m_axi_int_rresp_outmem),
+	.s_axi_rlast(m_axi_int_rlast_outmem),
+	.s_axi_rvalid(m_axi_int_rvalid_outmem),
+	.s_axi_rready(m_axi_int_rready_outmem)
+);
+
+
+bind interconnect slave_axi_cont slave_exreg(
+	.s_axi_aclk(clk),
+	.s_axi_aresetn(reset), 
+
+	.s_axi_awaddr(m_axi_int_awaddr_exreg),
+	.s_axi_awlen(m_axi_int_awlen_exreg),
+	.s_axi_awsize(m_axi_int_awsize_exreg),
+	.s_axi_awburst(m_axi_int_awburst_exreg),
+	.s_axi_awvalid(m_axi_int_awvalid_exreg),
+	.s_axi_awready(m_axi_int_awready_exreg),
+
+	// WRITE DATA CHANNEL
+	.s_axi_wdata(m_axi_int_wdata_exreg),
+	.s_axi_wstrb(m_axi_int_wstrb_exreg),
+	.s_axi_wlast(m_axi_int_wlast_exreg),
+	.s_axi_wvalid(m_axi_int_wvalid_exreg),
+	.s_axi_wready(m_axi_int_wready_exreg),
+
+	// WRITE RESPONSE CHANNEL
+	.s_axi_bresp(m_axi_int_bresp_exreg),
+	.s_axi_bvalid(m_axi_int_bvalid_exreg),
+	.s_axi_bready(m_axi_int_bready_exreg),
+
+	// READ ADDRESS CHANNEL
+	.s_axi_araddr(m_axi_int_araddr_exreg),
+	.s_axi_arlen(m_axi_int_arlen_exreg),
+	.s_axi_arsize(m_axi_int_arsize_exreg),
+	.s_axi_arburst(m_axi_int_arburst_exreg),
+	.s_axi_arvalid(m_axi_int_arvalid_exreg),
+	.s_axi_arready(m_axi_int_arready_exreg),
+
+	// READ DATA CHANNEL
+	.s_axi_rdata(m_axi_int_rdata_exreg),
+	.s_axi_rresp(m_axi_int_rresp_exreg),
+	.s_axi_rlast(m_axi_int_rlast_exreg),
+	.s_axi_rvalid(m_axi_int_rvalid_exreg),
+	.s_axi_rready(m_axi_int_rready_exreg)
+);
+
+
+bind interconnect slave_axi_cont slave_reg(
+	.s_axi_aclk(clk),
+	.s_axi_aresetn(reset), 
+
+	.s_axi_awaddr(m_axi_int_awaddr_reg),
+	.s_axi_awlen(m_axi_int_awlen_reg),
+	.s_axi_awsize(m_axi_int_awsize_reg),
+	.s_axi_awburst(m_axi_int_awburst_reg),
+	.s_axi_awvalid(m_axi_int_awvalid_reg),
+	.s_axi_awready(m_axi_int_awready_reg),
+
+	// WRITE DATA CHANNEL
+	.s_axi_wdata(m_axi_int_wdata_reg),
+	.s_axi_wstrb(m_axi_int_wstrb_reg),
+	.s_axi_wlast(m_axi_int_wlast_reg),
+	.s_axi_wvalid(m_axi_int_wvalid_reg),
+	.s_axi_wready(m_axi_int_wready_reg),
+
+	// WRITE RESPONSE CHANNEL
+	.s_axi_bresp(m_axi_int_bresp_reg),
+	.s_axi_bvalid(m_axi_int_bvalid_reg),
+	.s_axi_bready(m_axi_int_bready_reg),
+
+	// READ ADDRESS CHANNEL
+	.s_axi_araddr(m_axi_int_araddr_reg),
+	.s_axi_arlen(m_axi_int_arlen_reg),
+	.s_axi_arsize(m_axi_int_arsize_reg),
+	.s_axi_arburst(m_axi_int_arburst_reg),
+	.s_axi_arvalid(m_axi_int_arvalid_reg),
+	.s_axi_arready(m_axi_int_arready_reg),
+
+	// READ DATA CHANNEL
+	.s_axi_rdata(m_axi_int_rdata_reg),
+	.s_axi_rresp(m_axi_int_rresp_ctreg),
+	.s_axi_rlast(m_axi_int_rlast_reg),
+	.s_axi_rvalid(m_axi_int_rvalid_reg),
+	.s_axi_rready(m_axi_int_rready_reg)
 );
 ////////////////////////////////////////////////////////////////////////////////
 // BIND master axi controllers with master checker
@@ -167,15 +329,18 @@ bind master_axi_cont checker_master chk_master(
   .reset(m_axi_aresetn),
 
   .axi_base_address_i(axi_base_address_i),
-  .axi_write_address_i(axi_write_address_i),
+  .axi_burst_len(axi_burst_len),
+
   .axi_write_init_i(axi_write_init_i),
+  .axi_write_address_i(axi_write_address_i),
   .axi_write_data_i(axi_write_data_i),
+  .axi_write_strb_i(axi_write_strb_i),
   .axi_write_vld_i(axi_write_vld_i),
   .axi_write_rdy_o(axi_write_rdy_o),
   .axi_write_done_o(axi_write_done_o),
 
   .axi_read_init_i(axi_read_init_i),
-  .axi_read_address_i(axi_read_addr),
+  .axi_read_address_i(axi_read_address_i),
   .axi_read_data_o(axi_read_data_o),
   .axi_read_vld_o(axi_read_vld_o),
   .axi_read_rdy_i(axi_read_rdy_i),
@@ -188,10 +353,11 @@ bind master_axi_cont checker_master chk_master(
 
 bind arbiter_rr checker_fair_int chk_fairness(
 	.clk(clk),
-	.reset(resetn),
+	.reset(rstn),
 
 	.req(req),
-	.gnt(gnt)
+	.gnt(gnt),
+	.busy(busy)
 );
 ////////////////////////////////////////////////////////////////////////////////
 // BIND axi controllers with axi protocol checker

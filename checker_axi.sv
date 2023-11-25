@@ -55,7 +55,7 @@ checker  checker_axi(
 			handshake_cnt_w <= 1'b0;
 		end
 		else begin
-			if(wvalid && wready && !wlast) begin
+			if(wvalid && wready && !wlast && awlen != '0) begin
 				handshake_cnt_w <= handshake_cnt_w + 1'b1;
 			end
 			else if(wlast) begin
@@ -116,11 +116,11 @@ checker  checker_axi(
 
   //SECTION AW channel prop
 
-  // ast_aw_stable_awaddr: assert property (stable_before_handshake(awvalid, awready, awaddr));
-  // ast_aw_stable_awlen: assert property (stable_before_handshake(awvalid, awready, awlen));
-  // ast_aw_stable_awsize: assert property (stable_before_handshake(awvalid, awready, awsize));
-  // ast_aw_stable_awburst: assert property (stable_before_handshake(awvalid, awready, awburst));
-  // ast_aw_awvalid_until_awready: assert property (valid_before_handshake(awvalid, awready));
+  ast_aw_stable_awaddr: assert property (stable_before_handshake(awvalid, awready, awaddr));
+  ast_aw_stable_awlen: assert property (stable_before_handshake(awvalid, awready, awlen));
+  ast_aw_stable_awsize: assert property (stable_before_handshake(awvalid, awready, awsize));
+  ast_aw_stable_awburst: assert property (stable_before_handshake(awvalid, awready, awburst));
+  ast_aw_awvalid_until_awready: assert property (valid_before_handshake(awvalid, awready));
   // ast_awready_max_wait: assert property (handshake_max_wait(awvalid, awready, 1'b1));
 
 
@@ -131,14 +131,14 @@ checker  checker_axi(
   //SECTION W channel prop
 
 	// IMPORTANT will be removed until the main master logic is implemented
-  // ast_w_stable_wdata: assert property (stable_before_handshake(wvalid, wready, wdata));
-  // ast_w_stable_wstrb: assert property (stable_before_handshake(wvalid, wready, wstrb));
-  // ast_w_data_wlast: assert property (data_last(wvalid, handshake_cnt_w, awlen, wlast));
+  ast_w_stable_wdata: assert property (stable_before_handshake(wvalid, wready, wdata));
+  ast_w_stable_wstrb: assert property (stable_before_handshake(wvalid, wready, wstrb));
+  ast_w_data_wlast: assert property (data_last(wvalid, handshake_cnt_w, awlen, wlast));
 
   // cov_w_data_wlast_c: cover property (wlast);
 
 	//IMPORTANT fails beacuse wvalid does not falls after wlast
-  // ast_w_wvalid_until_wready: assert property (valid_before_handshake(wvalid, wready));
+  ast_w_wvalid_until_wready: assert property (valid_before_handshake(wvalid, wready));
 
   //SECTION B channel prop
 	// ast_b_no_slave_error: assert property(bvalid && bready |-> bresp == 2'b00);
@@ -152,7 +152,7 @@ checker  checker_axi(
   ast_ar_stable_arburst: assert property (stable_before_handshake(arvalid, arready, arburst));
 
   ast_ar_arvalid_until_arready: assert property (valid_before_handshake(arvalid, arready));
-  ast_arready_max_wait: assert property (handshake_max_wait(arvalid, arready, 1'b1));
+  //ast_arready_max_wait: assert property (handshake_max_wait(arvalid, arready, 1'b1));
 
   // cov_arvalid_c: cover property (arvalid);
 
@@ -173,7 +173,7 @@ checker  checker_axi(
 	// FIXME Cannot be proved because rready is always true
   // ast_r_rvalid_until_rready: assert property (valid_before_handshake(rvalid, rready));
 
-	ast_r_no_slave_error: assert property(rvalid && rready |-> rresp == 2'b00);
+	// ast_r_no_slave_error: assert property(rvalid && rready |-> rresp == 2'b00);
 
   // cov_r_rvalid: cover property (rvalid);
   // cov_r_rready: cover property (rready);

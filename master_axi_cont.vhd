@@ -281,7 +281,10 @@ begin
         init_write_txn_ff2 <= '0';
       else
 				-- NOTE Here starts the transaction, this code isolates transaction rising edge which enables all other processes
-        init_write_txn_ff  <= axi_write_init_i;
+				-- IMPORTANT new transaction can start only if current is not active
+				if(start_single_burst_write = '0' and burst_write_active = '0') then
+					init_write_txn_ff  <= axi_write_init_i;
+				end if;
         init_write_txn_ff2 <= init_write_txn_ff;
       end if;
     end if;
@@ -296,7 +299,9 @@ begin
         init_read_txn_ff  <= '0';
         init_read_txn_ff2 <= '0';
       else
-        init_read_txn_ff  <= axi_read_init_i;
+				if(start_single_burst_read = '0' and burst_read_active = '0') then
+					init_read_txn_ff  <= axi_read_init_i;
+				end if;
         init_read_txn_ff2 <= init_read_txn_ff;
       end if;
     end if;
@@ -413,7 +418,7 @@ begin
 	  process(M_AXI_ACLK)                                                               
 	  begin                                                                             
 	    if (rising_edge (M_AXI_ACLK)) then                                              
-	      if (M_AXI_ARESETN = '1' or start_single_burst_write = '1' or init_write_txn_pulse = '1') then 
+	      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then 
 	        write_index <= (others => '0');   
 	      else                                                                          
 	        if (wnext = '1' and (unsigned(write_index) /= unsigned(AXI_BURST_LEN))) then 
@@ -513,7 +518,7 @@ begin
 	  process(M_AXI_ACLK)                                                   
 	  begin                                                                 
 	    if (rising_edge (M_AXI_ACLK)) then                                  
-	      if (M_AXI_ARESETN = '1' or start_single_burst_read = '1' or init_read_txn_pulse = '1') then    
+	      if (M_AXI_ARESETN = '1' or init_read_txn_pulse = '1') then    
 	        read_index <= (others => '0');                                  
 	      else                                                              
 	        if (rnext = '1' and (unsigned(read_index) <= unsigned(AXI_BURST_LEN))) then   

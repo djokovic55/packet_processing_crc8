@@ -4,7 +4,8 @@ checker checker_fair_int(
   reset,
 
   req,
-  gnt
+  gnt,
+	busy
 );
 
 	default clocking @(posedge clk);
@@ -16,20 +17,20 @@ checker checker_fair_int(
     sig == sig_aux;
   endproperty
 
-  logic[3:0] chosen_agent_a;
-  logic[3:0] chosen_agent_b;
+  logic[1:0] chosen_agent_a;
+  logic[1:0] chosen_agent_b;
 
   asm_agent_a_stability: assume property ($stable(chosen_agent_a));
   asm_agent_b_stability: assume property ($stable(chosen_agent_b));
 
   logic agent_b_should_be_granted;
   always @(posedge clk)
-    if(rst) 
+    if(reset) 
       agent_b_should_be_granted <= 1'b0;
     else begin
-      if(gnt[chosen_agent_b])
+      if(gnt[chosen_agent_b] && !busy)
         agent_b_should_be_granted <= 1'b0;
-      else if(req[chosen_agent_a] &&  req[chosen_agent_b] && gnt[chosen_agent_a])
+      else if(req[chosen_agent_b] && gnt[chosen_agent_a] && !busy)
         agent_b_should_be_granted <= 1'b1;
     end
 
