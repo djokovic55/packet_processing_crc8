@@ -4,8 +4,8 @@ main:
 int:
 	jg do_int.tcl
 
-phase2:
-	jg do_phase2.tcl
+top:
+	jg do_top.tcl
 
 pb:
 	jg do_pb.tcl

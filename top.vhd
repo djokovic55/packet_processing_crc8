@@ -12,6 +12,7 @@ entity top is
         clk : in std_logic;
         reset : in std_logic;
 
+        -- ex_reg top interface 
 				pb_irq_i : in std_logic;
 				pb_addr_in_i : in std_logic_vector(ADDR_WIDTH-1 downto 0);
 				pb_byte_cnt_i : in std_logic_vector(3 downto 0);
@@ -28,7 +29,67 @@ entity top is
 
 				pp_irq_i : in std_logic;
 				pp_addr_hdr_i : in std_logic_vector(ADDR_WIDTH-1 downto 0);
-				pp_ignore_ecc_err_i : in std_logic
+				pp_ignore_ecc_err_i : in std_logic;
+
+        -- inmem port B top interface, used for memory configuration
+        inmem_en_b_i	: in std_logic;
+        inmem_data_b_i	: in std_logic_vector(31 downto 0);
+        inmem_addr_b_i	: in std_logic_vector(13 downto 0);
+        inmem_we_b_i	: in std_logic_vector(3 downto 0);
+        inmem_data_b_o	: out std_logic_vector(31 downto 0);
+
+        -- outmem port B top interface, memory read only
+        outmem_en_b_i	: in std_logic;
+        outmem_data_b_i	: in std_logic_vector(31 downto 0);
+        outmem_addr_b_i	: in std_logic_vector(13 downto 0);
+        outmem_we_b_i	: in std_logic_vector(3 downto 0);
+        outmem_data_b_o	: out std_logic_vector(31 downto 0);
+
+        -- regs top interface
+        pb0_start_top : out std_logic;
+        pb0_busy_top : out std_logic;
+        pb0_irq_top : out std_logic;
+        pb0_addr_in_top : out std_logic_vector(ADDR_WIDTH-1 downto 0);
+        pb0_byte_cnt_top : out std_logic_vector(3 downto 0);
+        pb0_pkt_type_top : out std_logic_vector(3 downto 0);
+        pb0_ecc_en_top : out std_logic;
+        pb0_crc_en_top : out std_logic;
+        pb0_ins_ecc_err_top : out std_logic_vector(1 downto 0);
+        pb0_ins_crc_err_top : out std_logic;
+        pb0_ecc_val_top : out std_logic_vector(3 downto 0);
+        pb0_crc_val_top: out std_logic_vector(7 downto 0);
+        pb0_sop_val_top: out std_logic_vector(2 downto 0);
+        pb0_data_sel_top: out std_logic_vector(3 downto 0);
+        pb0_addr_out_top: out std_logic_vector(31 downto 0);
+
+        -- [x] interface with builder1
+        pb1_start_top : out std_logic;
+        pb1_busy_top : out std_logic;
+        pb1_irq_top : out std_logic;
+        pb1_addr_in_top : out std_logic_vector(ADDR_WIDTH-1 downto 0);
+        pb1_byte_cnt_top : out std_logic_vector(3 downto 0);
+        pb1_pkt_type_top : out std_logic_vector(3 downto 0);
+        pb1_ecc_en_top : out std_logic;
+        pb1_crc_en_top : out std_logic;
+        pb1_ins_ecc_err_top : out std_logic_vector(1 downto 0);
+        pb1_ins_crc_err_top : out std_logic;
+        pb1_ecc_val_top : out std_logic_vector(3 downto 0);
+        pb1_crc_val_top: out std_logic_vector(7 downto 0);
+        pb1_sop_val_top: out std_logic_vector(2 downto 0);
+        pb1_data_sel_top: out std_logic_vector(3 downto 0);
+        pb1_addr_out_top: out std_logic_vector(31 downto 0);
+        -- [x] interface with parser
+
+        pp_start_top : out std_logic;
+        pp_busy_top : out std_logic;
+        pp_irq_top : out std_logic;
+        pp_addr_hdr_top : out std_logic_vector(ADDR_WIDTH-1 downto 0);
+        pp_ignore_ecc_err_top : out std_logic;
+        pp_pkt_ecc_corr_top : out std_logic;
+        pp_pkt_ecc_uncorr_top : out std_logic;
+        pp_pkt_crc_err_top : out std_logic;
+        pp_pkt_byte_cnt_top : out std_logic_vector(3 downto 0);
+        pp_pkt_type_top : out std_logic_vector(3 downto 0)
   );
 end entity;
 -- some test
@@ -768,6 +829,15 @@ architecture rtl of top is
 		S_AXI_ARESETN	: in std_logic;
 
 		--------------------------------------------------------------------------------
+		-- Memory B port - top level use
+		--------------------------------------------------------------------------------
+		en_b_i	: in std_logic;
+		data_b_i	: in std_logic_vector(31 downto 0);
+		addr_b_i	: in std_logic_vector(13 downto 0);
+		we_b_i	: in std_logic_vector(3 downto 0);
+		data_b_o	: out std_logic_vector(31 downto 0);
+
+		--------------------------------------------------------------------------------
 		-- SLAVE INTERFACE WRITE ADDRESS
 		--------------------------------------------------------------------------------
 		-- Write address
@@ -875,49 +945,90 @@ architecture rtl of top is
 		-- [x] interface with builder0
 
 		pb0_start_o : out std_logic;
+		pb0_start_top : out std_logic;
 		pb0_busy_i : in std_logic;
+		pb0_busy_top : out std_logic;
 		pb0_irq_i : in std_logic;
+		pb0_irq_top : out std_logic;
 		pb0_addr_in_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pb0_addr_in_top : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		pb0_byte_cnt_o : out std_logic_vector(3 downto 0);
+		pb0_byte_cnt_top : out std_logic_vector(3 downto 0);
 		pb0_pkt_type_o : out std_logic_vector(3 downto 0);
+		pb0_pkt_type_top : out std_logic_vector(3 downto 0);
 		pb0_ecc_en_o : out std_logic;
+		pb0_ecc_en_top : out std_logic;
 		pb0_crc_en_o : out std_logic;
+		pb0_crc_en_top : out std_logic;
 		pb0_ins_ecc_err_o : out std_logic_vector(1 downto 0);
+		pb0_ins_ecc_err_top : out std_logic_vector(1 downto 0);
 		pb0_ins_crc_err_o : out std_logic;
+		pb0_ins_crc_err_top : out std_logic;
 		pb0_ecc_val_o : out std_logic_vector(3 downto 0);
+		pb0_ecc_val_top : out std_logic_vector(3 downto 0);
 		pb0_crc_val_o: out std_logic_vector(7 downto 0);
+		pb0_crc_val_top: out std_logic_vector(7 downto 0);
 		pb0_sop_val_o: out std_logic_vector(2 downto 0);
+		pb0_sop_val_top: out std_logic_vector(2 downto 0);
 		pb0_data_sel_o: out std_logic_vector(3 downto 0);
+		pb0_data_sel_top: out std_logic_vector(3 downto 0);
 		pb0_addr_out_o: out std_logic_vector(31 downto 0);
+		pb0_addr_out_top: out std_logic_vector(31 downto 0);
 
 		-- [x] interface with builder1
 		pb1_start_o : out std_logic;
+		pb1_start_top : out std_logic;
 		pb1_busy_i : in std_logic;
+		pb1_busy_top : out std_logic;
 		pb1_irq_i : in std_logic;
+		pb1_irq_top : out std_logic;
 		pb1_addr_in_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pb1_addr_in_top : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		pb1_byte_cnt_o : out std_logic_vector(3 downto 0);
+		pb1_byte_cnt_top : out std_logic_vector(3 downto 0);
 		pb1_pkt_type_o : out std_logic_vector(3 downto 0);
+		pb1_pkt_type_top : out std_logic_vector(3 downto 0);
 		pb1_ecc_en_o : out std_logic;
+		pb1_ecc_en_top : out std_logic;
 		pb1_crc_en_o : out std_logic;
+		pb1_crc_en_top : out std_logic;
 		pb1_ins_ecc_err_o : out std_logic_vector(1 downto 0);
+		pb1_ins_ecc_err_top : out std_logic_vector(1 downto 0);
 		pb1_ins_crc_err_o : out std_logic;
+		pb1_ins_crc_err_top : out std_logic;
 		pb1_ecc_val_o : out std_logic_vector(3 downto 0);
+		pb1_ecc_val_top : out std_logic_vector(3 downto 0);
 		pb1_crc_val_o: out std_logic_vector(7 downto 0);
+		pb1_crc_val_top: out std_logic_vector(7 downto 0);
 		pb1_sop_val_o: out std_logic_vector(2 downto 0);
+		pb1_sop_val_top: out std_logic_vector(2 downto 0);
 		pb1_data_sel_o: out std_logic_vector(3 downto 0);
+		pb1_data_sel_top: out std_logic_vector(3 downto 0);
 		pb1_addr_out_o: out std_logic_vector(31 downto 0);
+		pb1_addr_out_top: out std_logic_vector(31 downto 0);
 		-- [x] interface with parser
 
 		pp_start_o : out std_logic;
+		pp_start_top : out std_logic;
 		pp_busy_i : in std_logic;
+		pp_busy_top : out std_logic;
 		pp_irq_i : in std_logic;
+		pp_irq_top : out std_logic;
 		pp_addr_hdr_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pp_addr_hdr_top : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		pp_ignore_ecc_err_o : out std_logic;
+		pp_ignore_ecc_err_top : out std_logic;
 		pp_pkt_ecc_corr_i : in std_logic;
+		pp_pkt_ecc_corr_top : out std_logic;
 		pp_pkt_ecc_uncorr_i : in std_logic;
+		pp_pkt_ecc_uncorr_top : out std_logic;
 		pp_pkt_crc_err_i : in std_logic;
+		pp_pkt_crc_err_top : out std_logic;
 		pp_pkt_byte_cnt_i : in std_logic_vector(3 downto 0);
+		pp_pkt_byte_cnt_top : out std_logic_vector(3 downto 0);
 		pp_pkt_type_i : in std_logic_vector(3 downto 0);
+		pp_pkt_type_top : out std_logic_vector(3 downto 0);
+
 		-- Global Clock Signal
 		S_AXI_ACLK	: in std_logic;
 		-- Global Reset Signal. This Signal is Active LOW
@@ -1927,6 +2038,12 @@ begin
 		S_AXI_ACLK => clk,
 		S_AXI_ARESETN => reset,
 
+    en_b_i => inmem_en_b_i,
+    data_b_i => inmem_data_b_i,
+    addr_b_i => inmem_addr_b_i(13 downto 0),
+    we_b_i => inmem_we_b_i,
+    data_b_o  => inmem_data_b_o,
+
 		S_AXI_AWADDR => m_axi_int_awaddr_inmem,
 		S_AXI_AWLEN => m_axi_int_awlen_inmem,
 		S_AXI_AWSIZE => m_axi_int_awsize_inmem,
@@ -1964,6 +2081,12 @@ begin
   port map(
 		S_AXI_ACLK => clk,
 		S_AXI_ARESETN => reset,
+
+    en_b_i => outmem_en_b_i,
+    data_b_i => outmem_data_b_i,
+    addr_b_i => outmem_addr_b_i(13 downto 0),
+    we_b_i => outmem_we_b_i,
+    data_b_o  => outmem_data_b_o,
 
 		S_AXI_AWADDR => m_axi_int_awaddr_outmem,
 		S_AXI_AWLEN => m_axi_int_awlen_outmem,
@@ -2004,49 +2127,89 @@ begin
     int_irq_o => int_irq_s,
 
 		pb0_start_o => pb0_start_s,
+		pb0_start_top => pb0_start_top,
 		pb0_busy_i => pb0_busy_s,
+		pb0_busy_top => pb0_busy_top,
 		pb0_irq_i => pb0_irq_s,
+		pb0_irq_top => pb0_irq_top,
 		pb0_addr_in_o => pb0_addr_in_s,
+		pb0_addr_in_top => pb0_addr_in_top,
 		pb0_byte_cnt_o => pb0_byte_cnt_s,
+		pb0_byte_cnt_top => pb0_byte_cnt_top,
 		pb0_pkt_type_o => pb0_pkt_type_s,
+		pb0_pkt_type_top => pb0_pkt_type_top,
 		pb0_ecc_en_o => pb0_ecc_en_s,
+		pb0_ecc_en_top => pb0_ecc_en_top,
 		pb0_crc_en_o => pb0_crc_en_s,
+		pb0_crc_en_top => pb0_crc_en_top,
 		pb0_ins_ecc_err_o => pb0_ins_ecc_err_s,
+		pb0_ins_ecc_err_top => pb0_ins_ecc_err_top,
 		pb0_ins_crc_err_o => pb0_ins_crc_err_s,
+		pb0_ins_crc_err_top => pb0_ins_crc_err_top,
 		pb0_ecc_val_o => pb0_ecc_val_s,
+		pb0_ecc_val_top => pb0_ecc_val_top,
 		pb0_crc_val_o => pb0_crc_val_s,
+		pb0_crc_val_top => pb0_crc_val_top,
 		pb0_sop_val_o => pb0_sop_val_s,
+		pb0_sop_val_top => pb0_sop_val_top,
 		pb0_data_sel_o => pb0_data_sel_s,
+		pb0_data_sel_top => pb0_data_sel_top,
 		pb0_addr_out_o => pb0_addr_out_s,
+		pb0_addr_out_top => pb0_addr_out_top,
 
 		-- [x] interface with builder1
 		pb1_start_o => pb1_start_s,
+		pb1_start_top => pb1_start_top,
 		pb1_busy_i => pb1_busy_s,
+		pb1_busy_top => pb1_busy_top,
 		pb1_irq_i => pb1_irq_s,
+		pb1_irq_top => pb1_irq_top,
 		pb1_addr_in_o => pb1_addr_in_s,
+		pb1_addr_in_top => pb1_addr_in_top,
 		pb1_byte_cnt_o => pb1_byte_cnt_s,
+		pb1_byte_cnt_top => pb1_byte_cnt_top,
 		pb1_pkt_type_o => pb1_pkt_type_s,
+		pb1_pkt_type_top => pb1_pkt_type_top,
 		pb1_ecc_en_o => pb1_ecc_en_s,
+		pb1_ecc_en_top => pb1_ecc_en_top,
 		pb1_crc_en_o => pb1_crc_en_s,
+		pb1_crc_en_top => pb1_crc_en_top,
 		pb1_ins_ecc_err_o => pb1_ins_ecc_err_s,
+		pb1_ins_ecc_err_top => pb1_ins_ecc_err_top,
 		pb1_ins_crc_err_o => pb1_ins_crc_err_s,
+		pb1_ins_crc_err_top => pb1_ins_crc_err_top,
 		pb1_ecc_val_o => pb1_ecc_val_s,
+		pb1_ecc_val_top => pb1_ecc_val_top,
 		pb1_crc_val_o => pb1_crc_val_s,
+		pb1_crc_val_top => pb1_crc_val_top,
 		pb1_sop_val_o => pb1_sop_val_s,
+		pb1_sop_val_top => pb1_sop_val_top,
 		pb1_data_sel_o => pb1_data_sel_s,
+		pb1_data_sel_top => pb1_data_sel_top,
 		pb1_addr_out_o => pb1_addr_out_s,
+		pb1_addr_out_top => pb1_addr_out_top,
 		-- [x] interface with parser
 
 		pp_start_o => pp_start_s,
+		pp_start_top => pp_start_top,
 		pp_busy_i => pp_busy_s,
+		pp_busy_top => pp_busy_top,
 		pp_irq_i => pp_irq_s,
+		pp_irq_top => pp_irq_top,
 		pp_addr_hdr_o => pp_addr_hdr_s,
+		pp_addr_hdr_top => pp_addr_hdr_top,
 		pp_ignore_ecc_err_o => pp_ignore_ecc_err_s,
+		pp_ignore_ecc_err_top => pp_ignore_ecc_err_top,
 		pp_pkt_ecc_corr_i => pp_pkt_ecc_corr_s,
+		pp_pkt_ecc_corr_top => pp_pkt_ecc_corr_top,
 		pp_pkt_ecc_uncorr_i => pp_pkt_ecc_uncorr_s,
+		pp_pkt_ecc_uncorr_top => pp_pkt_ecc_uncorr_top,
 		pp_pkt_crc_err_i => pp_pkt_crc_err_s,
+		pp_pkt_crc_err_top => pp_pkt_crc_err_top,
 		pp_pkt_byte_cnt_i => pp_pkt_byte_cnt_s,
+		pp_pkt_byte_cnt_top => pp_pkt_byte_cnt_top,
 		pp_pkt_type_i => pp_pkt_type_s,
+		pp_pkt_type_top => pp_pkt_type_top,
 
 		S_AXI_ACLK => clk,
 		S_AXI_ARESETN => reset,

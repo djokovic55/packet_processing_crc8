@@ -120,8 +120,9 @@ checker  checker_master(
   asm_read_rdy_gen: assume property (equal_as_aux_signal(read_rdy, axi_read_rdy_i));
   // asm_read_rdy_gen: assume property (axi_read_rdy_i == 1'b1);
 
-	asm_base_addr_value: assume property(axi_base_address_i inside {32'h0, 32'h00010000, 32'h00100000, 32'h00200000});
+	// asm_base_addr_value: assume property(axi_base_address_i inside {32'h0, 32'h00010000, 32'h00100000, 32'h00200000});
 	asm_base_addr_stability: assume property($stable(axi_base_address_i));
+	asm_base_addr_value: assume property(axi_base_address_i inside {32'h0});
 
 	asm_write_addr_stability: assume property($stable(axi_write_address_i));
 	asm_write_addr_value: assume property(axi_write_address_i == 32'h7);

@@ -19,11 +19,11 @@ entity data_memory is
 		--------------------------------------------------------------------------------
 		-- Memory B port - top level use
 		--------------------------------------------------------------------------------
-		-- en_b_i	: in std_logic;
-		-- data_b_i	: in std_logic_vector(31 downto 0);
-		-- addr_b_i	: in std_logic_vector(13 downto 0);
-		-- we_b_i	: in std_logic_vector(3 downto 0);
-		-- data_b_o	: out std_logic_vector(31 downto 0);
+		en_b_i	: in std_logic;
+		data_b_i	: in std_logic_vector(31 downto 0);
+		addr_b_i	: in std_logic_vector(13 downto 0);
+		we_b_i	: in std_logic_vector(3 downto 0);
+		data_b_o	: out std_logic_vector(31 downto 0);
 
 		--------------------------------------------------------------------------------
 		-- SLAVE INTERFACE WRITE ADDRESS
@@ -296,12 +296,18 @@ begin
     we_a_i => we_a_s,
     data_a_o => data_a_o_s,
 
-		-- port b won't be used
-    en_b_i => en_b_s,
-    data_b_i => data_b_i_s,
-    addr_b_i => addr_b_s(13 downto 0),
-    we_b_i => we_b_s,
-    data_b_o  => data_b_o_s
+		-- port b used for memory init and/or read
+    -- en_b_i => en_b_s,
+    -- data_b_i => data_b_i_s,
+    -- addr_b_i => addr_b_s(13 downto 0),
+    -- we_b_i => we_b_s,
+    -- data_b_o  => data_b_o_s
+
+    en_b_i => en_b_i,
+    data_b_i => data_b_i,
+    addr_b_i => addr_b_i(13 downto 0),
+    we_b_i => we_b_i,
+    data_b_o  => data_b_o
 	);
 
 

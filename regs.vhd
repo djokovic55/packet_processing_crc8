@@ -21,49 +21,89 @@ entity regs is
 		-- [x] interface with builder0
 
 		pb0_start_o : out std_logic;
+		pb0_start_top : out std_logic;
 		pb0_busy_i : in std_logic;
+		pb0_busy_top : out std_logic;
 		pb0_irq_i : in std_logic;
+		pb0_irq_top : out std_logic;
 		pb0_addr_in_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pb0_addr_in_top : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		pb0_byte_cnt_o : out std_logic_vector(3 downto 0);
+		pb0_byte_cnt_top : out std_logic_vector(3 downto 0);
 		pb0_pkt_type_o : out std_logic_vector(3 downto 0);
+		pb0_pkt_type_top : out std_logic_vector(3 downto 0);
 		pb0_ecc_en_o : out std_logic;
+		pb0_ecc_en_top : out std_logic;
 		pb0_crc_en_o : out std_logic;
+		pb0_crc_en_top : out std_logic;
 		pb0_ins_ecc_err_o : out std_logic_vector(1 downto 0);
+		pb0_ins_ecc_err_top : out std_logic_vector(1 downto 0);
 		pb0_ins_crc_err_o : out std_logic;
+		pb0_ins_crc_err_top : out std_logic;
 		pb0_ecc_val_o : out std_logic_vector(3 downto 0);
+		pb0_ecc_val_top : out std_logic_vector(3 downto 0);
 		pb0_crc_val_o: out std_logic_vector(7 downto 0);
+		pb0_crc_val_top: out std_logic_vector(7 downto 0);
 		pb0_sop_val_o: out std_logic_vector(2 downto 0);
+		pb0_sop_val_top: out std_logic_vector(2 downto 0);
 		pb0_data_sel_o: out std_logic_vector(3 downto 0);
+		pb0_data_sel_top: out std_logic_vector(3 downto 0);
 		pb0_addr_out_o: out std_logic_vector(31 downto 0);
+		pb0_addr_out_top: out std_logic_vector(31 downto 0);
 
 		-- [x] interface with builder1
 		pb1_start_o : out std_logic;
+		pb1_start_top : out std_logic;
 		pb1_busy_i : in std_logic;
+		pb1_busy_top : out std_logic;
 		pb1_irq_i : in std_logic;
+		pb1_irq_top : out std_logic;
 		pb1_addr_in_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pb1_addr_in_top : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		pb1_byte_cnt_o : out std_logic_vector(3 downto 0);
+		pb1_byte_cnt_top : out std_logic_vector(3 downto 0);
 		pb1_pkt_type_o : out std_logic_vector(3 downto 0);
+		pb1_pkt_type_top : out std_logic_vector(3 downto 0);
 		pb1_ecc_en_o : out std_logic;
+		pb1_ecc_en_top : out std_logic;
 		pb1_crc_en_o : out std_logic;
+		pb1_crc_en_top : out std_logic;
 		pb1_ins_ecc_err_o : out std_logic_vector(1 downto 0);
+		pb1_ins_ecc_err_top : out std_logic_vector(1 downto 0);
 		pb1_ins_crc_err_o : out std_logic;
+		pb1_ins_crc_err_top : out std_logic;
 		pb1_ecc_val_o : out std_logic_vector(3 downto 0);
+		pb1_ecc_val_top : out std_logic_vector(3 downto 0);
 		pb1_crc_val_o: out std_logic_vector(7 downto 0);
+		pb1_crc_val_top: out std_logic_vector(7 downto 0);
 		pb1_sop_val_o: out std_logic_vector(2 downto 0);
+		pb1_sop_val_top: out std_logic_vector(2 downto 0);
 		pb1_data_sel_o: out std_logic_vector(3 downto 0);
+		pb1_data_sel_top: out std_logic_vector(3 downto 0);
 		pb1_addr_out_o: out std_logic_vector(31 downto 0);
+		pb1_addr_out_top: out std_logic_vector(31 downto 0);
 		-- [x] interface with parser
 
 		pp_start_o : out std_logic;
+		pp_start_top : out std_logic;
 		pp_busy_i : in std_logic;
+		pp_busy_top : out std_logic;
 		pp_irq_i : in std_logic;
+		pp_irq_top : out std_logic;
 		pp_addr_hdr_o : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+		pp_addr_hdr_top : out std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
 		pp_ignore_ecc_err_o : out std_logic;
+		pp_ignore_ecc_err_top : out std_logic;
 		pp_pkt_ecc_corr_i : in std_logic;
+		pp_pkt_ecc_corr_top : out std_logic;
 		pp_pkt_ecc_uncorr_i : in std_logic;
+		pp_pkt_ecc_uncorr_top : out std_logic;
 		pp_pkt_crc_err_i : in std_logic;
+		pp_pkt_crc_err_top : out std_logic;
 		pp_pkt_byte_cnt_i : in std_logic_vector(3 downto 0);
+		pp_pkt_byte_cnt_top : out std_logic_vector(3 downto 0);
 		pp_pkt_type_i : in std_logic_vector(3 downto 0);
+		pp_pkt_type_top : out std_logic_vector(3 downto 0);
 
 		-- Global Clock Signal
 		S_AXI_ACLK	: in std_logic;
@@ -451,10 +491,13 @@ begin
 	int_irq_o(2) <= pp_ctrl1_s;
 
 	--------------------------------------------------------------------------------	
-	-- I/O connections PB0
+	-- I/O connections PB0 and top assignments
 	--------------------------------------------------------------------------------	
+	pb0_irq_top <= pb0_ctrl1_s;
+	pb0_busy_top <= pb0_busy_i; 
 
 	pb0_start_o <= pb0_ctrl0_s; 
+	pb0_start_top <= pb0_ctrl0_s; 
 	-- IMPORTANT all inputs to register are assinged inside corresponding proccesses
 	-- pb0_sts_s <= pb0_busy_i; 
 	--FIXME Interrupt req is not implemented fully because cont does not have connections with controller
@@ -462,46 +505,74 @@ begin
 	-- pb0_ctrl1_s <= pb0_irq_i; 
 
 	pb0_addr_in_o <= pb0_ctrl2_s; 
+	pb0_addr_in_top <= pb0_ctrl2_s; 
   
   -- ctr3 confing
 	pb0_byte_cnt_o <= pb0_ctrl3_s(3 downto 0); -- 4 
+	pb0_byte_cnt_top <= pb0_ctrl3_s(3 downto 0); -- 4 
 	pb0_pkt_type_o <= pb0_ctrl3_s(7 downto 4); -- 4
+	pb0_pkt_type_top <= pb0_ctrl3_s(7 downto 4); -- 4
 	pb0_ecc_en_o <= pb0_ctrl3_s(8); -- 1
+	pb0_ecc_en_top <= pb0_ctrl3_s(8); -- 1
 	pb0_crc_en_o <= pb0_ctrl3_s(9); -- 1
+	pb0_crc_en_top <= pb0_ctrl3_s(9); -- 1
 	pb0_ins_ecc_err_o <= pb0_ctrl3_s(11 downto 10); -- 2
+	pb0_ins_ecc_err_top <= pb0_ctrl3_s(11 downto 10); -- 2
 	pb0_ins_crc_err_o <= pb0_ctrl3_s(12); -- 1
+	pb0_ins_crc_err_top <= pb0_ctrl3_s(12); -- 1
 	pb0_ecc_val_o <= pb0_ctrl3_s(16 downto 13); -- 4
+	pb0_ecc_val_top <= pb0_ctrl3_s(16 downto 13); -- 4
 	pb0_crc_val_o <= pb0_ctrl3_s(24 downto 17); -- 8
+	pb0_crc_val_top <= pb0_ctrl3_s(24 downto 17); -- 8
 	pb0_sop_val_o <= pb0_ctrl3_s(27 downto 25); -- 3
+	pb0_sop_val_top <= pb0_ctrl3_s(27 downto 25); -- 3
 	pb0_data_sel_o <= pb0_ctrl3_s(31 downto 28); -- 4
+	pb0_data_sel_top <= pb0_ctrl3_s(31 downto 28); -- 4
 
   -- byte access
 	pb0_addr_out_o <= pb0_ctrl4_s; 
+	pb0_addr_out_top <= pb0_ctrl4_s; 
 	
 	--------------------------------------------------------------------------------	
-	-- I/O connections PB1
+	-- I/O connections PB1 and top assignments
 	--------------------------------------------------------------------------------	
+	pb1_irq_top <= pb1_ctrl1_s;
+	pb1_busy_top <= pb1_busy_i; 
+
 	pb1_start_o <= pb1_ctrl0_s; 
+	pb1_start_top <= pb1_ctrl0_s; 
 	-- pb1_sts_s <= pb1_busy_i; 
 	--FIXME Interrupt req is not implemented fully because cont does not have connections with regs
 	-- pb1_ctrl1_s <= pb1_irq_i; 
 
 	pb1_addr_in_o <= pb1_ctrl2_s; 
+	pb1_addr_in_top <= pb1_ctrl2_s; 
   
   -- ctr3 confing
 	pb1_byte_cnt_o <= pb1_ctrl3_s(3 downto 0); 
+	pb1_byte_cnt_top <= pb1_ctrl3_s(3 downto 0); 
 	pb1_pkt_type_o <= pb1_ctrl3_s(7 downto 4); 
+	pb1_pkt_type_top <= pb1_ctrl3_s(7 downto 4); 
 	pb1_ecc_en_o <= pb1_ctrl3_s(8); 
+	pb1_ecc_en_top <= pb1_ctrl3_s(8); 
 	pb1_crc_en_o <= pb1_ctrl3_s(9); 
+	pb1_crc_en_top <= pb1_ctrl3_s(9); 
 	pb1_ins_ecc_err_o <= pb1_ctrl3_s(11 downto 10); 
+	pb1_ins_ecc_err_top <= pb1_ctrl3_s(11 downto 10); 
 	pb1_ins_crc_err_o <= pb1_ctrl3_s(12); 
+	pb1_ins_crc_err_top <= pb1_ctrl3_s(12); 
 	pb1_ecc_val_o <= pb1_ctrl3_s(16 downto 13); 
+	pb1_ecc_val_top <= pb1_ctrl3_s(16 downto 13); 
 	pb1_crc_val_o <= pb1_ctrl3_s(24 downto 17); 
+	pb1_crc_val_top <= pb1_ctrl3_s(24 downto 17); 
 	pb1_sop_val_o <= pb1_ctrl3_s(27 downto 25); 
+	pb1_sop_val_top <= pb1_ctrl3_s(27 downto 25); 
 	pb1_data_sel_o <= pb1_ctrl3_s(31 downto 28); 
+	pb1_data_sel_top <= pb1_ctrl3_s(31 downto 28); 
 
   -- byte access
 	pb1_addr_out_o <= pb1_ctrl4_s; 
+	pb1_addr_out_top <= pb1_ctrl4_s; 
 
 	--------------------------------------------------------------------------------	
 	-- I/O connections PP
@@ -516,12 +587,24 @@ begin
 	-- pp_sts_s(11 downto 8) <= pp_pkt_type_i;
 
 	pp_start_o <= pp_ctrl0_s; 
+	pp_start_top <= pp_ctrl0_s; 
 
 
 	-- pp_ctrl1_s <= pp_irq_i; 
 
 	pp_addr_hdr_o <= pp_ctrl2_s; 
+	pp_addr_hdr_top <= pp_ctrl2_s; 
 	pp_ignore_ecc_err_o <= pp_ctrl3_s; 
+	pp_ignore_ecc_err_top <= pp_ctrl3_s; 
+
+	pp_irq_top <= pp_irq_i; 
+
+	pp_busy_top <= pp_busy_i;
+	pp_pkt_ecc_corr_top <= pp_pkt_ecc_corr_i;
+	pp_pkt_ecc_uncorr_top <= pp_pkt_ecc_uncorr_i;
+	pp_pkt_crc_err_top <= pp_pkt_crc_err_i;
+	pp_pkt_byte_cnt_top <= pp_pkt_byte_cnt_i;
+	pp_pkt_type_top <= pp_pkt_type_i;
 	--------------------------------------------------------------------------------	
 	-- Regs
 	--------------------------------------------------------------------------------	
