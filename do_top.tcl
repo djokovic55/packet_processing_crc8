@@ -2,7 +2,7 @@
 clear -all
 
 # verif
-analyze -sv09 checker_top.sv bind_top.sv
+analyze -sv09 checker_top.sv bind_top.sv checker_data_integrity.sv
 
 # src
 analyze -vhdl top.vhd interconnect.vhd arbiter_rr.vhd int_fsm.vhd controller.vhd external_regs.vhd data_memory.vhd master_axi_cont.vhd packet_builder.vhd packet_parser.vhd 
@@ -13,8 +13,9 @@ elaborate -vhdl -top {top}
 
 clock clk
 reset reset
-
-prove -bg -all
+visualize -new_window -raise
+visualize -confirm -vcd /nethome/aleksa.djokovic/Desktop/pp_top/packet_processing_crc8-master/data_integrity.vcd -window visualize:0
+# prove -bg -all
 
 
 

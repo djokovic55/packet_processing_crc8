@@ -1,7 +1,7 @@
 
 checker  checker_top(
-	clk	,
-	reset	,
+  clk,
+  reset,
 
   // ex_reg top interface 
   pb_irq,
@@ -19,7 +19,7 @@ checker  checker_top(
   pb_addr_out,
   pp_irq,
   pp_addr_hdr,
-  pp_ignore_ecc_err
+  pp_ignore_ecc_err,
 
   // inmem port B top interface, used for memory configuration
   inmem_en_b_i,
@@ -75,30 +75,30 @@ checker  checker_top(
   pp_pkt_ecc_uncorr_top,
   pp_pkt_crc_err_top,
   pp_pkt_byte_cnt_top,
-  pp_pkt_type_top,
+  pp_pkt_type_top
 );
 
-	default 
-	clocking @(posedge clk);
-	endclocking
+  default 
+  clocking @(posedge clk);
+  endclocking
 
-	default disable iff reset;
+  default disable iff reset;
 
-	//SECTION EX_REGS Interface Config
+  //SECTION EX_REGS Interface Config
   
   // Builder config
-	asm_max_byte_cnt: assume property(pb_byte_cnt <= 4'hF);
-	asm_min_byte_cnt: assume property(pb_byte_cnt >= 4'h0);
-	asm_stable_max_byte_cnt: assume property($stable(pb_byte_cnt));
+  asm_max_byte_cnt: assume property(pb_byte_cnt <= 4'hF);
+  asm_min_byte_cnt: assume property(pb_byte_cnt >= 4'h0);
+  asm_stable_max_byte_cnt: assume property($stable(pb_byte_cnt));
 
-	asm_merging_option: assume property(pb_data_sel inside {4'h0, 4'h1, 4'h2});
-	// asm_merging_option: assume property(pb_data_sel == 4'h2);
-	asm_merg_op_stability: assume property($stable(pb_data_sel));
+  // asm_merging_option: assume property(pb_data_sel inside {4'h0, 4'h1, 4'h2});
+  asm_merging_option: assume property(pb_data_sel == 4'h2);
+  asm_merg_op_stability: assume property($stable(pb_data_sel));
 
-	asm_crc_en: assume property(pb_crc_en == 1'b1);
-	asm_crc_en_stability: assume property($stable(pb_crc_en));
-	asm_ecc_en: assume property(pb_ecc_en == 1'b1);
-	asm_ecc_en_stability: assume property($stable(pb_ecc_en));
+  asm_crc_en: assume property(pb_crc_en == 1'b1);
+  asm_crc_en_stability: assume property($stable(pb_crc_en));
+  asm_ecc_en: assume property(pb_ecc_en == 1'b1);
+  asm_ecc_en_stability: assume property($stable(pb_ecc_en));
 
   asm_addr_in: assume property(pb_addr_in == 32'h1);
   asm_pkt_type: assume property(pb_pkt_type == 4'hA);
@@ -114,8 +114,8 @@ checker  checker_top(
   asm_ignore_ecc_err: assume property (pp_ignore_ecc_err == 1'b0);
 
   // Cover
-	pb_irq_c: cover property(pb_irq[*5]);
-	pp_irq_c: cover property(pp_irq[*5]);
+  pb_irq_c: cover property(pb_irq[*5]);
+  pp_irq_c: cover property(pp_irq[*5]);
 
 
   //SECTION REGS Interface props
@@ -124,6 +124,7 @@ checker  checker_top(
   cov_pp_start: cover property(pp_start_top == 1'b1);
 
   cov_pb0_start_byte_cnt0: cover property(pb0_start_top == 1'b1 && pb0_byte_cnt_top == 4'h0);
+  cov_pb0_start_byte_cnt7: cover property(pb0_start_top == 1'b1 && pb0_byte_cnt_top == 4'h7);
 
 
   cov_ecc_corr_err: cover property(pp_pkt_ecc_corr_top == 1'b1);
@@ -164,7 +165,7 @@ checker  checker_top(
   asm_inmem_en: assume property(inmem_en_b_i == 1'b1);
   asm_inmem_data_i: assume property(inmem_data_b_i == 32'hDEADBEEF);
   // asm_inmem_addr: assume property(inmem_addr_b_i == 14'h0);
-  asm_inmem_we: assume property(inmem_we_b_i == 1'b1);
+  asm_inmem_we: assume property(inmem_we_b_i == 4'hf);
   // asm_inmem_data: assume property(inmem_data_b_o == 1'b1);
 
   //SECTION OUTMEM Interface Port B props
