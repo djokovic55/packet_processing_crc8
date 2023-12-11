@@ -239,6 +239,28 @@ architecture Behavioral of controller is
 	);
   end component;
 
+  component fifo is
+  generic (
+    DATA_WIDTH : natural := 32;
+    FIFO_DEPTH : integer := 19
+    );
+  port (
+    reset : in std_logic;
+    clk      : in std_logic;
+ 
+    -- FIFO Write Interface
+    wr_en_i   : in  std_logic;
+    wr_data_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+    full_o    : out std_logic;
+ 
+    -- FIFO Read Interface
+    rd_pt_rst : in std_logic;
+    rd_en_i   : in  std_logic;
+    rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
+    empty_o   : out std_logic
+    );
+  end component;
+
     signal axi_burst_len_s : std_logic_vector(7 downto 0);
 
     --  WRITE CHANNEL
@@ -248,6 +270,7 @@ architecture Behavioral of controller is
     signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
     signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
     signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
+    signal axi_write_strb_s    : std_logic_vector(3 downto 0);
 
     -- READ CHANNEL
 
@@ -268,6 +291,18 @@ architecture Behavioral of controller is
 
     type state_t is (IDLE, PB_STATUS_READ, PP_STATUS_READ, CTRL_READ, CTRL_SETUP, START_TASK, INC_DROP_CNT, INTR_CLEAR);
     signal state_reg, state_next : state_t;
+
+    -- fifo signals
+    signal fifo_wr_en_s   : std_logic;
+    signal fifo_wr_data_s : std_logic_vector(31 downto 0);
+    signal fifo_full_s    : std_logic;
+
+    signal fifo_rd_pt_rst_s   : std_logic;
+    signal fifo_rd_en_s   : std_logic;
+    signal fifo_rd_data_s : std_logic_vector(31 downto 0);
+    signal fifo_empty_s   : std_logic;
+
+    signal fifo_rst_s   : std_logic;
 
     -- Register addresses
     constant REGS_BASE_ADDR: unsigned := x"00100000";
@@ -356,8 +391,8 @@ begin
       end if;
   end process; 
 
-  -- burst len configuration
-  axi_burst_len_s <= x"00";
+  -- -- burst len configuration
+  -- axi_burst_len_s <= x"00";
 
   -- comb process
   process(state_reg, ext_irq, int_irq, axi_write_done_s, axi_read_last_s, axi_read_data_reg,
@@ -365,8 +400,10 @@ begin
           clear_intr_addr_reg, setup_cnt_reg, cnt_max_reg, axi_read_data_next, pb_status_cnt_reg, axi_read_init_reg, axi_write_init_reg, axi_write_data_reg) is
   begin
 
+      
       -- default values
       state_next <= state_reg;
+
       axi_base_address_next <= axi_base_address_reg;
       axi_write_address_next <= axi_write_address_reg; 
       axi_read_address_next <= axi_read_address_reg;
@@ -381,15 +418,28 @@ begin
       
       axi_write_data_next <= axi_write_data_reg;
       axi_write_vld_s <= '0';
+      axi_write_strb_s <= (others => '0');
       axi_read_rdy_s <= '0';
 
       axi_read_init_next <= '0';
       axi_write_init_next <= '0';
 
+      -- burst len configuration
+      axi_burst_len_s <= x"00";
+
+      fifo_wr_data_s <= (others => '0');
+      fifo_wr_en_s <= '0';
+      fifo_rd_en_s <= '0';
+      fifo_rd_pt_rst_s <= '0';
+      fifo_rst_s <= '0';
+
       case state_reg is
   
           when IDLE =>
           
+            -- reset fifo
+            fifo_rst_s <= '1';
+
             axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
 					  pb_status_cnt_next <= (others => '0');
 					  setup_cnt_next <= (others => '0');
@@ -458,8 +508,8 @@ begin
               --axi_read_init_next <= '1';
 
 
-              if(axi_read_last_s = '1') then
-
+              -- only single burst
+              if(axi_read_vld_s = '1') then
 
                 clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
 
@@ -518,7 +568,7 @@ begin
               -- start transaction
               -- axi_read_init_next <= '1';
 
-              if(axi_read_last_s = '1') then
+              if(axi_read_vld_s = '1') then
 
                 clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PP_CTRL1);
 
@@ -554,8 +604,14 @@ begin
 
           
           when CTRL_READ =>
-              axi_read_rdy_s <= '1';
-              --  axi_read_init_next <= '1';
+            -- IMPORTANT address was set in status read state
+            axi_read_rdy_s <= '1';
+            axi_burst_len_s(1 downto 0) <= cnt_max_reg;
+
+            if(axi_read_vld_s = '1') then
+
+              fifo_wr_en_s <= '1';
+              fifo_wr_data_s <= axi_read_data_next;
 
               if(axi_read_last_s = '1') then
                 axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
@@ -563,55 +619,40 @@ begin
 								-- start new trans one cycle earlier
 								axi_write_init_next <= '1';
 
-								-- register read data to write_reg
-								axi_write_data_next <= axi_read_data_next;
-
+                -- Read data is stored inside fifo - regs config
                 ---------------------------------------- 
                 state_next <= CTRL_SETUP;
                 ---------------------------------------- 
-              else
-                ---------------------------------------- 
-                state_next <= CTRL_READ;
-                ---------------------------------------- 
               end if;
+            end if;
 
           when CTRL_SETUP =>
-              -- axi_write_data_s <= axi_read_data_reg;
-							-- data is valid because write_data is ready in write_data_reg
-              axi_write_vld_s <= '1';
+            axi_write_data_s <= fifo_rd_data_s;
+            axi_burst_len_s <= cnt_max_reg;
+            -- data is valid because write_data is ready in write_data_reg
+            axi_write_vld_s <= '1';
+            axi_write_strb_s <= (others => '1');
+
+            if(axi_write_rdy_s = '1') then
+              -- increment fifo to write next reg config
+              fifo_rd_en_s <= '1';
 
               if(axi_write_done_s = '1') then 
-                setup_cnt_next <= std_logic_vector(unsigned(setup_cnt_reg) + 1);
-                if(unsigned(setup_cnt_reg) = unsigned(cnt_max_reg)) then
-                  axi_write_address_next <= start_addr_reg;
+                axi_write_address_next <= start_addr_reg;
 
-									-- start new trans one cycle earlier
-									axi_write_init_next <= '1';
-									axi_write_data_next <= x"00000001";
-                  ---------------------------------------- 
-                  state_next <= START_TASK;
-                  ---------------------------------------- 
-                else 
-                  -- Read new ctrl register
-                  axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
-                  axi_read_address_next <= std_logic_vector(unsigned(axi_read_address_reg) + 4);
-                  axi_write_address_next <= std_logic_vector(unsigned(axi_write_address_reg) + 4);
-
-									-- start new trans one cycle earlier
-									axi_read_init_next <= '1';
-                  ---------------------------------------- 
-                  state_next <= CTRL_READ;
-                  ---------------------------------------- 
-                end if;
-
-              else
+                -- start new trans one cycle earlier
+                axi_write_init_next <= '1';
+                axi_write_data_next <= x"00000001";
                 ---------------------------------------- 
-                state_next <= CTRL_SETUP;
+                state_next <= START_TASK;
                 ---------------------------------------- 
               end if;
+            end if;
           when START_TASK =>
               -- axi_write_data_s(0) <= '1';
               axi_write_vld_s <= '1';
+              axi_write_strb_s <= (others => '1');
+
 
               if(axi_write_done_s = '1') then
                 axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
@@ -623,14 +664,11 @@ begin
                 ---------------------------------------- 
                 state_next <= INTR_CLEAR;
                 ---------------------------------------- 
-              else
-                ---------------------------------------- 
-                state_next <= START_TASK;
-                ---------------------------------------- 
               end if;
           when INC_DROP_CNT =>
               -- axi_write_data_s(0) <= '1';
               axi_write_vld_s <= '1';
+              axi_write_strb_s <= (others => '1');
 
               if(axi_write_done_s = '1') then
                 axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
@@ -679,7 +717,7 @@ begin
     AXI_WRITE_INIT_I    => axi_write_init_reg, 
     AXI_WRITE_DATA_I    => axi_write_data_reg, 
     AXI_WRITE_VLD_I     => axi_write_vld_s, 
-    AXI_WRITE_STRB_I     => (others => '1'), 
+    AXI_WRITE_STRB_I     => axi_write_strb_s, 
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 
     AXI_READ_ADDRESS_I => axi_read_address_reg, 
@@ -721,6 +759,23 @@ begin
 		M_AXI_RLAST => M_AXI_RLAST,	
 		M_AXI_RVALID => M_AXI_RVALID,	
 		M_AXI_RREADY => M_AXI_RREADY
+  );
+
+  regs_conf_fifo: fifo
+  generic map(
+    DATA_WIDTH => 32,
+    FIFO_DEPTH => 3)
+  port map(
+
+    clk => M_AXI_ACLK,      
+    reset => fifo_rst_s, 
+    wr_en_i => fifo_wr_en_s,   
+    wr_data_i => fifo_wr_data_s, 
+    full_o => fifo_full_s,    
+    rd_pt_rst => fifo_rd_pt_rst_s, 
+    rd_en_i => fifo_rd_en_s,   
+    rd_data_o => fifo_rd_data_s, 
+    empty_o => fifo_empty_s   
   );
 
 end architecture Behavioral;

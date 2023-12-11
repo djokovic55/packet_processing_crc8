@@ -1,6 +1,5 @@
 
 clear -all
-
 # verif
 analyze -sv09 checker_top.sv bind_top.sv checker_data_integrity.sv
 

@@ -176,21 +176,9 @@ architecture arch_imp of slave_axi_cont is
 	constant OPT_MEM_ADDR_BITS : integer := 7;
 	constant USER_NUM_MEM: integer := 1;
 	constant low : std_logic_vector (C_S_AXI_ADDR_WIDTH - 1 downto 0) := x"00000000";
-	------------------------------------------------
-	---- Signals for user logic memory space example
-	--------------------------------------------------
-	signal mem_address : std_logic_vector(OPT_MEM_ADDR_BITS downto 0);
-	signal mem_select : std_logic_vector(USER_NUM_MEM-1 downto 0);
-	type word_array is array (0 to USER_NUM_MEM-1) of std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-	signal mem_data_out : word_array;
 
-	signal i : integer;
-	signal j : integer;
-	signal mem_byte_index : integer;
-	type BYTE_RAM_TYPE is array (0 to 255) of std_logic_vector(7 downto 0);
 begin
 	-- I/O Connections assignments
-
 	S_AXI_AWREADY	<= axi_awready;
 	S_AXI_WREADY	<= axi_wready;
 	S_AXI_BRESP	<= axi_bresp;

@@ -53,6 +53,7 @@ begin
       when BUSY_READ =>
         busy_internal <= '1';
         
+        -- FIX add handshake
         if rlast = '1' then
           state_next <= AVAILABLE;  -- Transition back to AVAILABLE after read completion
 					busy_internal <= '0';
