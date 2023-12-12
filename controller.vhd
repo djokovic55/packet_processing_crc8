@@ -397,7 +397,7 @@ begin
   -- comb process
   process(state_reg, ext_irq, int_irq, axi_write_done_s, axi_read_last_s, axi_read_data_reg,
           axi_base_address_reg, axi_write_address_reg, axi_read_address_reg, start_addr_reg,
-          clear_intr_addr_reg, setup_cnt_reg, cnt_max_reg, axi_read_data_next, pb_status_cnt_reg, axi_read_init_reg, axi_write_init_reg, axi_write_data_reg) is
+          clear_intr_addr_reg, setup_cnt_reg, cnt_max_reg, axi_read_data_next, pb_status_cnt_reg, axi_read_init_reg, axi_write_init_reg, axi_write_data_reg, axi_read_vld_s, fifo_rd_data_s) is
   begin
 
       
@@ -518,8 +518,8 @@ begin
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL2);
                   cnt_max_next <= std_logic_vector(to_unsigned(2, 2));
-									-- start new trans one cycle earlier
-								  axi_read_init_next <= '1';
+		  -- start new trans one cycle earlier
+		  axi_read_init_next <= '1';
 									
                   
                   if(unsigned(pb_status_cnt_reg) = 0) then
@@ -541,16 +541,16 @@ begin
                   if(unsigned(pb_status_cnt_reg) = 1) then
                     axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                     axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
-										-- start new trans one cycle earlier
-										axi_write_init_next <= '1';
-										axi_write_data_next <= x"00000001";
+		    -- start new trans one cycle earlier
+		    axi_write_init_next <= '1';
+		    -- axi_write_data_next <= x"00000001";
 
                     ---------------------------------------- 
                     state_next <= INC_DROP_CNT;
                     ---------------------------------------- 
                   else
-										-- start new trans one cycle earlier
-										axi_read_init_next <= '1';
+		    -- start new trans one cycle earlier
+		    axi_read_init_next <= '1';
                     ---------------------------------------- 
                     state_next <= PB_STATUS_READ;
                     ---------------------------------------- 
@@ -578,8 +578,8 @@ begin
                   axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PP_CTRL2);
                   start_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PP_START);
                   cnt_max_next <= std_logic_vector(to_unsigned(1, 2));
-									-- start new trans one cycle earlier
-									axi_read_init_next <= '1';
+		  -- start new trans one cycle earlier
+		  axi_read_init_next <= '1';
 
                   ---------------------------------------- 
                   state_next <= CTRL_READ;
@@ -587,9 +587,9 @@ begin
                 else
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
-									-- start new trans one cycle earlier
-									axi_write_init_next <= '1';
-									axi_write_data_next <= x"00000001";
+		  -- start new trans one cycle earlier
+		  axi_write_init_next <= '1';
+		  axi_write_data_next <= x"00000001";
 
                   ---------------------------------------- 
                   state_next <= INC_DROP_CNT;
@@ -616,8 +616,8 @@ begin
               if(axi_read_last_s = '1') then
                 axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
 
-								-- start new trans one cycle earlier
-								axi_write_init_next <= '1';
+		-- start new trans one cycle earlier
+		axi_write_init_next <= '1';
 
                 -- Read data is stored inside fifo - regs config
                 ---------------------------------------- 
@@ -628,7 +628,7 @@ begin
 
           when CTRL_SETUP =>
             axi_write_data_s <= fifo_rd_data_s;
-            axi_burst_len_s <= cnt_max_reg;
+            axi_burst_len_s(1 downto 0) <= cnt_max_reg;
             -- data is valid because write_data is ready in write_data_reg
             axi_write_vld_s <= '1';
             axi_write_strb_s <= (others => '1');
@@ -637,19 +637,18 @@ begin
               -- increment fifo to write next reg config
               fifo_rd_en_s <= '1';
 
-              if(axi_write_done_s = '1') then 
-                axi_write_address_next <= start_addr_reg;
+            elsif(axi_write_done_s = '1') then 
+	      axi_write_address_next <= start_addr_reg;
 
-                -- start new trans one cycle earlier
-                axi_write_init_next <= '1';
-                axi_write_data_next <= x"00000001";
-                ---------------------------------------- 
-                state_next <= START_TASK;
-                ---------------------------------------- 
-              end if;
+	      -- start new trans one cycle earlier
+	      axi_write_init_next <= '1';
+	      -- axi_write_data_next <= x"00000001";
+	      ---------------------------------------- 
+	      state_next <= START_TASK;
+	      ---------------------------------------- 
             end if;
           when START_TASK =>
-              -- axi_write_data_s(0) <= '1';
+              axi_write_data_s(0) <= '1';
               axi_write_vld_s <= '1';
               axi_write_strb_s <= (others => '1');
 
@@ -658,15 +657,15 @@ begin
                 axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
                 axi_write_address_next <= clear_intr_addr_reg;
                 
-								-- start new trans one cycle earlier
-								axi_write_init_next <= '1';
-								-- write data takes previous value
+		-- start new trans one cycle earlier
+		axi_write_init_next <= '1';
+		-- write data takes previous value
                 ---------------------------------------- 
                 state_next <= INTR_CLEAR;
                 ---------------------------------------- 
               end if;
           when INC_DROP_CNT =>
-              -- axi_write_data_s(0) <= '1';
+              axi_write_data_s(0) <= '1';
               axi_write_vld_s <= '1';
               axi_write_strb_s <= (others => '1');
 
@@ -674,8 +673,8 @@ begin
                 axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                 axi_write_address_next <= clear_intr_addr_reg;
                 
-								-- start new trans one cycle earlier
-								axi_write_init_next <= '1';
+		-- start new trans one cycle earlier
+		axi_write_init_next <= '1';
                 ---------------------------------------- 
                 state_next <= INTR_CLEAR;
                 ---------------------------------------- 
@@ -685,7 +684,7 @@ begin
                 ---------------------------------------- 
               end if;
           when INTR_CLEAR =>
-              -- axi_write_data_s(0) <= '1';
+              axi_write_data_s(0) <= '1';
               axi_write_vld_s <= '1';
 
               if(axi_write_done_s = '1') then
@@ -715,7 +714,7 @@ begin
     AXI_BASE_ADDRESS_I  => axi_base_address_reg, 
     AXI_WRITE_ADDRESS_I => axi_write_address_reg, 
     AXI_WRITE_INIT_I    => axi_write_init_reg, 
-    AXI_WRITE_DATA_I    => axi_write_data_reg, 
+    AXI_WRITE_DATA_I    => axi_write_data_s, 
     AXI_WRITE_VLD_I     => axi_write_vld_s, 
     AXI_WRITE_STRB_I     => axi_write_strb_s, 
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
@@ -727,38 +726,38 @@ begin
     AXI_READ_RDY_I  => axi_read_rdy_s, 
     AXI_READ_LAST_O => axi_read_last_s, 
 
-		M_AXI_ACLK => M_AXI_ACLK,	
-		M_AXI_ARESETN => M_AXI_ARESETN,	
+    M_AXI_ACLK => M_AXI_ACLK,	
+    M_AXI_ARESETN => M_AXI_ARESETN,	
 
-		M_AXI_AWADDR => M_AXI_AWADDR,	
-		M_AXI_AWLEN => M_AXI_AWLEN,	
-		M_AXI_AWSIZE => M_AXI_AWSIZE,	
-		M_AXI_AWBURST => M_AXI_AWBURST,	
-		M_AXI_AWVALID => M_AXI_AWVALID,	
-		M_AXI_AWREADY => M_AXI_AWREADY,	
+    M_AXI_AWADDR => M_AXI_AWADDR,	
+    M_AXI_AWLEN => M_AXI_AWLEN,	
+    M_AXI_AWSIZE => M_AXI_AWSIZE,	
+    M_AXI_AWBURST => M_AXI_AWBURST,	
+    M_AXI_AWVALID => M_AXI_AWVALID,	
+    M_AXI_AWREADY => M_AXI_AWREADY,	
 
-		M_AXI_WDATA => M_AXI_WDATA,	
-		M_AXI_WSTRB => M_AXI_WSTRB,	
-		M_AXI_WLAST => M_AXI_WLAST,	
-		M_AXI_WVALID => M_AXI_WVALID,	
-		M_AXI_WREADY => M_AXI_WREADY,	
+    M_AXI_WDATA => M_AXI_WDATA,	
+    M_AXI_WSTRB => M_AXI_WSTRB,	
+    M_AXI_WLAST => M_AXI_WLAST,	
+    M_AXI_WVALID => M_AXI_WVALID,	
+    M_AXI_WREADY => M_AXI_WREADY,	
 
-		M_AXI_BRESP => M_AXI_BRESP,	
-		M_AXI_BVALID => M_AXI_BVALID,	
-		M_AXI_BREADY => M_AXI_BREADY,	
-    
-		M_AXI_ARADDR => M_AXI_ARADDR,	
-		M_AXI_ARLEN => M_AXI_ARLEN,	
-		M_AXI_ARSIZE => M_AXI_ARSIZE,	
-		M_AXI_ARBURST => M_AXI_ARBURST,	
-		M_AXI_ARVALID => M_AXI_ARVALID,	
-		M_AXI_ARREADY => M_AXI_ARREADY,	
+    M_AXI_BRESP => M_AXI_BRESP,	
+    M_AXI_BVALID => M_AXI_BVALID,	
+    M_AXI_BREADY => M_AXI_BREADY,	
 
-		M_AXI_RDATA => M_AXI_RDATA,	
-		M_AXI_RRESP => M_AXI_RRESP,	
-		M_AXI_RLAST => M_AXI_RLAST,	
-		M_AXI_RVALID => M_AXI_RVALID,	
-		M_AXI_RREADY => M_AXI_RREADY
+    M_AXI_ARADDR => M_AXI_ARADDR,	
+    M_AXI_ARLEN => M_AXI_ARLEN,	
+    M_AXI_ARSIZE => M_AXI_ARSIZE,	
+    M_AXI_ARBURST => M_AXI_ARBURST,	
+    M_AXI_ARVALID => M_AXI_ARVALID,	
+    M_AXI_ARREADY => M_AXI_ARREADY,	
+
+    M_AXI_RDATA => M_AXI_RDATA,	
+    M_AXI_RRESP => M_AXI_RRESP,	
+    M_AXI_RLAST => M_AXI_RLAST,	
+    M_AXI_RVALID => M_AXI_RVALID,	
+    M_AXI_RREADY => M_AXI_RREADY
   );
 
   regs_conf_fifo: fifo

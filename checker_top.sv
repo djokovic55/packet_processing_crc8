@@ -114,8 +114,8 @@ checker  checker_top(
   asm_ignore_ecc_err: assume property (pp_ignore_ecc_err == 1'b0);
 
   // Cover
-  pb_irq_c: cover property(pb_irq[*5]);
-  pp_irq_c: cover property(pp_irq[*5]);
+  cov_pb_irq: cover property(pb_irq[*5]);
+  cov_pp_irq: cover property(pp_irq[*5]);
 
 
   //SECTION REGS Interface props

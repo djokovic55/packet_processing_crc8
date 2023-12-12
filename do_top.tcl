@@ -12,9 +12,7 @@ elaborate -vhdl -top {top}
 
 clock clk
 reset reset
-visualize -new_window -raise
-visualize -confirm -vcd /nethome/aleksa.djokovic/Desktop/pp_top/packet_processing_crc8-master/data_integrity.vcd -window visualize:0
-# prove -bg -all
+prove -bg -all
 
 
 
