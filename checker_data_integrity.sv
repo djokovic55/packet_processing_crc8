@@ -3,8 +3,6 @@ module checker_data_integrity(
   input clk,
   input reset,
 
-  input start,
-
   input[3:0] byte_cnt,
   input[3:0] data_sel,
 

@@ -78,21 +78,72 @@ bind top checker_top chk_top(
   .pp_pkt_type_top(pp_pkt_type_top),
 );
 
-bind top.packet_builder0 checker_data_integrity chk_data_integrity(
+bind top.top_subsystem checker_data_integrity chk_data_integrity(
 	.clk(clk),	
 	.reset(reset),
-	.byte_cnt(byte_cnt_i),
-	.data_sel(data_sel_i),
+	.byte_cnt(pb_byte_cnt_i),
+	.data_sel(pb_data_sel_i),
 
-	.wdata(m_axi_wdata),
-	.wvalid(m_axi_wvalid),
-	.wlast(m_axi_wlast),
-	.wready(m_axi_wready), 
+	.wdata(m_axi_int_wdata_outmem),
+	.wvalid(m_axi_int_wvalid_outmem),
+	.wlast(m_axi_int_wlast_outmem),
+	.wready(m_axi_int_wready_outmem), 
 
-	.rdata(m_axi_rdata),
-	.rlast(m_axi_rlast),
-	.rvalid(m_axi_rvalid),
-	.rready(m_axi_rready)
+	.rdata(m_axi_int_rdata_inmem),
+	.rlast(m_axi_int_rlast_inmem),
+	.rvalid(m_axi_int_rvalid_inmem),
+	.rready(m_axi_int_rready_inmem)
 );
 
-// checker_axi to added
+
+bind top.top_subsystem.interconnect.arbiter_rr checker_fair_int chk_fairness(
+	.clk(clk),
+	.reset(rstn),
+
+	.req(req),
+	.gnt(gnt),
+	.busy(busy)
+);
+////////////////////////////////////////////////////////////////////////////////
+// BIND axi controllers with axi protocol checker
+////////////////////////////////////////////////////////////////////////////////
+
+bind top.top_subsystem.interconnect checker_axi chk_axi_prot(
+	.clk(m_axi_aclk),
+	.reset(m_axi_aresetn), 
+
+	.awaddr(s_axi_int_awaddr_ctrl),
+	.awlen(s_axi_int_awlen_ctrl),
+	.awsize(s_axi_int_awsize_ctrl),
+	.awburst(s_axi_int_awburst_ctrl),
+	.awvalid(s_axi_int_awvalid_ctrl),
+	.awready(s_axi_int_awready_ctrl),
+
+	// WRITE DATA CHANNEL
+	.wdata(s_axi_int_wdata_ctrl),
+	.wstrb(s_axi_int_wstrb_ctrl),
+	.wlast(s_axi_int_wlast_ctrl),
+	.wvalid(s_axi_int_wvalid_ctrl),
+	.wready(s_axi_int_wready_ctrl),
+
+	// WRITE RESPONSE CHANNEL
+	.bresp(s_axi_int_bresp_ctrl),
+	.bvalid(s_axi_int_bvalid_ctrl),
+	.bready(s_axi_int_bready_ctrl),
+
+	// READ ADDRESS CHANNEL
+	.araddr(s_axi_int_araddr_ctrl),
+	.arlen(s_axi_int_arlen_ctrl),
+	.arsize(s_axi_int_arsize_ctrl),
+	.arburst(s_axi_int_arburst_ctrl),
+	.arvalid(s_axi_int_arvalid_ctrl),
+	.arready(s_axi_int_arready_ctrl),
+
+	// READ DATA CHANNEL
+	.rdata(s_axi_int_rdata_ctrl),
+	.rresp(s_axi_int_rresp_ctrl),
+	.rlast(s_axi_int_rlast_ctrl),
+	.rvalid(s_axi_int_rvalid_ctrl),
+	.rready(s_axi_int_rready_ctrl)
+	////////////////////////////////////////////////////////////////////////////////
+);

@@ -1,0 +1,14 @@
+1. For port map allignment
+
+0wd0wd$50i <Esc>030|p>>>>j 
+example: 
+
+		EXT_PB_CTRL1_CONF => ext_pb_ctrl1_s, 
+result: 
+    EXT_PB_CTRL1_CONF             => ext_pb_ctrl1_s,                                       
+description: 
+  Changes the allignment position of the next caracter after word.
+
+2. Signal allignment
+
+0wd02wd$60i <Esc>040|p>>j 
