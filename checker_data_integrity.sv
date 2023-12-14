@@ -55,10 +55,10 @@ module checker_data_integrity(
 
   logic[3:0] chosen_byte;
 
-  asm_chosen_byte_stable: assume property(start |=> always $stable(chosen_byte));
+  asm_chosen_byte_stable: assume property($stable(chosen_byte));
 
   asm_chosen_byte_op0: assume property(disable iff(reset)
-    data_sel == 4'h0 |-> chosen_byte <= byte_cnt[3:2]);
+    data_sel == 4'h0 |-> chosen_byte <= byte_cnt && chosen_byte[1:0] == 2'b0);
 
   asm_chosen_byte_op1: assume property(disable iff(reset)
     data_sel == 4'h1 |-> chosen_byte <= byte_cnt && chosen_byte[1] == 1'b0);
@@ -118,6 +118,7 @@ module checker_data_integrity(
     end
     else begin
       case(data_sel) 
+        OP0: received_byte <= (chosen_byte[3:2] + 2);
         OP1: received_byte <= ((chosen_byte[3:2] * 2) + chosen_byte[0] + 2);
         default: received_byte <= (chosen_byte + 2); 
       endcase

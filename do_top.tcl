@@ -1,7 +1,7 @@
 
 clear -all
 # verif
-analyze -sv09 checker_top.sv bind_top.sv checker_data_integrity.sv
+analyze -sv09 checker_top.sv bind_top.sv checker_data_integrity.sv checker_axi.sv checker_fair_int.sv
 
 # src
 analyze -vhdl top.vhd top_subsystem.vhd interconnect.vhd arbiter_rr.vhd int_fsm.vhd controller.vhd external_regs.vhd data_memory.vhd master_axi_cont.vhd packet_builder.vhd packet_parser.vhd 
@@ -12,7 +12,8 @@ elaborate -vhdl -top {top}
 
 clock clk
 reset reset
-prove -bg -all
+task -create data_integrity -set -source_task <embedded> -copy_stopats -copy_abstractions all -copy_assumes -copy <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity:precondition1
+# prove -bg -all
 
 
 
