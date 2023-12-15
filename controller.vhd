@@ -586,7 +586,7 @@ begin
                   ---------------------------------------- 
                 else
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
-                  axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
+                  axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
 		  -- start new trans one cycle earlier
 		  axi_write_init_next <= '1';
 		  axi_write_data_next <= x"00000001";

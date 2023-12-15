@@ -417,19 +417,22 @@ architecture Behavioral of interconnect is
 	end component;
 	-- Busy logic generator, 3 states -> AVAILABLE, BUSY_WRITE, BUSY_READ
 	component int_fsm is
-    port (
-			clk : in std_logic;
-			reset : in std_logic;
+	port (
+	    clk : in std_logic;
+	    reset : in std_logic;
 
-			awvalid : in std_logic;
-			bvalid : in std_logic;
-			bready : in std_logic;
+	    awvalid : in std_logic;
+	    bvalid : in std_logic;
+	    bready : in std_logic;
 
-			arvalid : in std_logic;
-			rlast : in std_logic;
+	    arvalid : in std_logic;
+	    rlast : in std_logic;
+	    rvalid : in std_logic;
+	    rready : in std_logic;
+	    arlen : in std_logic_vector(7 downto 0);
 
-			busy : out std_logic
-    );
+	    busy : out std_logic
+	);
 	end component;
 
 	-- REQ signals
@@ -1210,6 +1213,9 @@ begin
 		bready => int_bready,
 		arvalid => int_arvalid,
 		rlast => int_rlast,
+		rvalid => int_rvalid,
+		rready => int_rready,
+		arlen => int_arlen,
 		busy => int_busy
 	);
 

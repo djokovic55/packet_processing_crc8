@@ -297,8 +297,8 @@ architecture arch_imp of slave_axi_lite_ex_regs_cont is
   -- registers while writing. These registers are cleared when reset (active low) is applied. Slave register write
   -- enable is asserted when valid address and data are available and the slave is ready to accept the write 
   -- address and write data.
-  slv_reg_wren <= axi_wready and S_AXI_WVALID and axi_awready and S_AXI_AWVALID;
-  process (S_AXI_ACLK)
+  slv_reg_wren <= axi_wready and S_AXI_WVALID;
+  process (S_AXI_WSTRB, axi_awaddr)
     variable loc_addr : std_logic_vector(OPT_MEM_ADDR_BITS downto 0); 
   begin
       -- Default assignments

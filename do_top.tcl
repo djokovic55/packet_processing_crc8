@@ -12,9 +12,32 @@ elaborate -vhdl -top {top}
 
 clock clk
 reset reset
-task -create data_integrity -set -source_task <embedded> -copy_stopats -copy_abstractions all -copy_assumes -copy <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity:precondition1
+
+# create regs_verif task
+task -create regs_verif -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.chk_top.ast_pb0_addr_in <embedded>::top.chk_top.ast_pb0_addr_in:precondition1 <embedded>::top.chk_top.ast_pb0_byte_cnt <embedded>::top.chk_top.ast_pb0_byte_cnt:precondition1 <embedded>::top.chk_top.ast_pb0_pkt_type <embedded>::top.chk_top.ast_pb0_pkt_type:precondition1 <embedded>::top.chk_top.ast_pb0_ecc_en <embedded>::top.chk_top.ast_pb0_ecc_en:precondition1 <embedded>::top.chk_top.ast_pb0_crc_en <embedded>::top.chk_top.ast_pb0_crc_en:precondition1 <embedded>::top.chk_top.ast_pb0_ins_ecc_err <embedded>::top.chk_top.ast_pb0_ins_ecc_err:precondition1 <embedded>::top.chk_top.ast_pb0_ins_crc_err <embedded>::top.chk_top.ast_pb0_ins_crc_err:precondition1 <embedded>::top.chk_top.ast_pb0_ecc_val <embedded>::top.chk_top.ast_pb0_ecc_val:precondition1 <embedded>::top.chk_top.ast_pb0_crc_val <embedded>::top.chk_top.ast_pb0_crc_val:precondition1 <embedded>::top.chk_top.ast_pb0_sop_val <embedded>::top.chk_top.ast_pb0_sop_val:precondition1 <embedded>::top.chk_top.ast_pb0_data_sel <embedded>::top.chk_top.ast_pb0_data_sel:precondition1 <embedded>::top.chk_top.ast_pb0_addr_out <embedded>::top.chk_top.ast_pb0_addr_out:precondition1
+# prove it using engine M
+# prove -task regs_verif -engine_mode {M} -bg
+
+# create data_integrity task
+task -create data_integrity -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity:precondition1
+# prove it using engine N
+# prove -task  data_integrity -engine_mode {N} -bg
+
+# create intcon_fairness task
+task -create intcon_fairness -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.subsys.intcon.arb_inst.chk_fairness.ast_fairness <embedded>::top.subsys.intcon.arb_inst.chk_fairness.ast_fairness:precondition1 <embedded>::top.subsys.intcon.arb_inst.chk_fairness.ast_no_deadlock
+# prove it using engine M
+# prove -task  intcon_fairness -engine_mode {B,M} -bg
+
+# create axi_prot task
+task -create axi_prot -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_stable_awaddr <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_stable_awaddr:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_stable_awlen <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_stable_awlen:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_stable_awsize <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_stable_awsize:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_stable_awburst <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_stable_awburst:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_awvalid_until_awready <embedded>::top.subsys.intcon.chk_axi_prot.ast_aw_awvalid_until_awready:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_w_stable_wdata <embedded>::top.subsys.intcon.chk_axi_prot.ast_w_stable_wdata:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_w_stable_wstrb <embedded>::top.subsys.intcon.chk_axi_prot.ast_w_stable_wstrb:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_w_data_wlast <embedded>::top.subsys.intcon.chk_axi_prot.ast_w_data_wlast:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_w_wvalid_until_wready <embedded>::top.subsys.intcon.chk_axi_prot.ast_w_wvalid_until_wready:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_stable_araddr <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_stable_araddr:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_stable_arlen <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_stable_arlen:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_stable_arsize <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_stable_arsize:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_stable_arburst <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_stable_arburst:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_arvalid_until_arready <embedded>::top.subsys.intcon.chk_axi_prot.ast_ar_arvalid_until_arready:precondition1 <embedded>::top.subsys.intcon.chk_axi_prot.ast_r_data_rlast <embedded>::top.subsys.intcon.chk_axi_prot.ast_r_data_rlast:precondition1
+# prove it using engine N
+# prove -task  axi_prot -engine_mode {N} -bg
+
+# create pp_end task
+task -create pp_end -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.chk_top.cov_pp_end
 # prove -bg -all
 
+#task -create data_integrity -set -source_task <embedded> -copy_stopats -copy_abstractions all -copy_assumes -copy <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity:precondition1
 
 
 # COMPLEXITY MANAGER COMMANDS

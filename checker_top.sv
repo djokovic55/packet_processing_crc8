@@ -86,7 +86,7 @@ checker  checker_top(
 
   //SECTION Builder - Parser combined work
 
-  cov_pb_pp_task: cover property((pb_byte_cnt == 4'h3 && pb0_start_top) s_eventually pp_start_top);
+  cov_pb_pp_task: cover property((pb_byte_cnt == 4'h3 && pb0_start_top) ##[1:$] pp_start_top);
 
   //SECTION EX_REGS Interface Config
   
@@ -95,8 +95,8 @@ checker  checker_top(
   asm_min_byte_cnt: assume property(pb_byte_cnt >= 4'h0);
   asm_stable_max_byte_cnt: assume property($stable(pb_byte_cnt));
 
-  // asm_merging_option: assume property(pb_data_sel inside {4'h0, 4'h1, 4'h2});
-  asm_merging_option: assume property(pb_data_sel == 4'h2);
+  asm_merging_option: assume property(pb_data_sel inside {4'h0, 4'h1, 4'h2});
+  // asm_merging_option: assume property(pb_data_sel == 4'h2);
   asm_merg_op_stability: assume property($stable(pb_data_sel));
 
   asm_crc_en: assume property(pb_crc_en == 1'b1);
@@ -124,8 +124,13 @@ checker  checker_top(
 
   //SECTION REGS Interface props
   cov_pb0_start: cover property(pb0_start_top == 1'b1);
+  cov_pb0_end: cover property(pb0_irq_top == 1'b1);
+
   cov_pb1_start: cover property(pb1_start_top == 1'b1);
+  cov_pb1_end: cover property(pb1_irq_top == 1'b1);
+
   cov_pp_start: cover property(pp_start_top == 1'b1);
+  cov_pp_end: cover property(pp_irq_top == 1'b1);
 
   cov_pb0_start_byte_cnt0: cover property(pb0_start_top == 1'b1 && pb0_byte_cnt_top == 4'h0);
   cov_pb0_start_byte_cnt7: cover property(pb0_start_top == 1'b1 && pb0_byte_cnt_top == 4'h7);

@@ -1,5 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use IEEE.NUMERIC_STD.ALL;
 
 entity int_fsm is
     port (
@@ -12,6 +13,9 @@ entity int_fsm is
 
         arvalid : in std_logic;
         rlast : in std_logic;
+        rvalid : in std_logic;
+        rready : in std_logic;
+        arlen : in std_logic_vector(7 downto 0);
 
         busy : out std_logic
     );
@@ -54,9 +58,10 @@ begin
         busy_internal <= '1';
         
         -- FIX add handshake
-        if rlast = '1' then
+        -- FIX consider single burst transaction
+        if (rlast = '1' and rvalid = '1' and rready = '1') or (unsigned(arlen) = 0 and rvalid = '1' and rready = '1') then
           state_next <= AVAILABLE;  -- Transition back to AVAILABLE after read completion
-					busy_internal <= '0';
+	  busy_internal <= '0';
         end if;
           
       when BUSY_WRITE =>
@@ -64,7 +69,7 @@ begin
         
         if bvalid = '1' and bready = '1' then
           state_next <= AVAILABLE;  -- Transition back to AVAILABLE after write completion
-					busy_internal <= '0';
+	  busy_internal <= '0';
         end if;
             
     end case;
