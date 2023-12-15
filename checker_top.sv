@@ -84,6 +84,10 @@ checker  checker_top(
 
   default disable iff reset;
 
+  //SECTION Builder - Parser combined work
+
+  cov_pb_pp_task: cover property((pb_byte_cnt == 4'h3 && pb0_start_top) s_eventually pp_start_top);
+
   //SECTION EX_REGS Interface Config
   
   // Builder config
@@ -128,7 +132,11 @@ checker  checker_top(
 
 
   cov_ecc_corr_err: cover property(pp_pkt_ecc_corr_top == 1'b1);
+  cov_no_ecc_corr_err: cover property(pp_pkt_ecc_corr_top == 1'b0);
   cov_ecc_uncorr_err: cover property(pp_pkt_ecc_uncorr_top == 1'b1);
+  cov_no_ecc_uncorr_err: cover property(pp_pkt_ecc_uncorr_top == 1'b0);
+  cov_crc_err: cover property(pp_pkt_crc_err_top == 1'b1);
+  cov_no_crc_err: cover property(pp_pkt_crc_err_top == 1'b0);
 
     // IMPORTANT Assert valid register values
 

@@ -313,6 +313,7 @@ end component hamming_check;
   --------------------------------------------------------------------------------
 
   constant INMEM_BASE_ADDR: unsigned := x"00000000";
+  constant OUTMEM_BASE_ADDR: unsigned := x"00010000";
   type state_t is (IDLE, HEADER_READ, INMEM_READ, CRC_LOOP);
   signal state_reg, state_next : state_t;
 
@@ -495,7 +496,7 @@ begin
         end if;
       
       when HEADER_READ => 
-        axi_base_address_s <= std_logic_vector(INMEM_BASE_ADDR);
+        axi_base_address_s <= std_logic_vector(OUTMEM_BASE_ADDR);
         axi_read_address_s <= addr_hdr_i;
         axi_burst_len_s <= (others => '0');
 
