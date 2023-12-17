@@ -583,7 +583,7 @@ begin
         end if;
 
       when INMEM_READ => 
-        axi_base_address_s <= std_logic_vector(INMEM_BASE_ADDR);
+        axi_base_address_s <= std_logic_vector(OUTMEM_BASE_ADDR);
         -- IMPORTANT 2 bytes of header are already read, so continue reading from first data byte to and including crc byte
         axi_read_address_s <= std_logic_vector(unsigned(addr_hdr_i) + 2);
         -- IMPORTANT axi burst len depends on byte_cnt, therefore inmem read phase will fail if this information is incorrect

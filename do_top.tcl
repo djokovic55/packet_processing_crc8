@@ -1,6 +1,7 @@
 
 clear -all
 # verif
+
 analyze -sv09 checker_top.sv bind_top.sv checker_data_integrity.sv checker_axi.sv checker_fair_int.sv
 
 # src
@@ -8,10 +9,13 @@ analyze -vhdl top.vhd top_subsystem.vhd interconnect.vhd arbiter_rr.vhd int_fsm.
 analyze -vhdl regs.vhd slave_axi_cont.vhd 
 analyze -vhdl slave_axi_lite_ex_regs_cont.vhd slave_axi_lite_regs_cont.vhd bram.vhd fifo.vhd crc_top.vhd crc8_parallel.vhd hamming_12_8.vhd hamming_check.vhd
 
-elaborate -vhdl -top {top}
 
+check_fsv -init
+elaborate -vhdl -top {top}
 clock clk
 reset reset
+
+check_fsv -fault -add subsys.parser.axi_read_data_s(4) -type SA1 -silent
 
 # create regs_verif task
 task -create regs_verif -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.chk_top.ast_pb0_addr_in <embedded>::top.chk_top.ast_pb0_addr_in:precondition1 <embedded>::top.chk_top.ast_pb0_byte_cnt <embedded>::top.chk_top.ast_pb0_byte_cnt:precondition1 <embedded>::top.chk_top.ast_pb0_pkt_type <embedded>::top.chk_top.ast_pb0_pkt_type:precondition1 <embedded>::top.chk_top.ast_pb0_ecc_en <embedded>::top.chk_top.ast_pb0_ecc_en:precondition1 <embedded>::top.chk_top.ast_pb0_crc_en <embedded>::top.chk_top.ast_pb0_crc_en:precondition1 <embedded>::top.chk_top.ast_pb0_ins_ecc_err <embedded>::top.chk_top.ast_pb0_ins_ecc_err:precondition1 <embedded>::top.chk_top.ast_pb0_ins_crc_err <embedded>::top.chk_top.ast_pb0_ins_crc_err:precondition1 <embedded>::top.chk_top.ast_pb0_ecc_val <embedded>::top.chk_top.ast_pb0_ecc_val:precondition1 <embedded>::top.chk_top.ast_pb0_crc_val <embedded>::top.chk_top.ast_pb0_crc_val:precondition1 <embedded>::top.chk_top.ast_pb0_sop_val <embedded>::top.chk_top.ast_pb0_sop_val:precondition1 <embedded>::top.chk_top.ast_pb0_data_sel <embedded>::top.chk_top.ast_pb0_data_sel:precondition1 <embedded>::top.chk_top.ast_pb0_addr_out <embedded>::top.chk_top.ast_pb0_addr_out:precondition1
