@@ -93,6 +93,7 @@ checker  checker_top(
   // Builder config
   asm_max_byte_cnt: assume property(pb_byte_cnt <= 4'hF);
   asm_min_byte_cnt: assume property(pb_byte_cnt >= 4'h0);
+  // asm_max_byte_cnt: assume property(pb_byte_cnt == 4'h0);
   asm_stable_max_byte_cnt: assume property($stable(pb_byte_cnt));
 
   asm_merging_option: assume property(pb_data_sel inside {4'h0, 4'h1, 4'h2});
