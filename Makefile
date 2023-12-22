@@ -5,7 +5,7 @@ int:
 	jg do_int.tcl
 
 top:
-	jg do_top.tcl
+	jg do_top.tcl -fpv
 
 pb:
 	jg do_pb.tcl

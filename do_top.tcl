@@ -22,7 +22,9 @@ check_fsv -fault -add outmem.slave_axi_cont_inmem.axi_rdata(4) -type SA1 -silent
 # ADD STROBES
 # check_fsv -strobe -add outmem.S_AXI_RDATA -functional
 check_fsv -strobe -add subsys.parser.header_reg -functional
-check_fsv -strobe -add outmem.S_AXI_RDATA -checker -checker_mode diff
+check_fsv -strobe -add subsys.parser.hamming_parity_check_out_s -checker -checker_mode diff
+set_fsv_generate_detectability On; set_fsv_clock_cycle_time 0
+set_fsv_generate_always_propagated On; set_fsv_generate_always_detected On; set_fsv_clock_cycle_time 0
 check_fsv -structural
 check_fsv -generate
 check_fsv -prove

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wavelist version="3">
-  <insertion-point-position>30</insertion-point-position>
+  <insertion-point-position>21</insertion-point-position>
   <group collapsed="false">
     <expr/>
     <label>Clocks Signals</label>
@@ -43,6 +43,16 @@
       <radix/>
     </wave>
   </group>
+  <wave collapsed="true">
+    <expr>subsys.parser.M_AXI_RDATA</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave collapsed="true">
+    <expr>top_bad_machine.subsys.parser.M_AXI_RDATA</expr>
+    <label>top_bad_machine.subsys.parser.M_AXI_RDATA</label>
+    <radix/>
+  </wave>
   <group collapsed="false">
     <expr/>
     <label>FO Strobes</label>
@@ -68,6 +78,27 @@
     <radix/>
   </wave>
   <wave>
+    <expr>subsys.parser.hamming_msb_parity_bit_s</expr>
+    <label>subsys.parser.hamming_msb_parity_bit_s</label>
+    <radix/>
+  </wave>
+  <wave>
+    <expr>top_bad_machine.subsys.parser.hamming_msb_parity_bit_s</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <spacer/>
+  <wave collapsed="true">
+    <expr>subsys.parser.pkt_byte_cnt_o_reg</expr>
+    <label/>
+    <radix/>
+  </wave>
+  <wave collapsed="true">
+    <expr>top_bad_machine.subsys.parser.pkt_byte_cnt_o_reg</expr>
+    <label>top_bad_machine.subsys.parser.pkt_byte_cnt_o_reg</label>
+    <radix/>
+  </wave>
+  <wave>
     <expr>subsys.parser.pkt_ecc_corr_o</expr>
     <label/>
     <radix/>
@@ -87,36 +118,6 @@
     <label>top_bad_machine.subsys.parser.pkt_ecc_uncorr_o</label>
     <radix/>
   </wave>
-  <wave>
-    <expr>subsys.parser.pkt_crc_err_o</expr>
-    <label/>
-    <radix/>
-  </wave>
-  <wave>
-    <expr>top_bad_machine.subsys.parser.pkt_crc_err_o</expr>
-    <label>top_bad_machine.subsys.parser.pkt_crc_err_o</label>
-    <radix/>
-  </wave>
-  <wave collapsed="true">
-    <expr>subsys.parser.M_AXI_RDATA</expr>
-    <label/>
-    <radix/>
-  </wave>
-  <wave collapsed="true">
-    <expr>top_bad_machine.subsys.parser.M_AXI_RDATA</expr>
-    <label>top_bad_machine.subsys.parser.M_AXI_RDATA</label>
-    <radix/>
-  </wave>
-  <wave>
-    <expr>subsys.parser.hamming_msb_parity_bit_s</expr>
-    <label>subsys.parser.hamming_msb_parity_bit_s</label>
-    <radix/>
-  </wave>
-  <wave>
-    <expr>top_bad_machine.subsys.parser.hamming_msb_parity_bit_s</expr>
-    <label/>
-    <radix/>
-  </wave>
   <wave collapsed="true">
     <expr>subsys.parser.state_reg</expr>
     <label/>
@@ -126,25 +127,5 @@
     <expr>top_bad_machine.subsys.parser.state_reg</expr>
     <label>top_bad_machine.subsys.parser.state_reg</label>
     <radix>top_bad_machine.subsys.parser.state_reg</radix>
-  </wave>
-  <wave>
-    <expr>subsys.parser.axi_read_data_s(7)</expr>
-    <label/>
-    <radix/>
-  </wave>
-  <wave>
-    <expr>top_bad_machine.subsys.parser.axi_read_data_s(7)</expr>
-    <label>top_bad_machine.subsys.parser.axi_read_data_s(7)</label>
-    <radix/>
-  </wave>
-  <wave>
-    <expr>subsys.parser.pkt_byte_cnt_o_next(3)</expr>
-    <label/>
-    <radix/>
-  </wave>
-  <wave>
-    <expr>top_bad_machine.subsys.parser.pkt_byte_cnt_o_next(3)</expr>
-    <label>top_bad_machine.subsys.parser.pkt_byte_cnt_o_next(3)</label>
-    <radix/>
   </wave>
 </wavelist>
