@@ -94,9 +94,18 @@ checker  checker_axi(
     valid && !ready |-> ##[0:timeout] ready;
   endproperty
 
-  property data_last (xvalid, handshake_cnt, axlen, xlast);
-		  xvalid && (handshake_cnt == axlen) && (axlen != '0) |-> xlast;
+  property data_last (handshake_cnt, axlen, xlast);
+		(handshake_cnt == axlen) && (axlen != '0) |-> xlast;
   endproperty
+
+  property single_burst_data_last (axlen, xlast, axready, axvalid);
+		axready && axvalid && (axlen == '0) |=> xlast;
+  endproperty
+
+  property single_burst_data_last_stable (xlast, xready, xvalid);
+		xlast && (!xready || !xvalid) |=> xlast;
+  endproperty
+
 
   //FIXME awready prop are not defined
 
@@ -133,7 +142,10 @@ checker  checker_axi(
 	// IMPORTANT will be removed until the main master logic is implemented
   ast_w_stable_wdata: assert property (stable_before_handshake(wvalid, wready, wdata));
   ast_w_stable_wstrb: assert property (stable_before_handshake(wvalid, wready, wstrb));
-  ast_w_data_wlast: assert property (data_last(wvalid, handshake_cnt_w, awlen, wlast));
+
+  ast_w_data_wlast: assert property (data_last(handshake_cnt_w, awlen, wlast));
+  ast_w_data_single_burst_wlast: assert property (single_burst_data_last(awlen, wlast, awready, awvalid);
+  ast_w_data_single_burst_wlast_stability: assert property (single_burst_data_last_stable(wlast, wready, wvalid);
 
   // cov_w_data_wlast_c: cover property (wlast);
 
@@ -168,7 +180,9 @@ checker  checker_axi(
 
 	// cov_radddr_val: cover property(araddr == 32'h7);
   // ast_r_stable_rdata: assert property (stable_before_handshake(rvalid, rready, rdata));
-  ast_r_data_rlast: assert property (data_last(rvalid, handshake_cnt_r, arlen, rlast));
+  ast_r_data_rlast: assert property (data_last(handshake_cnt_r, arlen, rlast));
+  ast_r_data_single_burst_rlast: assert property (single_burst_data_last(arlen, rlast, arready, arvalid);
+  ast_r_data_single_burst_rlast_stability: assert property (single_burst_data_last_stable(rlast, rready, rvalid);
 
 	// FIXME Cannot be proved because rready is always true
   // ast_r_rvalid_until_rready: assert property (valid_before_handshake(rvalid, rready));

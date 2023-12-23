@@ -399,16 +399,20 @@ begin
 	      if (M_AXI_ARESETN = '1' or init_write_txn_pulse = '1') then 
 	        axi_wlast <= '0';                                                           
 	      else                                                                          
-					 -- IMPORTANT wlast is always low when single burst
-	        if ((unsigned(write_index) = unsigned(AXI_BURST_LEN)-1) and burst_write_active = '1' and wnext = '1') then
+					 -- BUG wlast is always low when single burst
+					 -- Assert last for single beat transaction
+					if(unsigned(AXI_BURST_LEN) = 0 and axi_wlast = '0' and start_single_burst_write = '1') then
 	          axi_wlast <= '1';                                                         
+	        elsif ((unsigned(write_index) = unsigned(AXI_BURST_LEN)-1) and burst_write_active = '1' and wnext = '1') then
+	          axi_wlast <= '1';                                                         
+					end if;
+
 	          -- Deassrt axi_wlast when the last write data has been                    
 	          -- accepted by the slave with a valid response                            
-	        elsif (axi_wlast = '1' or unsigned(AXI_BURST_LEN) = 0) then 
+	        if (axi_wlast = '1' and wnext = '1') then 
 	          axi_wlast <= '0';                                                         
-	        -- elsif (axi_wlast = '1' and unsigned(AXI_BURST_LEN) = 0) then  
-	          -- axi_wlast <= '0';                                                         
 	        end if;                                                                     
+
 	      end if;                                                                       
 	    end if;                                                                         
 	  end process;                                                                      

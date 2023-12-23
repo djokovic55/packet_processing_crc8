@@ -312,7 +312,7 @@ begin
 	      axi_bresp  <= "00"; --need to work more on the responses
 	      -- axi_buser <= (others => '0');
 	    else
-	      if (axi_awv_awr_flag = '1' and axi_wready = '1' and S_AXI_WVALID = '1' and axi_bvalid = '0' and (S_AXI_WLAST = '1' or unsigned(S_AXI_AWLEN) = 0)) then
+	      if (axi_awv_awr_flag = '1' and axi_wready = '1' and S_AXI_WVALID = '1' and axi_bvalid = '0' and S_AXI_WLAST = '1') then
 	        axi_bvalid <= '1';
 	        axi_bresp  <= "00"; 
 	      elsif (S_AXI_BREADY = '1' and axi_bvalid = '1') then  
@@ -357,40 +357,40 @@ begin
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
 	    if S_AXI_ARESETN = '1' then
-	      axi_arburst <= (others => '0');
-	      axi_arlen <= (others => '0'); 
 	      axi_rlast <= '0';
 	      -- axi_ruser <= (others => '0');
 	    else
-	      if (axi_arready = '0' and S_AXI_ARVALID = '1' and axi_arv_arr_flag = '0') then
-	        axi_rlast <= '0';
-	        axi_arburst <= S_AXI_ARBURST;
-	        axi_arlen <= S_AXI_ARLEN;
-
+				-- single beat transaction
+				if(unsigned(axi_arlen) = '0' and axi_arv_arr_flag = '1') then
+	        axi_rlast <= '1';
 				elsif((unsigned(axi_arlen_cntr) = unsigned(axi_arlen) - 1) and axi_rlast = '0' and axi_arv_arr_flag = '1' and axi_rvalid = '1' and S_AXI_RREADY = '1') then  
 	        axi_rlast <= '1';
-				-- rlast will remain asserted until rready
-	      elsif (axi_rlast = '1' and S_AXI_RREADY = '1') then  
+				end if;
+
+				-- deassert rlast
+	      if (axi_rlast = '1' and S_AXI_RREADY = '1' and axi_rvalid = '1') then  
 	        axi_rlast <= '0';
-	      elsif (unsigned(axi_arlen) = 0) then  
-	        axi_rlast <= '0';
-	      end if;
+				end if;
 	    end if;
 	  end if;
 	end  process;  
 
-	-- burst length counter
+	-- burst length counter, register read transaction configuration
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then 
 	    if S_AXI_ARESETN = '1' then
 				axi_arlen_cntr <= (others => '0');
 				axi_araddr <= (others => '0');
+	      axi_arburst <= (others => '0');
+	      axi_arlen <= (others => '0'); 
 			else
 
 				if(axi_arready = '0' and S_AXI_ARVALID = '1' and axi_arv_arr_flag = '0') then
 					axi_arlen_cntr <= (others => '0');
 	        axi_araddr <= S_AXI_ARADDR(C_S_AXI_ADDR_WIDTH - 1 downto 0); ---- start address of transfer
+	        axi_arburst <= S_AXI_ARBURST;
+	        axi_arlen <= S_AXI_ARLEN;
 				elsif(axi_rvalid = '1' and S_AXI_RREADY = '1' and unsigned(axi_arlen_cntr) < unsigned(axi_arlen)) then
 					axi_arlen_cntr <= std_logic_vector(unsigned(axi_arlen_cntr) + 1);
 					case (axi_arburst) is
