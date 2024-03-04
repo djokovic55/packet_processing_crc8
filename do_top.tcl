@@ -2,6 +2,7 @@
 clear -all
 # verif
 
+check_cov -init
 analyze -sv09 checker_top.sv bind_top.sv checker_data_integrity.sv checker_axi.sv checker_fair_int.sv
 
 # src
