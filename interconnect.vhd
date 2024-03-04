@@ -1150,6 +1150,33 @@ begin
 		end case;
 	end process;
 
+	-- FIX rlast stability bug 
+	rlast_demux_gnt : process (int_rlast, gnt)
+	begin 
+		s_axi_int_rlast_ctrl <= '0';
+		s_axi_int_rlast_pb0 <= '0';
+		s_axi_int_rlast_pb1 <= '0';
+	 s_axi_int_rlast_pp <= '0';
+
+		case(gnt) is 
+		-- // [x] Fix gnt 0000 value
+			when "0001" =>
+				s_axi_int_rlast_ctrl <= int_rlast;
+			when "0010" =>
+				s_axi_int_rlast_pb0 <= int_rlast;
+			when "0100" =>
+				s_axi_int_rlast_pb1 <= int_rlast;
+			when "1000" =>
+				s_axi_int_rlast_pp <= int_rlast;
+			when others =>
+				-- default
+				s_axi_int_rlast_ctrl <= '0';
+				s_axi_int_rlast_pb0 <= '0';
+				s_axi_int_rlast_pb1 <= '0';
+				s_axi_int_rlast_pp <= '0';
+		end case;
+	end process;
+
 	rready_mux_gnt : process(
 					s_axi_int_rready_ctrl, s_axi_int_rready_pb0, s_axi_int_rready_pb1, s_axi_int_rready_pp,
 					gnt

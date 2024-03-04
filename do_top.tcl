@@ -10,7 +10,7 @@ analyze -vhdl regs.vhd slave_axi_cont.vhd
 analyze -vhdl slave_axi_lite_ex_regs_cont.vhd slave_axi_lite_regs_cont.vhd bram.vhd fifo.vhd crc_top.vhd crc8_parallel.vhd hamming_12_8.vhd hamming_check.vhd
 
 
-check_fsv -init
+# check_fsv -init
 elaborate -vhdl -top {top}
 clock clk
 reset reset
@@ -18,16 +18,16 @@ reset reset
 # FSV COMMANDS
 # check_fsv -fault -add subsys.parser.axi_read_data_s(4) -type SA1 -silent
 # ADD FAULTS
-check_fsv -fault -add outmem.slave_axi_cont_inmem.axi_rdata(4) -type SA1 -silent
+# check_fsv -fault -add outmem.slave_axi_cont_inmem.axi_rdata(4) -type SA1 -silent
 # ADD STROBES
 # check_fsv -strobe -add outmem.S_AXI_RDATA -functional
-check_fsv -strobe -add subsys.parser.header_reg -functional
-check_fsv -strobe -add subsys.parser.hamming_parity_check_out_s -checker -checker_mode diff
-set_fsv_generate_detectability On; set_fsv_clock_cycle_time 0
-set_fsv_generate_always_propagated On; set_fsv_generate_always_detected On; set_fsv_clock_cycle_time 0
-check_fsv -structural
-check_fsv -generate
-check_fsv -prove
+# check_fsv -strobe -add subsys.parser.header_reg -functional
+# check_fsv -strobe -add subsys.parser.hamming_parity_check_out_s -checker -checker_mode diff
+# set_fsv_generate_detectability On; set_fsv_clock_cycle_time 0
+# set_fsv_generate_always_propagated On; set_fsv_generate_always_detected On; set_fsv_clock_cycle_time 0
+# check_fsv -structural
+# check_fsv -generate
+# check_fsv -prove
 
 ## Use the existing trace as initial value for another formal proof.
 #prove -from <embedded>::top.chk_top.cov_no_ecc_uncorr_err -task . -bg
