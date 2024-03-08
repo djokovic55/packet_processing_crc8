@@ -1110,19 +1110,15 @@ begin
 
 	s_axi_int_rdata_ctrl <= int_rdata;
 	s_axi_int_rresp_ctrl <= int_rresp;
-	s_axi_int_rlast_ctrl <= int_rlast;
 
 	s_axi_int_rdata_pb0 <= int_rdata;
 	s_axi_int_rresp_pb0 <= int_rresp;
-	s_axi_int_rlast_pb0 <= int_rlast;
 
 	s_axi_int_rdata_pb1 <= int_rdata;
 	s_axi_int_rresp_pb1 <= int_rresp;
-	s_axi_int_rlast_pb1 <= int_rlast;
 
 	s_axi_int_rdata_pp <= int_rdata;
 	s_axi_int_rresp_pp <= int_rresp;
-	s_axi_int_rlast_pp <= int_rlast;
 
 	rvalid_demux_gnt : process (int_rvalid, gnt)
 	begin 

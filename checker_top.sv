@@ -100,23 +100,41 @@ checker  checker_top(
   // asm_merging_option: assume property(pb_data_sel == 4'h2);
   asm_merg_op_stability: assume property($stable(pb_data_sel));
 
-  asm_crc_en: assume property(pb_crc_en == 1'b1);
+  // asm_crc_en: assume property(pb_crc_en == 1'b1);
   asm_crc_en_stability: assume property($stable(pb_crc_en));
-  asm_ecc_en: assume property(pb_ecc_en == 1'b1);
+  // asm_ecc_en: assume property(pb_ecc_en == 1'b1);
   asm_ecc_en_stability: assume property($stable(pb_ecc_en));
 
-  asm_addr_in: assume property(pb_addr_in == 32'h1);
-  asm_pkt_type: assume property(pb_pkt_type == 4'hA);
-  asm_ins_ecc_err: assume property(pb_ins_ecc_err == 1'b0);
-  asm_ins_crc_err: assume property(pb_ins_crc_err == 1'b0);
-  asm_ecc_val: assume property(pb_ecc_val == 4'h0);
-  asm_crc_val: assume property(pb_crc_val == 8'hCC);
-  asm_sop_val: assume property(pb_sop_val == 3'h7);
-  asm_addr_out: assume property(pb_addr_out == 32'h2);
+  asm_addr_in: assume property(pb_addr_in[31:4] == '0);
+  asm_addr_in_stability: assume property($stable(pb_addr_in));
+
+  // asm_pkt_type: assume property(pb_pkt_type == 4'hA);
+  asm_pkt_type_stability: assume property($stable(pb_pkt_type));
+
+  // asm_ins_ecc_err: assume property(pb_ins_ecc_err == 1'b0);
+  asm_ins_ecc_err_stability: assume property($stable(pb_ins_ecc_err));
+
+  // asm_ins_crc_err: assume property(pb_ins_crc_err == 1'b0);
+  asm_ins_crc_err_stability: assume property($stable(pb_ins_crc_err));
+
+  // asm_ecc_val: assume property(pb_ecc_val == 4'h0);
+  asm_ecc_val_stability: assume property($stable(pb_ecc_val));
+
+  // asm_crc_val: assume property(pb_crc_val == 8'hCC);
+  asm_crc_val_stability: assume property($stable(pb_crc_val));
+
+  // asm_sop_val: assume property(pb_sop_val == 3'h7);
+  asm_sop_val_stability: assume property($stable(pb_sop_val));
+
+  asm_addr_out: assume property(pb_addr_out[31:4] == '0);
+  asm_addr_out_stability: assume property($stable(pb_addr_out));
 
   // Parser config
-  asm_addr_hdr_i: assume property (pp_addr_hdr == 32'h2);
-  asm_ignore_ecc_err: assume property (pp_ignore_ecc_err == 1'b0);
+  asm_addr_hdr_i: assume property (pp_addr_hdr[31:4] == '0);
+  asm_addr_hdr_i_stability: assume property ($stable(pp_addr_hdr));
+
+  // asm_ignore_ecc_err: assume property (pp_ignore_ecc_err == 1'b0);
+  asm_ignore_ecc_err_stability: assume property ($stable(pp_ignore_ecc_err));
 
   // Cover
   cov_pb_irq: cover property(pb_irq[*5]);
@@ -177,15 +195,21 @@ checker  checker_top(
 
   //SECTION INMEM Interface Port B props
   asm_inmem_en: assume property(inmem_en_b_i == 1'b1);
-  asm_inmem_data_i: assume property(inmem_data_b_i == 32'hDEADBEEF);
+
+  // asm_inmem_data_i: assume property(inmem_data_b_i == 32'hDEADBEEF);
+  asm_inmem_data_i_stability: assume property($stable(inmem_data_b_i));
+
   // asm_inmem_addr: assume property(inmem_addr_b_i == 14'h0);
-  asm_inmem_we: assume property(inmem_we_b_i == 4'hf);
+  // asm_inmem_we: assume property(inmem_we_b_i == 4'hf);
   // asm_inmem_data: assume property(inmem_data_b_o == 1'b1);
 
   //SECTION OUTMEM Interface Port B props
   // outmem port B top interface, memory read only
   asm_outmem_en: assume property(outmem_en_b_i == 1'b1);
-  asm_outmem_data_i: assume property(outmem_data_b_i == 32'h0);
+
+  // asm_outmem_data_i: assume property(outmem_data_b_i == 32'h0);
+  asm_outmem_data_i_stability: assume property($stable(outmem_data_b_i));
+
   // asm_outmem_addr: assume property(outmem_addr_b_i == 14'h1);
   asm_outmem_we: assume property(outmem_we_b_i == 1'b0);
   // asm_outmem_data: assume property(outmem_data_b_o == 1'b1);
