@@ -3,6 +3,9 @@ clear -all
 # verif
 
 check_cov -init
+# only data integrity checker analysis
+# check_cov -init -type {proof bound} -model all -exclude_instance { * } -include_instance {subsys.chk_data_integrity} 
+# check_cov -init -type {bound}
 analyze -sv09 checker_top.sv bind_top.sv checker_data_integrity.sv checker_axi.sv checker_fair_int.sv
 
 # src
@@ -15,6 +18,13 @@ analyze -vhdl slave_axi_lite_ex_regs_cont.vhd slave_axi_lite_regs_cont.vhd bram.
 elaborate -vhdl -top {top}
 clock clk
 reset reset
+
+### Apstractions
+stopat subsys.system_regs.pb1_sts_s
+assume -name pb1_always_busy -env {subsys.system_regs.pb1_sts_s = '0'}
+
+### Start coverage analysis
+# check_cov -measure -task {<embedded>} -bg
 
 # FSV COMMANDS
 # check_fsv -fault -add subsys.parser.axi_read_data_s(4) -type SA1 -silent
