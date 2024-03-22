@@ -375,7 +375,7 @@ begin
           axi_base_address_reg <= axi_base_address_next ;
           axi_write_address_reg <= axi_write_address_next;
           axi_write_init_reg <= axi_write_init_next;
-					axi_write_data_reg <= axi_write_data_next;
+		  axi_write_data_reg <= axi_write_data_next;
 
           axi_read_address_reg <= axi_read_address_next;
           axi_read_data_reg <= axi_read_data_next;

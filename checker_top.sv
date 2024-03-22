@@ -1,81 +1,82 @@
 
-checker  checker_top(
-  clk,
-  reset,
+module  checker_top(
+  input clk,
+  input reset,
 
   // ex_reg top interface 
-  pb_irq,
-  pb_addr_in,
-  pb_byte_cnt,
-  pb_pkt_type,
-  pb_ecc_en,
-  pb_crc_en,
-  pb_ins_ecc_err,
-  pb_ins_crc_err,
-  pb_ecc_val,
-  pb_crc_val,
-  pb_sop_val,
-  pb_data_sel,
-  pb_addr_out,
-  pp_irq,
-  pp_addr_hdr,
-  pp_ignore_ecc_err,
-
+  output pb_irq,
+  output[31:0] pb_addr_in,
+  output[3:0] pb_byte_cnt,
+  output[3:0] pb_pkt_type,
+  output pb_ecc_en,
+  output pb_crc_en,
+  output pb_ins_ecc_err,
+  output pb_ins_crc_err,
+  output[3:0] pb_ecc_val,
+  output[7:0] pb_crc_val,
+  output[2:0] pb_sop_val,
+  output[3:0] pb_data_sel,
+  output[31:0] pb_addr_out,
+  output pp_irq,
+  output[31:0] pp_addr_hdr,
+	output pp_ignore_ecc_err,
   // inmem port B top interface, used for memory configuration
-  inmem_en_b_i,
-  inmem_data_b_i,
-  inmem_addr_b_i,
-  inmem_we_b_i,
-  inmem_data_b_o,
+  output inmem_en_b_i,
+  output[31:0] inmem_data_b_i,
+  output[13:0] inmem_addr_b_i,
+  output inmem_we_b_i,
+  input[31:0] inmem_data_b_o,
 
   // outmem port B top interface, memory read only
-  outmem_en_b_i,
-  outmem_data_b_i,
-  outmem_addr_b_i,
-  outmem_we_b_i,
-  outmem_data_b_o,
+  output outmem_en_b_i,
+  output[31:0] outmem_data_b_i,
+  output[13:0] outmem_addr_b_i,
+  output outmem_we_b_i,
+  input[31:0] outmem_data_b_o,
 
   // regs top interface
-  pb0_start_top,
-  pb0_busy_top,
-  pb0_irq_top,
-  pb0_addr_in_top,
-  pb0_byte_cnt_top,
-  pb0_pkt_type_top,
-  pb0_ecc_en_top,
-  pb0_crc_en_top,
-  pb0_ins_ecc_err_top,
-  pb0_ins_crc_err_top,
-  pb0_ecc_val_top,
-  pb0_crc_val_top,
-  pb0_sop_val_top,
-  pb0_data_sel_top,
-  pb0_addr_out_top,
-  pb1_start_top,
-  pb1_busy_top,
-  pb1_irq_top,
-  pb1_addr_in_top,
-  pb1_byte_cnt_top,
-  pb1_pkt_type_top,
-  pb1_ecc_en_top,
-  pb1_crc_en_top,
-  pb1_ins_ecc_err_top,
-  pb1_ins_crc_err_top,
-  pb1_ecc_val_top,
-  pb1_crc_val_top,
-  pb1_sop_val_top,
-  pb1_data_sel_top,
-  pb1_addr_out_top,
-  pp_start_top,
-  pp_busy_top,
-  pp_irq_top,
-  pp_addr_hdr_top,
-  pp_ignore_ecc_err_top,
-  pp_pkt_ecc_corr_top,
-  pp_pkt_ecc_uncorr_top,
-  pp_pkt_crc_err_top,
-  pp_pkt_byte_cnt_top,
-  pp_pkt_type_top
+  input pb0_start_top,
+  input pb0_busy_top,
+  input pb0_irq_top,
+  input[31:0] pb0_addr_in_top,
+  input[3:0] pb0_byte_cnt_top,
+  input[3:0] pb0_pkt_type_top,
+  input pb0_ecc_en_top,
+  input pb0_crc_en_top,
+  input[1:0] pb0_ins_ecc_err_top,
+  input pb0_ins_crc_err_top,
+  input[3:0] pb0_ecc_val_top,
+  input[7:0] pb0_crc_val_top,
+  input[2:0] pb0_sop_val_top,
+  input[3:0] pb0_data_sel_top,
+  input[31:0] pb0_addr_out_top,
+
+  input pb1_start_top,
+  input pb1_busy_top,
+  input pb1_irq_top,
+  input[31:0] pb1_addr_in_top,
+  input[3:0] pb1_byte_cnt_top,
+  input[3:0] pb1_pkt_type_top,
+  input pb1_ecc_en_top,
+  input pb1_crc_en_top,
+  input[1:0] pb1_ins_ecc_err_top,
+  input pb1_ins_crc_err_top,
+  input[3:0] pb1_ecc_val_top,
+  input[7:0] pb1_crc_val_top,
+  input[2:0] pb1_sop_val_top,
+  input[3:0] pb1_data_sel_top,
+  input[31:0] pb1_addr_out_top,
+
+  input pp_start_top,
+  input pp_busy_top,
+  input pp_irq_top,
+  input[31:0] pp_addr_hdr_top,
+  input pp_ignore_ecc_err_top,
+  input pp_pkt_ecc_corr_top,
+  input pp_pkt_ecc_uncorr_top,
+  input pp_pkt_crc_err_top,
+  input[3:0] pp_pkt_byte_cnt_top,
+  input[3:0] pp_pkt_type_top
 );
 
   default 
@@ -93,7 +94,7 @@ checker  checker_top(
   // Builder config
   asm_max_byte_cnt: assume property(pb_byte_cnt <= 4'hF);
   asm_min_byte_cnt: assume property(pb_byte_cnt >= 4'h0);
-  // asm_max_byte_cnt: assume property(pb_byte_cnt == 4'h0);
+  // asm_max_byte_cnt: assume property(pb_byte_cnt == 4'h1);
   asm_stable_max_byte_cnt: assume property($stable(pb_byte_cnt));
 
   asm_merging_option: assume property(pb_data_sel inside {4'h0, 4'h1, 4'h2});
@@ -144,6 +145,8 @@ checker  checker_top(
   //SECTION REGS Interface props
   cov_pb0_start: cover property(pb0_start_top == 1'b1);
   cov_pb0_end: cover property(pb0_irq_top == 1'b1);
+  cov_pb0_start_byte_cnt0: cover property(pb0_start_top == 1'b1 && pb0_byte_cnt_top == 4'h0);
+  cov_pb0_start_byte_cnt7: cover property(pb0_start_top == 1'b1 && pb0_byte_cnt_top == 4'h7);
 
   cov_pb1_start: cover property(pb1_start_top == 1'b1);
   cov_pb1_end: cover property(pb1_irq_top == 1'b1);
@@ -151,8 +154,9 @@ checker  checker_top(
   cov_pp_start: cover property(pp_start_top == 1'b1);
   cov_pp_end: cover property(pp_irq_top == 1'b1);
 
-  cov_pb0_start_byte_cnt0: cover property(pb0_start_top == 1'b1 && pb0_byte_cnt_top == 4'h0);
-  cov_pb0_start_byte_cnt7: cover property(pb0_start_top == 1'b1 && pb0_byte_cnt_top == 4'h7);
+  cov_pp_start_byte_cnt5: cover property(pp_start_top == 1'b1 && pp_pkt_byte_cnt_top == 4'h5);
+  cov_pp_byte_cnt5: cover property(pp_pkt_byte_cnt_top == 4'h5);
+
 
 
   cov_ecc_corr_err: cover property(pp_pkt_ecc_corr_top == 1'b1);
@@ -163,6 +167,7 @@ checker  checker_top(
   cov_no_crc_err: cover property(pp_pkt_crc_err_top == 1'b0);
 
     // IMPORTANT Assert valid register values
+  // ast_no_crc_err: assert property(pp_pkt_crc_err_top == 1'b0);
 
   ast_pb0_addr_in: assert property(pb0_start_top |-> pb0_addr_in_top == pb_addr_in);
   ast_pb0_byte_cnt: assert property(pb0_start_top |-> pb0_byte_cnt_top == pb_byte_cnt);
@@ -196,14 +201,16 @@ checker  checker_top(
   //SECTION INMEM Interface Port B props
   asm_inmem_en: assume property(inmem_en_b_i == 1'b1);
 
-  // asm_inmem_data_i: assume property(inmem_data_b_i == 32'hDEADBEEF);
-  asm_inmem_data_i_stability: assume property($stable(inmem_data_b_i));
+  // asm_inmem_data_i: assume property(inmem_data_b_i == 32'hBABABABA);
+  // asm_inmem_data_i_stability: assume property($stable(inmem_data_b_i));
 
   // asm_inmem_addr: assume property(inmem_addr_b_i == 14'h0);
   // asm_inmem_we: assume property(inmem_we_b_i == 4'hf);
   // asm_inmem_data: assume property(inmem_data_b_o == 1'b1);
 
+	////////////////////////////////////////////////////////////////////////////////
   //SECTION OUTMEM Interface Port B props
+
   // outmem port B top interface, memory read only
   asm_outmem_en: assume property(outmem_en_b_i == 1'b1);
 
@@ -214,6 +221,278 @@ checker  checker_top(
   asm_outmem_we: assume property(outmem_we_b_i == 1'b0);
   // asm_outmem_data: assume property(outmem_data_b_o == 1'b1);
 
-  //IMPORTANT Assert data integrity 
+	////////////////////////////////////////////////////////////////////////////////	
+  //IMPORTANT Check CRC calculation
 
-endchecker
+	// Read data from memory after pp_start
+	logic[7:0] data_in_s;
+	logic[7:0] crc_mid_result_reg, crc_mid_result_next;
+	logic[7:0] crc_out_s;
+
+	logic[3:0] crc_cnt_reg, crc_cnt_next;
+	logic[7:0] crc_ext_reg, crc_ext_next;
+	logic[7:0] crc_calc_reg, crc_calc_next;
+	logic[3:0] byte_cnt_reg, byte_cnt_next;
+
+	logic[13:0] addr_free;
+	logic[13:0] addr_reg, addr_next;
+
+	logic crc_err_reg, crc_err_next;
+	logic corr_err_irq_reg, corr_err_irq_reg2;
+	logic corr_err_irq_pulse;
+
+
+
+	// Mid-result crc register block
+	always @(posedge clk) begin
+		if(reset)
+			crc_mid_result_reg <= '0;
+		else if(pp_start_top || corr_err_irq_pulse) 
+			crc_mid_result_reg <= '0;
+		else
+			crc_mid_result_reg <= crc_out_s;
+	end
+
+	// CRC calc FSM
+	typedef enum {IDLE, HEADER_READ, CRC_CALC, COMPARE_CRC} State;
+
+	State state_reg, state_next;
+
+	assign corr_err_irq_pulse = !corr_err_irq_reg2 && corr_err_irq_reg;
+
+	// detect single error irq edge
+	always_ff @(posedge clk) begin
+	 	if(reset || pp_irq_top) begin
+			corr_err_irq_reg <= 1'b0;
+			corr_err_irq_reg2 <= 1'b0;
+		end
+		else begin
+			if(pp_pkt_ecc_corr_top)
+				corr_err_irq_reg <= 1'b1;
+
+			corr_err_irq_reg2 <= corr_err_irq_reg;
+		end
+	end
+
+
+	// seq logic
+	always_ff @(posedge clk) begin
+		if(reset) begin
+			state_reg <= IDLE;
+			crc_calc_reg <= '0;
+			crc_cnt_reg <=  '0;
+			crc_ext_reg <=  '0;
+			crc_calc_reg <=  '0;
+			byte_cnt_reg <=  '0;
+			addr_reg <=  '0;
+			crc_err_reg <= 1'b0;
+		end
+		else begin
+			state_reg <= state_next;
+			crc_cnt_reg <=  crc_cnt_next;
+			crc_ext_reg <=  crc_ext_next;
+			crc_calc_reg <=  crc_calc_next;
+			byte_cnt_reg <=  byte_cnt_next;
+			addr_reg <=  addr_next;
+			crc_err_reg <= crc_err_next;
+		end
+	end
+
+	// comb logic
+	always_comb begin
+	// defaults
+		data_in_s <= '0;
+		state_next <= state_reg;
+		addr_next <= addr_reg;
+		byte_cnt_next <= byte_cnt_reg;
+		crc_cnt_next <= crc_cnt_reg;
+		crc_ext_next <= crc_ext_reg;
+		crc_calc_next <= crc_calc_reg;
+		crc_err_next <= crc_err_reg;
+
+		// single error interrupt
+		// cancel current execution, start again
+		// reset everything with correct byte count data
+		if(corr_err_irq_pulse) begin
+
+			byte_cnt_next <= pp_pkt_byte_cnt_top;
+			addr_next <= pp_addr_hdr_top + 2;
+			crc_cnt_next <= '0;
+			crc_ext_next <= '0;
+			crc_calc_next <= '0;
+			crc_err_next <= '0;
+
+			state_next <= CRC_CALC;
+		end 
+		else begin
+
+			case(state_reg)
+				IDLE: begin 
+					crc_cnt_next <= '0;
+					if(pp_start_top) begin
+						crc_err_next <= '0;
+						addr_next <= pp_addr_hdr_top;
+						state_next <= HEADER_READ;
+					end else
+						state_next <= IDLE;
+				end
+				HEADER_READ: begin
+					byte_cnt_next <= inmem_data_b_o[7:4];
+					addr_next <= addr_reg + 2;
+					state_next <= CRC_CALC;
+				end
+				CRC_CALC: begin
+					data_in_s <= inmem_data_b_o[7:0];
+					crc_cnt_next <= crc_cnt_reg + 1;
+					addr_next <= addr_reg + 1;
+					// store CRC
+					if(crc_cnt_reg == byte_cnt_reg)
+						crc_calc_next <= crc_out_s;
+
+					if(crc_cnt_reg == byte_cnt_reg + 1) begin
+						crc_ext_next <= inmem_data_b_o[7:0];
+						state_next <= COMPARE_CRC;
+					end else
+						state_next <= CRC_CALC;
+				end
+				COMPARE_CRC: begin
+					if(crc_ext_reg == crc_calc_reg) begin
+						crc_err_next <= 1'b0;
+					end else
+						crc_err_next <= 1'b1;
+
+					state_next <= IDLE;
+				end
+			endcase
+		end
+	end 
+	////////////////////////////////////////////////////////////////////////////////	
+
+	// Block for crc byte calculation
+	crc_chk_calc (
+		.crc_in(crc_mid_result_reg),
+		.data_in(data_in_s),
+		.crc_out(crc_out_s));
+
+	// Asssert correct CRC
+	// ast_crc_chk: assert property(state_reg == COMPARE_CRC |-> crc_ext_reg == crc_calc_reg);
+	ast_crc_err: assert property(pp_irq_top && pp_pkt_crc_err_top && !pp_pkt_ecc_uncorr_top && !pp_pkt_ecc_corr_top |-> crc_err_reg);
+	ast_crc_no_err: assert property(pp_irq_top && !pp_pkt_crc_err_top && !pp_pkt_ecc_uncorr_top && !pp_pkt_ecc_corr_top |-> !crc_err_reg);
+	ast_crc_err_when_ecc_err_exists: assert property(pp_irq_top && pp_pkt_crc_err_top && !pp_pkt_ecc_uncorr_top && pp_pkt_ecc_corr_top |-> crc_err_reg);
+	ast_crc_no_err_when_ecc_err_exists: assert property(pp_irq_top && !pp_pkt_crc_err_top && !pp_pkt_ecc_uncorr_top && pp_pkt_ecc_corr_top |-> !crc_err_reg);
+
+	////////////////////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////////////////////	
+	// IMPORTANT Check data integrity
+
+  logic[3:0] chosen_byte;
+
+  asm_chosen_byte_stable_top: assume property($stable(chosen_byte));
+
+  asm_chosen_byte_op0_top: assume property(disable iff(reset)
+    pb_data_sel == 4'h0 |-> chosen_byte <= pb_byte_cnt && chosen_byte[1:0] == 2'b0);
+
+  asm_chosen_byte_op1_top: assume property(disable iff(reset)
+    pb_data_sel == 4'h1 |-> chosen_byte <= pb_byte_cnt && chosen_byte[1] == 1'b0);
+  
+  asm_chosen_byte_op2_top: assume property(disable iff(reset)
+    pb_data_sel == 4'h2 |-> chosen_byte <= pb_byte_cnt);
+
+	typedef enum {IDLE_DI, CHOOSE_BYTE, BUILD_LOOP, RECEIVE_BYTE} di_State;
+
+	di_State di_state_reg, di_state_next;
+
+  reg[7:0] chosen_byte_data, chosen_byte_data_next;
+  logic chosen_byte_flag;
+  const logic[3:0] OP0 = 4'h0;
+  const logic[3:0] OP1 = 4'h1;
+  const logic[3:0] OP2 = 4'h2;
+
+	logic[13:0] di_byte_addr;
+	logic di_err;
+
+  logic[4:0] received_byte; 
+  reg[7:0] received_byte_data, received_byte_data_next;
+
+  always_comb begin
+		case(pb_data_sel) 
+			OP0: received_byte <= (chosen_byte[3:2] + 2);
+			OP1: received_byte <= ((chosen_byte[3:2] * 2) + chosen_byte[0] + 2);
+			default: received_byte <= (chosen_byte + 2); 
+		endcase
+  end
+
+	always_ff @(posedge clk) begin
+		if(reset) begin
+			di_state_reg <= IDLE_DI;
+			chosen_byte_data <= '0;
+			received_byte_data <= '0;
+		end
+		else begin
+			di_state_reg <= di_state_next;
+			chosen_byte_data <= chosen_byte_data_next;
+			received_byte_data <= received_byte_data_next;
+		end
+	end
+
+	always_comb begin
+		// defaults
+		di_state_next <= di_state_reg;
+		chosen_byte_data_next <= chosen_byte_data;
+		received_byte_data_next <= received_byte_data;
+		di_byte_addr <= '0;
+		di_err <= '0;
+
+		case(di_state_reg)
+			IDLE_DI: begin 
+				if(pb0_start_top) begin
+					di_state_next <= CHOOSE_BYTE;
+				end else
+					di_state_next <= IDLE_DI;
+			end
+			CHOOSE_BYTE: begin
+				di_byte_addr <= pb_addr_in + chosen_byte;
+				chosen_byte_data_next <= inmem_data_b_o;
+
+				di_state_next <= RECEIVE_BYTE;
+			end
+			RECEIVE_BYTE: begin
+				if(pb0_irq_top) begin
+					di_byte_addr <= pb_addr_out + received_byte;
+					received_byte_data_next <= inmem_data_b_o;
+					if(chosen_byte_data != received_byte_data_next)
+						di_err <= 1'b1;
+
+					di_state_next <= IDLE_DI;
+				end else
+					di_state_next <= RECEIVE_BYTE;
+			end
+		endcase
+	end 
+
+	ast_di: assert property(!di_err);
+	cov_pp_pb_work: cover property(!pp_busy_top && !pb0_busy_top);
+
+	////////////////////////////////////////////////////////////////////////////////	
+	// Memory interface B arbitration logic between DI and CRC checkers
+
+	logic[13:0] inmem_addr_b_s;
+
+	always_comb begin
+		if(!pp_busy_top)
+			inmem_addr_b_s <= addr_reg;
+		else if(!pb0_busy_top)
+			inmem_addr_b_s <= di_byte_addr;
+		else
+			inmem_addr_b_s <= addr_free;
+	end
+
+	// assume pkt validity, constrain address
+	asm_no_write: assume property(!pp_busy_top || !pb0_busy_top |-> !inmem_we_b_i);
+	asm_mem_addr: assume property(inmem_addr_b_i == inmem_addr_b_s);
+	// assume addr bound
+	asm_addr_bound: assume property(inmem_addr_b_i < 14'h13);
+
+
+	////////////////////////////////////////////////////////////////////////////////	
+endmodule

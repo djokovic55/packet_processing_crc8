@@ -1,0 +1,521 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>JG Coverage Report</title>
+  <script type="text/javascript">
+    var treetable_rowstate = new Array();
+    var treetable_callbacks = new Array();
+    function treetable_hideRow(rowId) {
+      el = document.getElementById(rowId);
+      el.style.display = "none";
+    }
+
+    function treetable_showRow(rowId) {
+      el = document.getElementById(rowId);
+      el.style.display = "";
+    }
+
+    function treetable_hasChildren(rowId) {
+      res = document.getElementById(rowId + '_0');
+      return (res != null);
+    }
+
+    function treetable_getRowChildren(rowId) {
+      el = document.getElementById(rowId);
+      var arr = new Array();
+      i = 0;
+      while (true) {
+        childRowId = rowId + '_' + i;
+        childEl = document.getElementById(childRowId);
+        if (childEl) {
+          arr[i] = childRowId;
+        } else {
+          break;
+        }
+        i++;
+      }
+
+    return (arr);
+    }
+
+    function treetable_toggleRow(rowId, state, force) {
+      var rowChildren;
+      var i;
+      // open or close all children rows depend on current state
+      force = (force == null) ? 1 : force;
+      if (state == null) {
+        row_state = ((treetable_rowstate[rowId]) ? (treetable_rowstate[rowId]) : 1) * -1;
+      } else {
+        row_state = state;
+       }
+      rowChildren = treetable_getRowChildren(rowId);
+      if (rowChildren.length == 0) return (false);
+      for (i = 0; i < rowChildren.length; i++) {
+        if (row_state == -1) {
+          treetable_hideRow(rowChildren[i]);
+          treetable_toggleRow(rowChildren[i], row_state, -1);
+          } else {
+        if (force == 1 || treetable_rowstate[rowId] != -1) {
+           treetable_showRow(rowChildren[i]);
+           treetable_toggleRow(rowChildren[i], row_state, -1);
+         }
+       }
+     }
+     if (force == 1) {
+       treetable_rowstate[rowId] = row_state;
+       treetable_fireEventRowStateChanged(rowId, row_state);
+       }
+       return (true);
+      }
+
+    function treetable_fireEventRowStateChanged(rowId, state) {
+       if (treetable_callbacks['eventRowStateChanged']) {
+          callback = treetable_callbacks['eventRowStateChanged'] + "('" + rowId + "', " + state + ");";
+          eval(callback);
+        }
+      }
+
+    function treetable_collapseAll(tableId) {
+       table = document.getElementById(tableId);
+       rowChildren = table.getElementsByTagName('tr');
+       for (i = 0; i < rowChildren.length; i++) {
+       if (index = rowChildren[i].id.indexOf('_')) {
+           // do not hide root elements
+           if(index != rowChildren[i].id.lastIndexOf('_')) {
+             rowChildren[i].style.display = 'none';
+           }
+           if (treetable_hasChildren(rowChildren[i].id)) {
+             treetable_rowstate[rowChildren[i].id] = -1;
+             treetable_fireEventRowStateChanged(rowChildren[i].id, -1);
+            }
+          }
+        }
+        return (true);
+      }
+
+      function treetable_expandAll(tableId) {
+        table = document.getElementById(tableId);
+        rowChildren = table.getElementsByTagName('tr');
+        for (i = 0; i < rowChildren.length; i++) {
+          if (index = rowChildren[i].id.indexOf('_')) {
+            rowChildren[i].style.display = '';
+            if (treetable_hasChildren(rowChildren[i].id)) {
+              treetable_rowstate[rowChildren[i].id] = 1;
+              treetable_fireEventRowStateChanged(rowChildren[i].id, 1);
+           }
+         }
+       }
+       return (true);
+      }
+   </script>
+  <script type="text/javascript">
+    treetable_callbacks['eventRowStateChanged'] = 'treetable_eventRowChanged';
+
+    function treetable_eventRowChanged(rowId, state) {
+      img = document.getElementById(rowId).getElementsByTagName('td')[0].getElementsByTagName('img')[0];
+if (state == 1) {
+        img.src = 'html_files/collapse_icon.png';
+      } else {
+        img.src = 'html_files/expand_icon.png';
+      }
+      return (true);
+    }
+
+openPage = function(instance) {
+    location.href = "html_files/cov_report_crc_check_detailed.html?Key="+instance;
+}
+
+  </script>
+  <style type="text/css">
+    .treetable {
+    }
+
+    .treetable th {
+      background:#A2A9A2;
+      margin:1px;
+      padding: 1 5px;
+      font-weight:bold;
+      font-size: 100%;
+    }
+
+    .treetable td {
+      background:#C9D0C9;
+      margin:1px;
+      padding: 0 5px;
+    }
+    .treetable td.number {
+      text-align:right;
+    }
+
+    .treetable td.cover {
+      background:#EBE0CA;
+    }
+    .treetable td.in {
+      background:#84E98F;
+    }
+    .treetable td.out {
+      background:#E78177;
+    }
+
+    a {
+      text-decoration:none;
+      color:#82218B;
+    }
+    a:hover {
+      color: blue;
+      background-color: transparent;
+      text-decoration: underline;
+    }
+
+    .button {
+      border:none;
+      margin: 0 4px 0 0;
+    }
+
+    body {
+    font-size:17px;
+    }
+  </style>
+</head>
+<h2 style="color: #000000; background-color: #FFFFFF; margin: 5px; text-align: center;adding-bottom: 8px;margin: 0 0 10px;border-bottom: 3px solid #e31837;padding-bottom: 15px;" ><img src=html_files/cadenceLogo.png align=left width="76" height="20"/> Jasper&trade; Coverage App - Summary Coverage Report</h2>
+<br>
+<table>
+  <tr><td><FONT style="COLOR: blue">User</FONT> </td><td> &nbsp;&nbsp;aleksadj</td></tr>
+  <tr><td><FONT style="COLOR: blue">Host</FONT> </td><td> &nbsp;&nbsp;veri-xn122.qb.veriest</td></tr>
+  <tr><td><FONT style="COLOR: blue">Report date</FONT> </td><td> &nbsp;&nbsp;Thursday, March 21, 2024 11:37:59 AM IST IST</td></tr>
+  <tr><td><FONT style="COLOR: blue">Report options</FONT> </td><td> &nbsp;&nbsp;-report -exclude { { reset waived deadcode } } -task crc_debug -report_file cov_report_crc_check.html -html -no_return </td></tr>
+  <tr><td><FONT style="COLOR: blue">Tasks</FONT> </td><td> &nbsp;&nbsp;crc_debug</td></tr>
+</table>
+&nbsp; &nbsp; <a href="cov_report_crc_check_bounded.html"><h4>Click Here To View Bounded Report</h4></a><br>
+<table>
+  <tr>
+    <td><FONT style="COLOR: blue">Coverage percentage Color Coding</FONT> &nbsp;&nbsp;&nbsp;</th>
+    <th style="background-color:orangered">&nbsp;&nbsp;&nbsp;< 30&nbsp;&nbsp;&nbsp;</th>
+    <th style="background-color:orange">&nbsp;&nbsp;&nbsp;< 70&nbsp;&nbsp;&nbsp;</th>
+    <th style="background-color:limegreen">&nbsp;&nbsp;&nbsp;< 100&nbsp;&nbsp;&nbsp;</th>
+  </tr>
+</table>
+<br>
+<body>
+  <a href="#" onclick="treetable_expandAll('table1');">Expand all</a>  <a href="#" onclick="treetable_collapseAll('table1');">Collapse all</a>
+  <table id="table1" class="treetable">
+    <colgroup>
+      <col width="570" />
+      <col width="210" />
+      <col width="210" />
+      <col width="210" />
+      <col width="100" />
+      <col width="0*" />
+    </colgroup>
+<tr>
+    <th style="word-wrap: normal;">Instance Name</th>
+    <th style="word-wrap: normal;">Formal Coverage</th>
+    <th style="word-wrap: normal;">Stimuli Coverage</th>
+    <th style="word-wrap: normal;">Checker Coverage</th>
+    <th style="word-wrap: normal;">Excluded Covers</th>
+</tr>
+<tr id="table1_0">
+  <td><a href="#/" onclick="treetable_toggleRow('table1_0');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top');"><FONT style="COLOR: darkblue; font-weight:bold;">top</FONT></a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">61.55%</FONT> &nbsp;&nbsp;(2467/4008)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">78.67%</FONT> &nbsp;&nbsp;(3153/4008)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">77.47%</FONT> &nbsp;&nbsp;(3102/4004)</td>
+  <td class="number">552</td>
+</tr>
+<tr id="table1_0_0">
+  <td>&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_0');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.inmem');">inmem</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">60.00%</FONT> &nbsp;&nbsp;(132/220)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">67.27%</FONT> &nbsp;&nbsp;(148/220)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">84.09%</FONT> &nbsp;&nbsp;(185/220)</td>
+  <td class="number">66</td>
+</tr>
+<tr id="table1_0_0_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.inmem.inmem_bram');">inmem_bram</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">64.52%</FONT> &nbsp;&nbsp;(20/31)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">74.19%</FONT> &nbsp;&nbsp;(23/31)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">90.32%</FONT> &nbsp;&nbsp;(28/31)</td>
+  <td class="number">12</td>
+</tr>
+<tr id="table1_0_0_1">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.inmem.slave_axi_cont_inmem');">slave_axi_cont_inmem</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">59.26%</FONT> &nbsp;&nbsp;(112/189)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">66.14%</FONT> &nbsp;&nbsp;(125/189)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">83.07%</FONT> &nbsp;&nbsp;(157/189)</td>
+  <td class="number">54</td>
+</tr>
+<tr id="table1_0_1">
+  <td>&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_1');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.outmem');">outmem</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">38.18%</FONT> &nbsp;&nbsp;(84/220)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">69.09%</FONT> &nbsp;&nbsp;(152/220)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">59.09%</FONT> &nbsp;&nbsp;(130/220)</td>
+  <td class="number">66</td>
+</tr>
+<tr id="table1_0_1_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.outmem.inmem_bram');">inmem_bram</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">17.24%</FONT> &nbsp;&nbsp;(5/29)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(29/29)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">17.24%</FONT> &nbsp;&nbsp;(5/29)</td>
+  <td class="number">14</td>
+</tr>
+<tr id="table1_0_1_1">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.outmem.slave_axi_cont_inmem');">slave_axi_cont_inmem</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">41.36%</FONT> &nbsp;&nbsp;(79/191)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">64.40%</FONT> &nbsp;&nbsp;(123/191)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">65.45%</FONT> &nbsp;&nbsp;(125/191)</td>
+  <td class="number">52</td>
+</tr>
+<tr id="table1_0_2">
+  <td>&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys');">subsys</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">62.51%</FONT> &nbsp;&nbsp;(2186/3497)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">79.55%</FONT> &nbsp;&nbsp;(2782/3497)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">77.95%</FONT> &nbsp;&nbsp;(2726/3497)</td>
+  <td class="number">405</td>
+</tr>
+<tr id="table1_0_2_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_0');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.intcon');">intcon</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">75.56%</FONT> &nbsp;&nbsp;(371/491)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">88.80%</FONT> &nbsp;&nbsp;(436/491)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">82.89%</FONT> &nbsp;&nbsp;(407/491)</td>
+  <td class="number">14</td>
+</tr>
+<tr id="table1_0_2_0_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_0_0');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.intcon.arb_inst');">arb_inst</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">48.00%</FONT> &nbsp;&nbsp;(12/25)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">72.00%</FONT> &nbsp;&nbsp;(18/25)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">48.00%</FONT> &nbsp;&nbsp;(12/25)</td>
+  <td class="number">7</td>
+</tr>
+<tr id="table1_0_2_0_0_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chk_fairness</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_0_1">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.intcon.fsm');">fsm</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">87.80%</FONT> &nbsp;&nbsp;(36/41)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">87.80%</FONT> &nbsp;&nbsp;(36/41)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(41/41)</td>
+  <td class="number">3</td>
+</tr>
+<tr id="table1_0_2_0_2">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chk_axi_prot</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_1">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_1');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.main_controller');">main_controller</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">85.78%</FONT> &nbsp;&nbsp;(368/429)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">94.17%</FONT> &nbsp;&nbsp;(404/429)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">89.04%</FONT> &nbsp;&nbsp;(382/429)</td>
+  <td class="number">34</td>
+</tr>
+<tr id="table1_0_2_1_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.main_controller.master_axi_cont_ctrl');">master_axi_cont_ctrl</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">84.21%</FONT> &nbsp;&nbsp;(192/228)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">92.98%</FONT> &nbsp;&nbsp;(212/228)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">86.84%</FONT> &nbsp;&nbsp;(198/228)</td>
+  <td class="number">17</td>
+</tr>
+<tr id="table1_0_2_1_1">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.main_controller.regs_conf_fifo');">regs_conf_fifo</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">91.67%</FONT> &nbsp;&nbsp;(22/24)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(24/24)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">91.67%</FONT> &nbsp;&nbsp;(22/24)</td>
+  <td class="number">2</td>
+</tr>
+<tr id="table1_0_2_2">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_2');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder0');">packet_builder0</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">72.21%</FONT> &nbsp;&nbsp;(491/680)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">95.15%</FONT> &nbsp;&nbsp;(647/680)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">74.26%</FONT> &nbsp;&nbsp;(505/680)</td>
+  <td class="number">40</td>
+</tr>
+<tr id="table1_0_2_2_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder0.fifo_in');">fifo_in</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">3.85%</FONT> &nbsp;&nbsp;(1/26)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">84.62%</FONT> &nbsp;&nbsp;(22/26)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">3.85%</FONT> &nbsp;&nbsp;(1/26)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_2_1">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder0.fifo_out');">fifo_out</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">54.17%</FONT> &nbsp;&nbsp;(13/24)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">83.33%</FONT> &nbsp;&nbsp;(20/24)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">62.50%</FONT> &nbsp;&nbsp;(15/24)</td>
+  <td class="number">2</td>
+</tr>
+<tr id="table1_0_2_2_2">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_2_2');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder0.crc_calc');">crc_calc</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">52.05%</FONT> &nbsp;&nbsp;(38/73)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(73/73)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">52.05%</FONT> &nbsp;&nbsp;(38/73)</td>
+  <td class="number">10</td>
+</tr>
+<tr id="table1_0_2_2_2_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder0.crc_calc.crc_calc');">crc_calc</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/8)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(8/8)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/8)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_2_3">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder0.hamming_calc');">hamming_calc</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/6)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(6/6)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/6)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_2_4">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder0.master_axi_cont_ctrl');">master_axi_cont_ctrl</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">77.49%</FONT> &nbsp;&nbsp;(179/231)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">91.77%</FONT> &nbsp;&nbsp;(212/231)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">81.39%</FONT> &nbsp;&nbsp;(188/231)</td>
+  <td class="number">14</td>
+</tr>
+<tr id="table1_0_2_3">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_3');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder1');">packet_builder1</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">22.35%</FONT> &nbsp;&nbsp;(152/680)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">36.03%</FONT> &nbsp;&nbsp;(245/680)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">72.06%</FONT> &nbsp;&nbsp;(490/680)</td>
+  <td class="number">40</td>
+</tr>
+<tr id="table1_0_2_3_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder1.fifo_in');">fifo_in</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">3.85%</FONT> &nbsp;&nbsp;(1/26)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">26.92%</FONT> &nbsp;&nbsp;(7/26)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">3.85%</FONT> &nbsp;&nbsp;(1/26)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_3_1">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder1.fifo_out');">fifo_out</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">16.67%</FONT> &nbsp;&nbsp;(4/24)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">29.17%</FONT> &nbsp;&nbsp;(7/24)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">62.50%</FONT> &nbsp;&nbsp;(15/24)</td>
+  <td class="number">2</td>
+</tr>
+<tr id="table1_0_2_3_2">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_3_2');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder1.crc_calc');">crc_calc</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">15.07%</FONT> &nbsp;&nbsp;(11/73)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">45.21%</FONT> &nbsp;&nbsp;(33/73)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">52.05%</FONT> &nbsp;&nbsp;(38/73)</td>
+  <td class="number">10</td>
+</tr>
+<tr id="table1_0_2_3_2_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder1.crc_calc.crc_calc');">crc_calc</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/8)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(8/8)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/8)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_3_3">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder1.hamming_calc');">hamming_calc</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/6)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(6/6)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/6)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_3_4">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.packet_builder1.master_axi_cont_ctrl');">master_axi_cont_ctrl</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">37.23%</FONT> &nbsp;&nbsp;(86/231)</td>
+  <td><FONT style="BACKGROUND-COLOR: orange">46.32%</FONT> &nbsp;&nbsp;(107/231)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">80.95%</FONT> &nbsp;&nbsp;(187/231)</td>
+  <td class="number">14</td>
+</tr>
+<tr id="table1_0_2_4">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_4');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.parser');">parser</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">80.64%</FONT> &nbsp;&nbsp;(329/408)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">95.10%</FONT> &nbsp;&nbsp;(388/408)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">82.84%</FONT> &nbsp;&nbsp;(338/408)</td>
+  <td class="number">107</td>
+</tr>
+<tr id="table1_0_2_4_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.parser.fifo_in');">fifo_in</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">75.00%</FONT> &nbsp;&nbsp;(18/24)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">83.33%</FONT> &nbsp;&nbsp;(20/24)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">91.67%</FONT> &nbsp;&nbsp;(22/24)</td>
+  <td class="number">2</td>
+</tr>
+<tr id="table1_0_2_4_1">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_4_1');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.parser.crc_calc');">crc_calc</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">91.78%</FONT> &nbsp;&nbsp;(67/73)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(73/73)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">91.78%</FONT> &nbsp;&nbsp;(67/73)</td>
+  <td class="number">10</td>
+</tr>
+<tr id="table1_0_2_4_1_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.parser.crc_calc.crc_calc');">crc_calc</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(8/8)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(8/8)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(8/8)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_4_2">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.parser.hamming_chk');">hamming_chk</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(4/4)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(4/4)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(4/4)</td>
+  <td class="number">0</td>
+</tr>
+<tr id="table1_0_2_4_3">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.parser.master_axi_cont_ctrl');">master_axi_cont_ctrl</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">70.44%</FONT> &nbsp;&nbsp;(112/159)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">90.57%</FONT> &nbsp;&nbsp;(144/159)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">72.96%</FONT> &nbsp;&nbsp;(116/159)</td>
+  <td class="number">86</td>
+</tr>
+<tr id="table1_0_2_5">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_5');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.system_regs');">system_regs</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">57.94%</FONT> &nbsp;&nbsp;(281/485)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">77.53%</FONT> &nbsp;&nbsp;(376/485)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">77.73%</FONT> &nbsp;&nbsp;(377/485)</td>
+  <td class="number">86</td>
+</tr>
+<tr id="table1_0_2_5_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.system_regs.regs_cont');">regs_cont</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orange">66.67%</FONT> &nbsp;&nbsp;(174/261)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">71.26%</FONT> &nbsp;&nbsp;(186/261)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">94.25%</FONT> &nbsp;&nbsp;(246/261)</td>
+  <td class="number">50</td>
+</tr>
+<tr id="table1_0_2_6">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_2_6');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.exreg');">exreg</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">80.34%</FONT> &nbsp;&nbsp;(188/234)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">85.47%</FONT> &nbsp;&nbsp;(200/234)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">94.44%</FONT> &nbsp;&nbsp;(221/234)</td>
+  <td class="number">68</td>
+</tr>
+<tr id="table1_0_2_6_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.exreg.ex_regs_cont');">ex_regs_cont</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">79.41%</FONT> &nbsp;&nbsp;(162/204)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">84.31%</FONT> &nbsp;&nbsp;(172/204)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">94.61%</FONT> &nbsp;&nbsp;(193/204)</td>
+  <td class="number">52</td>
+</tr>
+<tr id="table1_0_2_7">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.subsys.chk_data_integrity');">chk_data_integrity</a></td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/74)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">94.59%</FONT> &nbsp;&nbsp;(70/74)</td>
+  <td><FONT style="BACKGROUND-COLOR: orangeRed">0.00%</FONT> &nbsp;&nbsp;(0/74)</td>
+  <td class="number">16</td>
+</tr>
+<tr id="table1_0_3">
+  <td>&nbsp;&nbsp;<a href="#/" onclick="treetable_toggleRow('table1_0_3');"><img src="html_files/collapse_icon.png" class="button" alt="" width="12" height="12" /></a>&nbsp;<a href="#" title="Click to view Cover Items" onclick="javascript:openPage('top.chk_top');">chk_top</a></td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">91.55%</FONT> &nbsp;&nbsp;(65/71)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">100.00%</FONT> &nbsp;&nbsp;(71/71)</td>
+  <td><FONT style="BACKGROUND-COLOR: limeGreen">91.04%</FONT> &nbsp;&nbsp;(61/67)</td>
+  <td class="number">15</td>
+</tr>
+<tr id="table1_0_3_0">
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:i_1292</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td>0.00% &nbsp;&nbsp;(0/0)</td>
+  <td class="number">0</td>
+</tr>
+</table>
+<br><br>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<table>
+</table>
+<head>
+  <title>JG Coverage Report</title>
+  <script type="text/javascript">
+    var treetable_rowstate = new Array();
+    var treetable_callbacks = new Array();
+    function treetable_hideRow(rowId) {
+      el = document.getElementById(rowId);
+      el.style.display = "none";
+    }
+
+    function treetable_showRow(rowId) {
+      el = document.getElementById(rowId);
+      el.style.display = "";
+    }
+
+    function treetable_hasChildren(rowId) {
+      res = document.getElementById(rowId + '_0');
+      return (res != null);
+    }
+
+    function treetable_getRowChildren(rowId) {
+      el = document.getElementById(rowId);
+      var arr = new Array();
+      i = 0;
+      while (true) {
+        childRowId = rowId + '_' + i;
+        childEl = document.getElementById(childRowId);
+        if (childEl) {
+          arr[i] = childRowId;
+        } else {
+          break;
+        }
+        i++;
+      }
+
+    return (arr);
+    }
+
+    function treetable_toggleRow(rowId, state, force) {
+      var rowChildren;
+      var i;
+      // open or close all children rows depend on current state
+      force = (force == null) ? 1 : force;
+      if (state == null) {
+        row_state = ((treetable_rowstate[rowId]) ? (treetable_rowstate[rowId]) : 1) * -1;
+      } else {
+        row_state = state;
+       }
+      rowChildren = treetable_getRowChildren(rowId);
+      if (rowChildren.length == 0) return (false);
+      for (i = 0; i < rowChildren.length; i++) {
+        if (row_state == -1) {
+          treetable_hideRow(rowChildren[i]);
+          treetable_toggleRow(rowChildren[i], row_state, -1);
+          } else {
+        if (force == 1 || treetable_rowstate[rowId] != -1) {
+           treetable_showRow(rowChildren[i]);
+           treetable_toggleRow(rowChildren[i], row_state, -1);
+         }
+       }
+     }
+     if (force == 1) {
+       treetable_rowstate[rowId] = row_state;
+       treetable_fireEventRowStateChanged(rowId, row_state);
+       }
+       return (true);
+      }
+
+    function treetable_fireEventRowStateChanged(rowId, state) {
+       if (treetable_callbacks['eventRowStateChanged']) {
+          callback = treetable_callbacks['eventRowStateChanged'] + "('" + rowId + "', " + state + ");";
+          eval(callback);
+        }
+      }
+
+    function treetable_collapseAll(tableId) {
+       table = document.getElementById(tableId);
+       rowChildren = table.getElementsByTagName('tr');
+       for (i = 0; i < rowChildren.length; i++) {
+       if (index = rowChildren[i].id.indexOf('_')) {
+           // do not hide root elements
+           if(index != rowChildren[i].id.lastIndexOf('_')) {
+             rowChildren[i].style.display = 'none';
+           }
+           if (treetable_hasChildren(rowChildren[i].id)) {
+             treetable_rowstate[rowChildren[i].id] = -1;
+             treetable_fireEventRowStateChanged(rowChildren[i].id, -1);
+            }
+          }
+        }
+        return (true);
+      }
+
+      function treetable_expandAll(tableId) {
+        table = document.getElementById(tableId);
+        rowChildren = table.getElementsByTagName('tr');
+        for (i = 0; i < rowChildren.length; i++) {
+          if (index = rowChildren[i].id.indexOf('_')) {
+            rowChildren[i].style.display = '';
+            if (treetable_hasChildren(rowChildren[i].id)) {
+              treetable_rowstate[rowChildren[i].id] = 1;
+              treetable_fireEventRowStateChanged(rowChildren[i].id, 1);
+           }
+         }
+       }
+       return (true);
+      }
+   </script>
+  <script type="text/javascript">
+    treetable_callbacks['eventRowStateChanged'] = 'treetable_eventRowChanged';
+
+    function treetable_eventRowChanged(rowId, state) {
+      img = document.getElementById(rowId).getElementsByTagName('td')[0].getElementsByTagName('img')[0];
+if (state == 1) {
+        img.src = 'html_files/collapse_icon.png';
+      } else {
+        img.src = 'html_files/expand_icon.png';
+      }
+      return (true);
+    }
+
+openBoundedPage = function(tId) {
+    location.href = "html_files/cov_report_crc_check_bounded_detailed.html?tId="+tId;
+}
+
+  </script>
+  <style type="text/css">
+    .treetable {
+    }
+
+    .treetable th {
+      background:#A2A9A2;
+      margin:1px;
+      padding: 1 5px;
+      font-weight:bold;
+      font-size: 100%;
+    }
+
+    .treetable td {
+      background:#C9D0C9;
+      margin:1px;
+      padding: 0 5px;
+    }
+    .treetable td.number {
+      text-align:right;
+    }
+
+    .treetable td.cover {
+      background:#EBE0CA;
+    }
+    .treetable td.in {
+      background:#84E98F;
+    }
+    .treetable td.out {
+      background:#E78177;
+    }
+
+    a {
+      text-decoration:none;
+      color:#82218B;
+    }
+    a:hover {
+      color: blue;
+      background-color: transparent;
+      text-decoration: underline;
+    }
+
+    .button {
+      border:none;
+      margin: 0 4px 0 0;
+    }
+
+    body {
+    font-size:17px;
+    }
+  </style>
+</head>
+<h2 style="color: #000000; background-color: #FFFFFF; margin: 5px; text-align: center;adding-bottom: 8px;margin: 0 0 10px;border-bottom: 3px solid #e31837;padding-bottom: 15px;" ><img src=html_files/cadenceLogo.png align=left width="76" height="20"/> Jasper&trade; Coverage App - Bounded Coverage Report</h2>
+<br>
+<table>
+  <tr><td><FONT style="COLOR: blue">User</FONT> </td><td> &nbsp;&nbsp;aleksadj</td></tr>
+  <tr><td><FONT style="COLOR: blue">Host</FONT> </td><td> &nbsp;&nbsp;veri-xn122.qb.veriest</td></tr>
+  <tr><td><FONT style="COLOR: blue">Report date</FONT> </td><td> &nbsp;&nbsp;Thursday, March 21, 2024 11:38:05 AM IST IST</td></tr>
+  <tr><td><FONT style="COLOR: blue">Report options</FONT> </td><td> &nbsp;&nbsp;-report -exclude { { reset waived deadcode } } -task crc_debug -report_file cov_report_crc_check.html -html -no_return </td></tr>
+  <tr><td><FONT style="COLOR: blue">Tasks</FONT> </td><td> &nbsp;&nbsp;crc_debug</td></tr>
+</table>
+<br>
+<body>
+  <table id="table1" class="treetable">
+    <colgroup>
+      <col width="570" />
+      <col width="190" />
+      <col width="190" />
+      <col width="190" />
+      <col width="190" />
+      <col width="190" />
+      <col width="190" />
+      <col width="190" />
+      <col width="100" />
+      <col width="0*" />
+    </colgroup>
+<tr>
+    <th style="word-wrap: normal;">Assert  Name </th>
+    <th style="word-wrap: normal;">Bounded Coverage(%)</th>
+    <th style="word-wrap: normal;">Assert Bound</th>
+    <th style="word-wrap: normal;">In COI</th>
+    <th style="word-wrap: normal;">Covered CIs Beyond Bound</th>
+    <th style="word-wrap: normal;">Covered CIs Max Bound</th>
+    <th style="word-wrap: normal;">Undetermined CIs</th>
+    <th style="word-wrap: normal;">Undetermined CIs Max Bound</th>
+</tr>
+</table>
+<table>
+  <tr><td><FONT style="COLOR: blue">Assert Bound</FONT> </td><td> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Cycle count of the bounded proof</td></tr></br>
+  <tr><td><FONT style="COLOR: blue">In COI</FONT> </td><td> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Total cover items in the COI of the assertion</td></tr></br>
+  <tr><td><FONT style="COLOR: blue">Covered CIs Beyond Bound</FONT> </td><td> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Unconfirmed covers in the COI, that is, covers reached beyond the proof bound</td></tr></br>
+  <tr><td><FONT style="COLOR: blue">Covered CIs Max Bound</FONT> </td><td> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Highest bound of the unconfirmed covers</td></tr></br>
+  <tr><td><FONT style="COLOR: blue">Undetermined CIs</FONT> </td><td> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Undetermined covers, that is, covers in the COI of the assertion regardless of bound</td></tr></br>
+  <tr><td><FONT style="COLOR: blue">Undetermined CIs Max Bound</FONT> </td><td> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Highest bound of the undetermined covers</td></tr></br>
+</table>
+</table>
+<br><br>
+</body>
+</html>

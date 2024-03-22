@@ -21,6 +21,11 @@ entity packet_parser is
         pkt_byte_cnt_o : out std_logic_vector(3 downto 0);
         pkt_type_o : out std_logic_vector(3 downto 0);
 
+				-- checker port
+				-- parser_state: out std_logic_vector(1 downto 0);
+				-- crc_pos: out std_logic_vector(1 downto 0);
+				-- pkt_byte_cnt_o_reg : out std_logic_vector(3 downto 0);
+
         -- User ports ends
 
         --------------------------------------------------------------------------------
@@ -325,7 +330,6 @@ end component hamming_check;
   signal busy_o_reg, busy_o_next  : std_logic;
   signal pkt_ecc_corr_o_reg, pkt_ecc_corr_o_next  : std_logic;
   signal pkt_ecc_uncorr_o_reg, pkt_ecc_uncorr_o_next  : std_logic;
-  signal pkt_crc_err_o_reg, pkt_crc_err_o_next  : std_logic;
   signal pkt_byte_cnt_o_reg, pkt_byte_cnt_o_next: std_logic_vector(3 downto 0);
   signal pkt_type_o_reg, pkt_type_o_next  : std_logic_vector(3 downto 0);
 
@@ -335,6 +339,7 @@ end component hamming_check;
   signal fifo_in_full_s    : std_logic;
 
   signal fifo_in_rd_pt_rst_s   : std_logic;
+  signal fifo_reset_s   : std_logic;
   signal fifo_in_rd_en_s   : std_logic;
   signal fifo_in_rd_data_s : std_logic_vector(31 downto 0);
   signal fifo_in_empty_s   : std_logic;
@@ -370,8 +375,8 @@ begin
   -- output signals
 
   pkt_ecc_corr_o <= pkt_ecc_corr_o_reg;
-  pkt_ecc_uncorr_o <= pkt_ecc_uncorr_o_reg;
-  pkt_crc_err_o <= pkt_crc_err_o_reg;
+  pkt_ecc_uncorr_o <= pkt_ecc_uncorr_o_next;
+  pkt_crc_err_o <= crc_err_s;
   pkt_byte_cnt_o <= pkt_byte_cnt_o_reg;
   pkt_type_o <= pkt_type_o_reg;
 
@@ -387,6 +392,9 @@ begin
 	-- fifo
 	fifo_in_rd_pt_rst_s <= '0';  
 
+	-- checker output
+	-- parser_state <= state_reg;
+
   pp_fsm_seq_proc: process(M_AXI_ACLK)
   begin
       if(M_AXI_ACLK'event and M_AXI_ACLK = '1') then
@@ -397,7 +405,6 @@ begin
 
           pkt_ecc_corr_o_reg <= '0';
           pkt_ecc_uncorr_o_reg <= '0';
-          pkt_crc_err_o_reg <= '0';
           pkt_byte_cnt_o_reg <= (others => '0');
           pkt_type_o_reg <= (others => '0');
           axi_read_init_reg <= '0';
@@ -408,7 +415,6 @@ begin
 
           pkt_ecc_corr_o_reg <= pkt_ecc_corr_o_next;
           pkt_ecc_uncorr_o_reg <= pkt_ecc_uncorr_o_next;
-          pkt_crc_err_o_reg <= pkt_crc_err_o_next;
           pkt_byte_cnt_o_reg <= pkt_byte_cnt_o_next;
           pkt_type_o_reg <= pkt_type_o_next;
 
@@ -421,7 +427,7 @@ begin
 
 
   pp_fsm_comb_proc:process(state_reg, header_reg, pkt_ecc_corr_o_reg, pkt_ecc_uncorr_o_reg, 
-                           pkt_crc_err_o_reg, pkt_byte_cnt_o_reg, pkt_type_o_reg, axi_read_data_s, 
+                           pkt_byte_cnt_o_reg, pkt_type_o_reg, axi_read_data_s, 
                            axi_read_vld_s, axi_read_last_s, hamming_parity_in_s, ignore_ecc_err_i, 
 													 start_i, addr_hdr_i, burst_len_with_crc_s, crc_reg, crc_ready_s, crc_pos_s, crc_out_s,
 													 hamming_parity_check_out_s, hamming_msb_parity_bit_s, shift_data_req_s) is
@@ -439,7 +445,6 @@ begin
     -- output regs
     pkt_ecc_corr_o_next <= pkt_ecc_corr_o_reg;
     pkt_ecc_uncorr_o_next <= pkt_ecc_uncorr_o_reg;
-    pkt_crc_err_o_next <= pkt_crc_err_o_reg;
     pkt_byte_cnt_o_next <= pkt_byte_cnt_o_reg;
     pkt_type_o_next <= pkt_type_o_reg;
 
@@ -464,6 +469,7 @@ begin
     fifo_in_wr_data_s <= (others => '0');
     fifo_in_wr_en_s <= '0';
     fifo_in_rd_en_s <= '0';
+    fifo_reset_s <= '0';
 
     -- Crc default
     start_crc_s <= '0';
@@ -478,11 +484,15 @@ begin
         -- reset all regs values
         pkt_ecc_corr_o_next <= '0';
         pkt_ecc_uncorr_o_next <= '0';
-        pkt_crc_err_o_next <= '0';
+				crc_err_s <= '0';
+				-- unused
         pkt_byte_cnt_o_next <= (others => '0');
         pkt_type_o_next <= (others => '0');
 
         busy_o <= '1';
+
+				-- reset fifo
+				fifo_reset_s <= '1';
 
         if(start_i = '1') then
 					axi_read_init_next <= '1';
@@ -496,7 +506,7 @@ begin
         end if;
       
       when HEADER_READ => 
-        axi_base_address_s <= std_logic_vector(OUTMEM_BASE_ADDR);
+        axi_base_address_s <= std_logic_vector(INMEM_BASE_ADDR);
         axi_read_address_s <= addr_hdr_i;
         axi_burst_len_s <= (others => '0');
 
@@ -583,15 +593,18 @@ begin
         end if;
 
       when INMEM_READ => 
-        axi_base_address_s <= std_logic_vector(OUTMEM_BASE_ADDR);
+        axi_base_address_s <= std_logic_vector(INMEM_BASE_ADDR);
         -- IMPORTANT 2 bytes of header are already read, so continue reading from first data byte to and including crc byte
         axi_read_address_s <= std_logic_vector(unsigned(addr_hdr_i) + 2);
         -- IMPORTANT axi burst len depends on byte_cnt, therefore inmem read phase will fail if this information is incorrect
         axi_burst_len_s <= burst_len_with_crc_s;
 
         axi_read_rdy_s <= '1';
+				--new
+				
 
         if(axi_read_vld_s = '1') then
+
           fifo_in_wr_en_s <= '1';
           fifo_in_wr_data_s <= axi_read_data_s;
           
@@ -635,9 +648,8 @@ begin
           -- crc_next <= crc_out_s;
           if(unsigned(crc_reg) /= unsigned(crc_out_s)) then
             crc_err_s <= '1';
-            -- [x] set output signals about crc error
-            pkt_crc_err_o_next <= '1';
           end if;
+					pkt_ecc_corr_o_next <= '0';
 
           irq_o <= '1';
           ---------------------------------------- 
@@ -658,7 +670,9 @@ begin
   port map(
 
     clk => M_AXI_ACLK,      
-    reset => M_AXI_ARESETN, 
+		-- change to be not system reset but the reset generated by parser block
+    reset => fifo_reset_s, 
+    -- reset => M_AXI_ARESETN, 
     wr_en_i => fifo_in_wr_en_s,   
     wr_data_i => fifo_in_wr_data_s, 
     full_o => fifo_in_full_s,    

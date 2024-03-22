@@ -36,6 +36,7 @@ architecture Behavioral of crc_top is
   signal shift_s : std_logic;
   signal shift_cnt_reg, shift_cnt_next : std_logic_vector(4 downto 0);
   signal pulse_cnt_reg, pulse_cnt_next : std_logic_vector(1 downto 0);
+  signal crc_ready_reg, crc_ready_next : std_logic;
 
   -- crc signals
   signal crc_reg : std_logic_vector(7 downto 0);
@@ -46,6 +47,7 @@ begin
 
   -- output crc8
   crc_out <= crc_reg;
+	crc_ready <= crc_ready_reg;
 
   -- crc mid result register
   crc_mid_res_reg: process(clk) is
@@ -88,17 +90,19 @@ begin
           state_reg <= IDLE;
           shift_cnt_reg <= (others => '0');
           pulse_cnt_reg <= (others => '0');
+          crc_ready_reg <= '0';
         else
           state_reg <= state_next;
           shift_cnt_reg <= shift_cnt_next;
           pulse_cnt_reg <= pulse_cnt_next;
+					crc_ready_reg <= crc_ready_next;
 
         end if;
       end if;
   end process; 
 
   fsm_comb_proc:process(state_reg, pulse_cnt_reg, shift_cnt_reg, start_crc, data_in,
-                        pulse_cnt_max, vld_bytes_last_pulse_cnt) is
+                        crc_ready_reg, crc_ready_next, pulse_cnt_max, vld_bytes_last_pulse_cnt) is
   begin
 
     -- default values
@@ -107,7 +111,7 @@ begin
     shift_cnt_next <= shift_cnt_reg;
     shift_s <= '0';
     data_req <= '0';
-    crc_ready <= '0';
+    crc_ready_next <= '0';
 
     case state_reg is
       when IDLE =>
@@ -175,7 +179,7 @@ begin
 
         if(unsigned(shift_cnt_reg) = unsigned(vld_bytes_last_pulse_cnt)) then
           -- KEY signal crc calculation done
-          crc_ready <= '1'; 
+          crc_ready_next <= '1'; 
           ---------------------------------------- 
           state_next <= IDLE;
           ---------------------------------------- 
@@ -191,7 +195,9 @@ begin
   crc_calc: crc8
   port map(
     crc_in => crc_reg, 
-    data_in => crc_data_in_s,
+		-- crc_data_in_s is register which makes 1 cycle latency crc calc bug
+		-- forward directly value from shift register 
+    data_in => q_s(7 downto 0),
     crc_out => crc_out_s
   );
 

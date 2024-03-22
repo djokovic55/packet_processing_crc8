@@ -410,6 +410,9 @@ architecture Behavioral of packet_builder is
   signal header_s : std_logic_vector(15 downto 0);
   signal ecc_s : std_logic_vector(3 downto 0);
 
+	-- define busy internal siganl to enable cutpoints on it
+	signal busy_s : std_logic;
+
   constant INMEM_BASE_ADDR: unsigned := x"00000000";
   constant OUTMEM_BASE_ADDR: unsigned := x"00010000";
 begin
@@ -458,6 +461,9 @@ begin
 
   -- shift data
   shift_data_in_s <= fifo_in_rd_data_s;
+
+	-- busy I/O assignment
+	busy_o <= busy_s;
 
   cycles_to_build: process(M_AXI_ACLK)
   begin
@@ -567,7 +573,7 @@ begin
     axi_read_init_s <= '0';
 
     -- Builder default
-    busy_o <= '0';
+    busy_s <= '0';
     irq_o <= '0';
 
     -- FIFOs default
@@ -587,7 +593,7 @@ begin
 
     case state_reg is
       when IDLE =>
-        busy_o <= '1';
+        busy_s <= '1';
 				pulse_cnt_next <= (others => '0');
 
 				-- reset all registers

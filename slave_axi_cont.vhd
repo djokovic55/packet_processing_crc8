@@ -257,7 +257,8 @@ begin
 	          when "01" => --incremental burst
 	            -- The write address for all the beats in the transaction are increments by awsize
 	            axi_awaddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_awaddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1);--awaddr aligned to 4 byte boundary
-	            axi_awaddr(ADDR_LSB-1 downto 0)  <= (others => '0');  ----for awsize = 4 bytes (010)
+							-- Uncomment to enable word allignment
+	            -- axi_awaddr(ADDR_LSB-1 downto 0)  <= (others => '0');  ----for awsize = 4 bytes (010)
 	          when "10" => --Wrapping burst
 	            -- The write address wraps when the address reaches wrap boundary 
 	            if (aw_wrap_en = '1') then
@@ -400,7 +401,8 @@ begin
 		  when "01" =>  --incremental burst
 		    -- The read address for all the beats in the transaction are increments by awsize
 		    axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB) <= std_logic_vector (unsigned(axi_araddr(C_S_AXI_ADDR_WIDTH - 1 downto ADDR_LSB)) + 1); --araddr aligned to 4 byte boundary
-		    axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');  ----for awsize = 4 bytes (010)
+				-- Uncomment to enable word allignment
+		    -- axi_araddr(ADDR_LSB-1 downto 0)  <= (others => '0');  ----for awsize = 4 bytes (010)
 		  when "10" =>  --Wrapping burst
 		    -- The read address wraps when the address reaches wrap boundary 
 		    if (ar_wrap_en = '1') then   

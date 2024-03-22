@@ -80,27 +80,29 @@ module checker_data_integrity(
     end
     else begin
 	  if(chosen_byte[3:2] == rpulse_cnt && rnext) begin
-		chosen_byte_flag <= 1'b1;
-		if(chosen_byte_flag)
-		  chosen_byte_flag <= 1'b0;	
 
-		case(data_sel) 
-		  OP0: begin
-			chosen_byte_data <= rdata[7:0];
-		  end
-		  OP1: begin
-			case(chosen_byte[0]) 
-			  1'b0: chosen_byte_data <= rdata[7:0];
-			  1'b1: chosen_byte_data <= rdata[15:8];
-			endcase
-		  end
-		  OP2: begin
-			case(chosen_byte[1:0]) 
-			  2'b00: chosen_byte_data <= rdata[7:0];
-			  2'b01: chosen_byte_data <= rdata[15:8];
-			  2'b10: chosen_byte_data <= rdata[23:16];
-			  2'b11: chosen_byte_data <= rdata[31:24];
-			endcase
+			chosen_byte_flag <= 1'b1;
+
+			if(chosen_byte_flag)
+				chosen_byte_flag <= 1'b0;	
+
+			case(data_sel) 
+				OP0: begin
+				chosen_byte_data <= rdata[7:0];
+				end
+				OP1: begin
+				case(chosen_byte[0]) 
+					1'b0: chosen_byte_data <= rdata[7:0];
+					1'b1: chosen_byte_data <= rdata[15:8];
+				endcase
+				end
+				OP2: begin
+				case(chosen_byte[1:0]) 
+					2'b00: chosen_byte_data <= rdata[7:0];
+					2'b01: chosen_byte_data <= rdata[15:8];
+					2'b10: chosen_byte_data <= rdata[23:16];
+					2'b11: chosen_byte_data <= rdata[31:24];
+				endcase
 		  end
 		endcase
 	  end
@@ -158,6 +160,7 @@ module checker_data_integrity(
   end
 
   ast_packet_integrity: assert property(chosen_packet_arrived |-> received_byte_data == chosen_byte_data);
+
   cov_chosen_byte_occurence: cover property(rnext ##[0:15] chosen_byte_flag);
 
   cov_chosen_byte_val0: cover property(chosen_byte == 4'h0);
