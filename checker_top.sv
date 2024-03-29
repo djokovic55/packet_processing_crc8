@@ -89,14 +89,18 @@ module  checker_top(
 
   cov_pb_pp_task: cover property((pb_byte_cnt == 4'h3 && pb0_start_top) ##[1:$] pp_start_top);
 
-  //SECTION EX_REGS Interface Config
   
-  // Builder config
+  // BUILDER CONFIG
+  asm_addr_in: assume property(pb_addr_in[31:4] == '0);
+  asm_addr_in_stability: assume property($stable(pb_addr_in));
+
+	// Byte cnt
   asm_max_byte_cnt: assume property(pb_byte_cnt <= 4'hF);
   asm_min_byte_cnt: assume property(pb_byte_cnt >= 4'h0);
   // asm_max_byte_cnt: assume property(pb_byte_cnt == 4'h1);
   asm_stable_max_byte_cnt: assume property($stable(pb_byte_cnt));
 
+	// Data sel
   asm_merging_option: assume property(pb_data_sel inside {4'h0, 4'h1, 4'h2});
   // asm_merging_option: assume property(pb_data_sel == 4'h2);
   asm_merg_op_stability: assume property($stable(pb_data_sel));
@@ -106,8 +110,6 @@ module  checker_top(
   // asm_ecc_en: assume property(pb_ecc_en == 1'b1);
   asm_ecc_en_stability: assume property($stable(pb_ecc_en));
 
-  asm_addr_in: assume property(pb_addr_in[31:4] == '0);
-  asm_addr_in_stability: assume property($stable(pb_addr_in));
 
   // asm_pkt_type: assume property(pb_pkt_type == 4'hA);
   asm_pkt_type_stability: assume property($stable(pb_pkt_type));
@@ -222,6 +224,36 @@ module  checker_top(
   // asm_outmem_data: assume property(outmem_data_b_o == 1'b1);
 
 	////////////////////////////////////////////////////////////////////////////////	
+  //SECTION CHECK ECC CALCULATION IN BUILD TASK
+	logic[3:0] ecc_pb_s;
+	logic[7:0] ecc_data_in_pb_s;
+	logic ecc_msb_pb_s;
+
+	// In builder checker (currently only for PB0) based on received config, calculate ecc code and msb bit,
+	// then upon building completion extract stored ecc code from outgoing memory to check correct calculation 
+
+	// calculate ECC code from received header data
+	assign ecc_pb_s[0] = ecc_data_in_pb_s[0] ^ ecc_data_in_pb_s[1] ^ ecc_data_in_pb_s[3] ^ ecc_data_in_pb_s[4] ^ ecc_data_in_pb_s[6];
+	assign ecc_pb_s[1] = ecc_data_in_pb_s[0] ^ ecc_data_in_pb_s[2] ^ ecc_data_in_pb_s[3] ^ ecc_data_in_pb_s[5] ^ ecc_data_in_pb_s[6];
+	assign ecc_pb_s[2] = ecc_data_in_pb_s[1] ^ ecc_data_in_pb_s[2] ^ ecc_data_in_pb_s[3] ^ ecc_data_in_pb_s[7];
+	assign ecc_pb_s[3] = ecc_data_in_pb_s[4] ^ ecc_data_in_pb_s[5] ^ ecc_data_in_pb_s[6] ^ ecc_data_in_pb_s[7];
+
+	// calculate ECC MSB bit do detect double+ errors
+	assign ecc_msb_pb_s = ecc_data_in_pb_s[0] ^ ecc_data_in_pb_s[1] ^ ecc_data_in_pb_s[2] ^ ecc_data_in_pb_s[3] ^ ecc_data_in_pb_s[4] ^ ecc_data_in_pb_s[5] ^ ecc_data_in_pb_s[6] ^ ecc_data_in_pb_s[7]; 
+
+	////////////////////////////////////////////////////////////////////////////////	
+  //SECTION CHECK ECC CALCULATION IN BUILD TASK
+	//SECTION CALCULATE ECC ERR CODE TO EXTRACT ECC ERRORS IN PARSE TASK
+	logic[7:0] ecc_data_in_pp_s;
+	logic[3:0] ecc_pp_s;
+	logic[3:0] ecc_err_code_pp_s;
+
+	// In parser checker, read HEADER data and calculate err code, then based on received ECC MSB bit and generated ecc err code conclude error existence
+	assign ecc_err_code_pp_s[0] = ecc_pp_s[0] ^ ecc_data_in_pp_s[0] ^ ecc_data_in_pp_s[1] ^ ecc_data_in_pp_s[3] ^ ecc_data_in_pp_s[4] ^ ecc_data_in_pp_s[6];
+	assign ecc_err_code_pp_s[1] = ecc_pp_s[1] ^ ecc_data_in_pp_s[0] ^ ecc_data_in_pp_s[2] ^ ecc_data_in_pp_s[3] ^ ecc_data_in_pp_s[5] ^ ecc_data_in_pp_s[6];
+	assign ecc_err_code_pp_s[2] = ecc_pp_s[2] ^ ecc_data_in_pp_s[1] ^ ecc_data_in_pp_s[2] ^ ecc_data_in_pp_s[3] ^ ecc_data_in_pp_s[7];
+	assign ecc_err_code_pp_s[3] = ecc_pp_s[3] ^ ecc_data_in_pp_s[4] ^ ecc_data_in_pp_s[5] ^ ecc_data_in_pp_s[6] ^ ecc_data_in_pp_s[7];
+	////////////////////////////////////////////////////////////////////////////////	
   //IMPORTANT Check CRC calculation
 
 	// Read data from memory after pp_start
@@ -240,6 +272,8 @@ module  checker_top(
 	logic crc_err_reg, crc_err_next;
 	logic corr_err_irq_reg, corr_err_irq_reg2;
 	logic corr_err_irq_pulse;
+	logic ecc_corr_err_pp_reg, ecc_corr_err_pp_next;
+	logic ecc_uncorr_err_pp_reg, ecc_uncorr_err_pp_next;
 
 
 
@@ -286,6 +320,10 @@ module  checker_top(
 			byte_cnt_reg <=  '0;
 			addr_reg <=  '0;
 			crc_err_reg <= 1'b0;
+
+			ecc_corr_err_pp_reg <= 1'b0;
+			ecc_uncorr_err_pp_reg <= 1'b0;
+
 		end
 		else begin
 			state_reg <= state_next;
@@ -295,6 +333,9 @@ module  checker_top(
 			byte_cnt_reg <=  byte_cnt_next;
 			addr_reg <=  addr_next;
 			crc_err_reg <= crc_err_next;
+
+			ecc_corr_err_pp_reg <= ecc_corr_err_pp_next;
+			ecc_uncorr_err_pp_reg <= ecc_uncorr_err_pp_next ;
 		end
 	end
 
@@ -310,6 +351,8 @@ module  checker_top(
 		crc_calc_next <= crc_calc_reg;
 		crc_err_next <= crc_err_reg;
 
+	  ecc_corr_err_pp_next <= ecc_corr_err_pp_reg;
+		ecc_uncorr_err_pp_next <= ecc_uncorr_err_pp_reg;
 		// single error interrupt
 		// cancel current execution, start again
 		// reset everything with correct byte count data
@@ -329,6 +372,11 @@ module  checker_top(
 			case(state_reg)
 				IDLE: begin 
 					crc_cnt_next <= '0;
+					if(pp_irq_top) begin
+						ecc_corr_err_pp_next <= '0;
+						ecc_uncorr_err_pp_next <= '0;
+					end
+
 					if(pp_start_top) begin
 						crc_err_next <= '0;
 						addr_next <= pp_addr_hdr_top;
@@ -336,9 +384,21 @@ module  checker_top(
 					end else
 						state_next <= IDLE;
 				end
+				//
 				HEADER_READ: begin
 					byte_cnt_next <= inmem_data_b_o[7:4];
 					addr_next <= addr_reg + 2;
+					// Check for errors and compare with parser's conclusion
+					ecc_data_in_pp_s <= inmem_data_b_o[11:4];
+					ecc_pp_s <= inmem_data_b_o[3:0];
+
+					if(ecc_err_code_pp_s != '0) begin
+						// received ecc msb bit
+						if(inmem_data_b_o[12:12])
+							ecc_corr_err_pp_next <= 1'b1;
+						else 
+							ecc_uncorr_err_pp_next <= 1'b1;
+					end 
 					state_next <= CRC_CALC;
 				end
 				CRC_CALC: begin
@@ -369,7 +429,7 @@ module  checker_top(
 	////////////////////////////////////////////////////////////////////////////////	
 
 	// Block for crc byte calculation
-	crc_chk_calc (
+	crc_chk_calc pp_crc_check(
 		.crc_in(crc_mid_result_reg),
 		.data_in(data_in_s),
 		.crc_out(crc_out_s));
@@ -381,11 +441,23 @@ module  checker_top(
 	ast_crc_err_when_ecc_err_exists: assert property(pp_irq_top && pp_pkt_crc_err_top && !pp_pkt_ecc_uncorr_top && pp_pkt_ecc_corr_top |-> crc_err_reg);
 	ast_crc_no_err_when_ecc_err_exists: assert property(pp_irq_top && !pp_pkt_crc_err_top && !pp_pkt_ecc_uncorr_top && pp_pkt_ecc_corr_top |-> !crc_err_reg);
 
+	ast_ecc_corr_err: assert property(pp_pkt_ecc_corr_top |-> ecc_corr_err_pp_reg);
+	ast_ecc_uncorr_err: assert property(pp_pkt_ecc_uncorr_top |-> ecc_uncorr_err_pp_reg);
+
 	////////////////////////////////////////////////////////////////////////////////	
 	////////////////////////////////////////////////////////////////////////////////	
 	// IMPORTANT Check data integrity
 
-  logic[3:0] chosen_byte;
+	// Builder checkers enable signals
+	logic pb0_checker_en;
+	logic pb1_cecker_en;
+
+  asm_pb0_chk_en_stability: assume property($stable(pb0_checker_en));
+  asm_pb1_chk_en_stability: assume property($stable(pb1_checker_en));
+	asm_only_one_active_pb_chk: assume property(not(pb0_checker_en && pb1_checker_en));
+	asm_one_active_pb_chk: assume property(not(!pb0_checker_en && !pb1_checker_en));
+
+  logic[3:0] chosen_byte; // CHECKER_INPUT chosen_byte
 
   asm_chosen_byte_stable_top: assume property($stable(chosen_byte));
 
@@ -398,7 +470,7 @@ module  checker_top(
   asm_chosen_byte_op2_top: assume property(disable iff(reset)
     pb_data_sel == 4'h2 |-> chosen_byte <= pb_byte_cnt);
 
-	typedef enum {IDLE_DI, CHOOSE_BYTE, BUILD_LOOP, RECEIVE_BYTE} di_State;
+	typedef enum {IDLE_DI, CHOOSE_BYTE, CRC_CALC_DI, RECEIVE_BYTE, COMPARE_CRC_DI} di_State;
 
 	di_State di_state_reg, di_state_next;
 
@@ -408,11 +480,22 @@ module  checker_top(
   const logic[3:0] OP1 = 4'h1;
   const logic[3:0] OP2 = 4'h2;
 
-	logic[13:0] di_byte_addr;
+	logic[13:0] chosen_byte_addr; // CHECKER_OUTPUT inmem addr for di check
+	logic[13:0] di_crc_addr_reg, di_crc_addr_next; // CHECKER_OUTPUT inmem addr for crc check
+	logic[13:0] received_byte_addr; // CHECKER_OUTPUT outmem addr
+
 	logic di_err;
 
   logic[4:0] received_byte; 
   reg[7:0] received_byte_data, received_byte_data_next;
+
+	// crc check signals
+	reg[7:0] di_crc_mid_result_reg;
+	logic[7:0] di_crc_out_s;
+	// logic[7:0] di_crc_ext_reg, di_crc_ext_next;
+	logic[7:0] di_crc_calc_reg, di_crc_calc_next;
+	logic di_crc_err_s;
+
 
   always_comb begin
 		case(pb_data_sel) 
@@ -422,76 +505,152 @@ module  checker_top(
 		endcase
   end
 
+	// Mid-result crc register block
+	always @(posedge clk) begin
+		if(reset)
+			di_crc_mid_result_reg <= '0;
+		else if(pb0_start_top) 
+			di_crc_mid_result_reg <= '0;
+		else
+			di_crc_mid_result_reg <= di_crc_out_s;
+	end
+
+	// Block for crc byte calculation during build phase
+	crc_chk_calc pb_crc_check(
+		.crc_in(di_crc_mid_result_reg),
+		.data_in(inmem_data_b_o),
+		.crc_out(di_crc_out_s));
+
+	// registers
 	always_ff @(posedge clk) begin
 		if(reset) begin
 			di_state_reg <= IDLE_DI;
 			chosen_byte_data <= '0;
 			received_byte_data <= '0;
+			di_crc_addr_reg <= '0;
+			// di_crc_ext_reg <=  '0;
+			di_crc_calc_reg <=  '0;
 		end
 		else begin
 			di_state_reg <= di_state_next;
 			chosen_byte_data <= chosen_byte_data_next;
 			received_byte_data <= received_byte_data_next;
+			di_crc_addr_reg <= di_crc_addr_next;
+			// di_crc_ext_reg <=  di_crc_ext_next;
+			di_crc_calc_reg <=  di_crc_calc_next;
 		end
 	end
+
+
+	// crc calculation check logic will be embedded into this FSM
+	// received_byte_addr is used to read crc_ext from outmem
 
 	always_comb begin
 		// defaults
 		di_state_next <= di_state_reg;
 		chosen_byte_data_next <= chosen_byte_data;
 		received_byte_data_next <= received_byte_data;
-		di_byte_addr <= '0;
+		chosen_byte_addr <= '0;
+		received_byte_addr <= '0;
 		di_err <= '0;
+
+		di_crc_addr_next <= di_crc_addr_reg;
+		// di_crc_ext_next <= di_crc_ext_reg;
+		di_crc_calc_next <= di_crc_calc_reg;
+		di_crc_err_s <= 1'b0;
 
 		case(di_state_reg)
 			IDLE_DI: begin 
+				di_crc_addr_next <= pb_addr_in; // CHECKER_INPUT pb_addr_in
+
 				if(pb0_start_top) begin
 					di_state_next <= CHOOSE_BYTE;
 				end else
 					di_state_next <= IDLE_DI;
 			end
 			CHOOSE_BYTE: begin
-				di_byte_addr <= pb_addr_in + chosen_byte;
-				chosen_byte_data_next <= inmem_data_b_o;
+				chosen_byte_addr <= pb_addr_in + chosen_byte;
+				chosen_byte_data_next <= inmem_data_b_o; // CHECKER_INPUT inmem_data_b_o
 
-				di_state_next <= RECEIVE_BYTE;
+				di_state_next <= CRC_CALC_DI;
 			end
+			CRC_CALC_DI: begin
+				di_crc_addr_next <= di_crc_addr_reg + 1;
+
+				//store CRC
+				if(di_crc_addr_reg == pb_addr_in + pb_byte_cnt) begin
+					di_crc_calc_next <= di_crc_out_s;
+
+					di_state_next <= RECEIVE_BYTE;
+				end
+
+				di_state_next <= CRC_CALC_DI;
+			end
+			// In this state crc byte is also extracted
+			// Outmem we is always disabled, 
+			// no fear that written crc value will ever be overwritten by the tool
 			RECEIVE_BYTE: begin
 				if(pb0_irq_top) begin
-					di_byte_addr <= pb_addr_out + received_byte;
-					received_byte_data_next <= inmem_data_b_o;
+					received_byte_addr <= pb_addr_out + received_byte; // CHECKER_INPUT pb_addr_out
+					received_byte_data_next <= outmem_data_b_o; // CHECKER_INPUT outmem_data_b_o
 					if(chosen_byte_data != received_byte_data_next)
-						di_err <= 1'b1;
-
-					di_state_next <= IDLE_DI;
+						di_err <= 1'b1; // CHOOSE_OUTPUT di_err
+						di_state_next <= COMPARE_CRC_DI;
 				end else
 					di_state_next <= RECEIVE_BYTE;
+			end
+			COMPARE_CRC_DI: begin
+				// crc address in outgoing memory of a built packet
+				received_byte_addr <= pb_addr_out + pb_byte_cnt + 3; // 2 for header, 1 for crc
+				// check crc
+				if(di_crc_calc_reg != outmem_data_b_o)
+					di_crc_err_s <= 1'b1; // CHOOSE_OUTPUT di_crc_err_s
+
+				di_state_next <= IDLE_DI;
 			end
 		endcase
 	end 
 
 	ast_di: assert property(!di_err);
-	cov_pp_pb_work: cover property(!pp_busy_top && !pb0_busy_top);
+	ast_crc_di: assert property(!di_crc_err_s);
+	cov_pp_pb0_work: cover property(!pp_busy_top && !pb0_busy_top);
+	cov_pp_pb1_work: cover property(!pp_busy_top && !pb1_busy_top);
+	cov_pb0_pb1_work: cover property(!pb1_busy_top && !pb0_busy_top);
+	cov_pb0_pb1_work2: cover property(pb0_start_top && pb_irq);
+	cov_pb0_work: cover property(pb0_start_top);
 
 	////////////////////////////////////////////////////////////////////////////////	
 	// Memory interface B arbitration logic between DI and CRC checkers
 
 	logic[13:0] inmem_addr_b_s;
 
+	// Packet parser has the priority because builder needs access only in his INMEM_READ state,
+	// when work between builder and parser can't be in conflict
+
+	// PB0 and PB1 are in conflict while working in parallel due to IVA
+	// Solution is to use free variable which will choose which builder will be checked
+	// Conflict occurs only while trying to access inmem and outmem address ports 
+	// So free variable will be used as a selection signal in following logic to distinguish which builder's checker 
+	// is going to access memory 
 	always_comb begin
 		if(!pp_busy_top)
 			inmem_addr_b_s <= addr_reg;
 		else if(!pb0_busy_top)
-			inmem_addr_b_s <= di_byte_addr;
+			if(di_state_reg == CHOOSE_BYTE)
+				inmem_addr_b_s <= chosen_byte_addr;
+			else
+				inmem_addr_b_s <= di_crc_addr_reg;
 		else
 			inmem_addr_b_s <= addr_free;
 	end
 
 	// assume pkt validity, constrain address
 	asm_no_write: assume property(!pp_busy_top || !pb0_busy_top |-> !inmem_we_b_i);
-	asm_mem_addr: assume property(inmem_addr_b_i == inmem_addr_b_s);
+	asm_inmem_addr: assume property(inmem_addr_b_i == inmem_addr_b_s);
+	asm_outmem_addr: assume property(!pb0_busy_top || !pb0_busy_top ##1 pb0_busy_top |-> outmem_addr_b_i == received_byte_addr);
 	// assume addr bound
-	asm_addr_bound: assume property(inmem_addr_b_i < 14'h13);
+	asm_in_addr_bound: assume property(inmem_addr_b_i < 14'h13);
+	asm_out_addr_bound: assume property(outmem_addr_b_i < 14'h13);
 
 
 	////////////////////////////////////////////////////////////////////////////////	

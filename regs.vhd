@@ -483,9 +483,9 @@ begin
   -- [x] AXI cont update to lite version
   -- [x] regs implementation
   -- [ ] top integration 
-	--------------------------------------------------------------------------------	
-	-- I/O connections controller - regs, internal irqs
-	--------------------------------------------------------------------------------	
+  --------------------------------------------------------------------------------	
+  -- I/O connections controller - regs, internal irqs
+  --------------------------------------------------------------------------------	
 	int_irq_o(0) <= pb0_ctrl1_s;
 	int_irq_o(1) <= pb1_ctrl1_s;
 	int_irq_o(2) <= pp_ctrl1_s;
@@ -500,7 +500,7 @@ begin
 	pb0_start_top <= pb0_ctrl0_s; 
 	-- IMPORTANT all inputs to register are assinged inside corresponding proccesses
 	-- pb0_sts_s <= pb0_busy_i; 
-	--FIXME Interrupt req is not implemented fully because cont does not have connections with controller
+	-- FIXME Interrupt req is not implemented fully because cont does not have connections with controller
 	-- done 
 	-- pb0_ctrl1_s <= pb0_irq_i; 
 
@@ -659,6 +659,9 @@ begin
 				end if;
 			elsif(pb0_irq_i = '1') then 
 				pb0_ctrl1_s <= '1';
+			-- added logic to solve controller irq reset bug, not in spec
+			else
+				pb0_ctrl1_s <= '0';
 			end if;
 		end if;
 	end process;

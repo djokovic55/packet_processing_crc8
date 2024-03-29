@@ -20,19 +20,99 @@ clock clk
 reset reset
 
 
+################################################################################
 ### Apstractions - disable PB1
-stopat subsys.system_regs.pb1_sts_s
-assume -name pb1_always_busy -env {subsys.system_regs.pb1_sts_s = '0'}
+# stopat subsys.system_regs.pb1_sts_s
+# assume -name pb1_always_busy -env {subsys.system_regs.pb1_sts_s = '0'}
+
+################################################################################
+
+### Apstractions - IVAs for Internal Registers 
+################################################################################
+# PB0 task
+################################################################################
+# Start register
+abstract -init_value subsys.system_regs.pb0_ctrl0_s
+# Addr_in register
+abstract -init_value subsys.system_regs.pb0_ctrl2_s
+assume -bound 1 -env -name asm_iva_pb0_addr_in {subsys.system_regs.pb0_ctrl2_s < x"13"}
+assume -bound 1 -env -name asm_iva_top_pb0_addr_in {subsys.system_regs.pb0_ctrl2_s = chk_top.pb_addr_in}
+
+# Config register
+abstract -init_value subsys.system_regs.pb0_ctrl3_s
+assume -bound 1 -env -name asm_iva_pb0_data_sel {subsys.system_regs.pb0_ctrl3_s(31 downto 28) < x"3" }
+
+assume -bound 1 -env -name asm_iva_top_pb0_byte_cnt {subsys.system_regs.pb0_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
+assume -bound 1 -env -name asm_iva_top_pb0_pkt_type {subsys.system_regs.pb0_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
+assume -bound 1 -env -name asm_iva_top_pb0_ecc_en {subsys.system_regs.pb0_ctrl3_s(8) = chk_top.pb_ecc_en}
+assume -bound 1 -env -name asm_iva_top_pb0_crc_en {subsys.system_regs.pb0_ctrl3_s(9) = chk_top.pb_crc_en}
+assume -bound 1 -env -name asm_iva_top_pb0_ins_ecc_err {subsys.system_regs.pb0_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
+assume -bound 1 -env -name asm_iva_top_pb0_ins_crc_err {subsys.system_regs.pb0_ctrl3_s(12) = chk_top.pb_ins_crc_err}
+assume -bound 1 -env -name asm_iva_top_pb0_ecc_val {subsys.system_regs.pb0_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
+assume -bound 1 -env -name asm_iva_top_pb0_crc_val {subsys.system_regs.pb0_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
+assume -bound 1 -env -name asm_iva_top_pb0_sop_val {subsys.system_regs.pb0_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
+assume -bound 1 -env -name asm_iva_top_pb0_data_sel {subsys.system_regs.pb0_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
+
+# Addr_out register
+abstract -init_value subsys.system_regs.pb0_ctrl4_s
+assume -bound 1 -env -name asm_iva_pb0_addr_out {subsys.system_regs.pb0_ctrl4_s < x"13"}
+assume -bound 1 -env -name asm_iva_top_pb0_addr_out {subsys.system_regs.pb0_ctrl4_s = chk_top.pb_addr_out}
+
+################################################################################
+# PB1 task
+################################################################################
+# Start register
+abstract -init_value subsys.system_regs.pb1_ctrl0_s
+# Addr_in register
+abstract -init_value subsys.system_regs.pb1_ctrl2_s
+assume -bound 1 -env -name asm_iva_pb1_addr_in {subsys.system_regs.pb1_ctrl2_s < x"13"}
+# assume -bound 1 -env -name asm_iva_top_pb1_addr_in {subsys.system_regs.pb1_ctrl2_s = chk_top.pb_addr_in}
+
+# Config register
+abstract -init_value subsys.system_regs.pb1_ctrl3_s
+assume -bound 1 -env -name asm_iva_pb1_data_sel {subsys.system_regs.pb1_ctrl3_s(31 downto 28) < x"3" }
+
+# assume -bound 1 -env -name asm_iva_top_pb1_byte_cnt {subsys.system_regs.pb1_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
+# assume -bound 1 -env -name asm_iva_top_pb1_pkt_type {subsys.system_regs.pb1_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
+# assume -bound 1 -env -name asm_iva_top_pb1_ecc_en {subsys.system_regs.pb1_ctrl3_s(8) = chk_top.pb_ecc_en}
+# assume -bound 1 -env -name asm_iva_top_pb1_crc_en {subsys.system_regs.pb1_ctrl3_s(9) = chk_top.pb_crc_en}
+# assume -bound 1 -env -name asm_iva_top_pb1_ins_ecc_err {subsys.system_regs.pb1_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
+# assume -bound 1 -env -name asm_iva_top_pb1_ins_crc_err {subsys.system_regs.pb1_ctrl3_s(12) = chk_top.pb_ins_crc_err}
+# assume -bound 1 -env -name asm_iva_top_pb1_ecc_val {subsys.system_regs.pb1_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
+# assume -bound 1 -env -name asm_iva_top_pb1_crc_val {subsys.system_regs.pb1_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
+# assume -bound 1 -env -name asm_iva_top_pb1_sop_val {subsys.system_regs.pb1_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
+# assume -bound 1 -env -name asm_iva_top_pb1_data_sel {subsys.system_regs.pb1_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
+
+# Addr_out register
+abstract -init_value subsys.system_regs.pb1_ctrl4_s
+assume -bound 1 -env -name asm_iva_pb1_addr_out {subsys.system_regs.pb1_ctrl4_s < x"13"}
+# assume -bound 1 -env -name asm_iva_top_pb1_addr_out {subsys.system_regs.pb1_ctrl4_s = chk_top.pb_addr_out}
+################################################################################
+
+# TASKs
 ## Create crc debug task
 task -create crc_debug -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.chk_top.ast_crc_err <embedded>::top.chk_top.ast_crc_err:precondition1 <embedded>::top.chk_top.ast_crc_no_err <embedded>::top.chk_top.ast_crc_no_err:precondition1 <embedded>::top.chk_top.ast_crc_err_when_ecc_err_exists <embedded>::top.chk_top.ast_crc_err_when_ecc_err_exists:precondition1 <embedded>::top.chk_top.ast_crc_no_err_when_ecc_err_exists <embedded>::top.chk_top.ast_crc_no_err_when_ecc_err_exists:precondition1
-## Create di debug task
-task -create di_debug -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.chk_top.cov_pp_pb_work <embedded>::top.chk_top.ast_di
+## Create iva debug task
+task -create iva_debug -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
+<embedded>::top.chk_top.cov_pp_pb1_work  
+<embedded>::top.chk_top.cov_pp_pb0_work 
+<embedded>::top.chk_top.cov_pb0_pb1_work 
+<embedded>::top.chk_top.cov_pb0_pb1_work2 
+<embedded>::top.chk_top.cov_pb0_work 
+<embedded>::top.chk_top.ast_di 
+<embedded>::top.chk_top.ast_crc_di
+<embedded>::top.chk_top.ast_ecc_corr_err
+<embedded>::top.chk_top.ast_ecc_uncorr_err
+}
+
 ## Inititiate using M engine
 # prove -task crc_debug -engine_mode {M} -bg
 # prove -bg -task {crc_debug}
-prove -bg -task {di_debug}
+prove -bg -task {iva_debug}
 # prove -bg -all
 
+## Create iva debug task
+################################################################################
 
 ### Waive solved unreachable cover points
 # check_cov -waiver -add -instance subsys.packet_builder1 -comment {Added by GUI, apply waiver on instance 'subsys.packet_builder1'}
@@ -59,10 +139,13 @@ prove -bg -task {di_debug}
 # check_cov -waiver -add -cover_item_id { 3204} -comment {Added by GUI, apply waiver on ' 3204'}
 # check_cov -waiver -add -cover_item_id { 4124 4345 4245 4128} -comment {Added by GUI, apply waiver on ' 4124 4345 4245 4128'}
 
-### Start coverage analysis
+################################################################################
+# START COVERAGE ANALYSIS
 # check_cov -measure -task {<embedded>} -bg
-#
 
+################################################################################
+# FORMAL SAFETY APP COMMANDS
+#
 # check_fsv -fault -add subsys.parser.axi_read_data_s(4) -type SA1 -silent
 # ADD FAULTS
 # check_fsv -fault -add outmem.slave_axi_cont_inmem.axi_rdata(4) -type SA1 -silent
@@ -108,6 +191,7 @@ prove -bg -task {di_debug}
 #task -create data_integrity -set -source_task <embedded> -copy_stopats -copy_abstractions all -copy_assumes -copy <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity:precondition1
 
 
+################################################################################
 # COMPLEXITY MANAGER COMMANDS
 #  
 # Create new task and copy properties from source task

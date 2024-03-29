@@ -503,24 +503,20 @@ begin
             end if;
   
           when PB_STATUS_READ =>
-
               axi_read_rdy_s <= '1';
               --axi_read_init_next <= '1';
-
 
               -- only single burst
               if(axi_read_vld_s = '1') then
 
                 clear_intr_addr_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL1);
 
-
                 if(axi_read_data_next(0) = '1') then
                   axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                   axi_read_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_PB_CTRL2);
                   cnt_max_next <= std_logic_vector(to_unsigned(2, 2));
-		  -- start new trans one cycle earlier
-		  axi_read_init_next <= '1';
-									
+									-- start new trans one cycle earlier
+									axi_read_init_next <= '1';
                   
                   if(unsigned(pb_status_cnt_reg) = 0) then
                     axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(PB0_CTRL2);
@@ -541,16 +537,16 @@ begin
                   if(unsigned(pb_status_cnt_reg) = 1) then
                     axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                     axi_write_address_next <= std_logic_vector(to_unsigned(0, C_M_AXI_DATA_WIDTH-8))&std_logic_vector(EXT_DROP_CNT);
-		    -- start new trans one cycle earlier
-		    axi_write_init_next <= '1';
-		    -- axi_write_data_next <= x"00000001";
+										-- start new trans one cycle earlier
+										axi_write_init_next <= '1';
+										-- axi_write_data_next <= x"00000001";
 
                     ---------------------------------------- 
                     state_next <= INC_DROP_CNT;
                     ---------------------------------------- 
                   else
-		    -- start new trans one cycle earlier
-		    axi_read_init_next <= '1';
+										-- start new trans one cycle earlier
+										axi_read_init_next <= '1';
                     ---------------------------------------- 
                     state_next <= PB_STATUS_READ;
                     ---------------------------------------- 
