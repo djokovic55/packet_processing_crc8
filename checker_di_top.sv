@@ -3,10 +3,17 @@ module  checker_di_top(
   input clk,
   input reset,
   input checker_en,
+	input pb_start,
+	input pb_irq_top,
+	input pb_crc_en,
+	input[7:0] pb_crc_val,
+
 
   input[7:0] chosen_byte,
 
   input[31:0] pb_addr_in,
+  input[3:0] pb_data_sel,
+	input[3:0] pb_byte_cnt,
   input[31:0] inmem_data_b_o,
 
   input[31:0] pb_addr_out,
@@ -15,6 +22,9 @@ module  checker_di_top(
   output[13:0] inmem_addr_di,
   output[13:0] inmem_addr_crc,
   output[13:0] outmem_addr_di_crc,
+  output[2:0] state_di,
+  output di_err,
+  output di_crc_err
 	);
 	
   default 
@@ -23,10 +33,6 @@ module  checker_di_top(
 
   default disable iff reset;
 
-	// Port assignments
-	assign inmem_addr_di = chosen_byte_addr;
-	assign inmem_addr_crc = di_crc_addr_reg;
-	assign outmem_addr_di_crc = received_byte_addr;
 
 	typedef enum {IDLE_DI, CHOOSE_BYTE, CRC_CALC_DI, RECEIVE_BYTE, COMPARE_CRC_DI} di_State;
 	di_State di_state_reg, di_state_next;
@@ -48,25 +54,51 @@ module  checker_di_top(
 
 	// crc check signals
 	reg[7:0] di_crc_mid_result_reg;
+	reg[7:0] di_crc_data_in_s;
 	logic[7:0] di_crc_out_s;
 	// logic[7:0] di_crc_ext_reg, di_crc_ext_next;
 	logic[7:0] di_crc_calc_reg, di_crc_calc_next;
 	logic di_crc_err_s;
+	logic[13:0] crc_addr_s;
+	logic[7:0] byte_cnt;
 
+	logic op1_data_cnt_reg, op1_data_cnt_next;
 
+	////////////////////////////////////////////////////////////////////////////////
+	// Data_sel dependent info
+	////////////////////////////////////////////////////////////////////////////////
   always_comb begin
 		case(pb_data_sel) 
-			OP0: received_byte <= (chosen_byte[3:2] + 2);
-			OP1: received_byte <= ((chosen_byte[3:2] * 2) + chosen_byte[0] + 2);
-			default: received_byte <= (chosen_byte + 2); 
+			OP0: begin 
+				// address of received byte
+				received_byte <= (chosen_byte[3:2] + 2);
+				// crc position
+				crc_addr_s <= (pb_byte_cnt[3:2] + 3);
+				// byte count
+				byte_cnt <= (pb_byte_cnt[3:2]);
+			end
+			OP1: begin
+				received_byte <= ((chosen_byte[3:2] * 2) + chosen_byte[0] + 2);
+				crc_addr_s <= ((pb_byte_cnt[3:2] * 2) + (pb_byte_cnt[1] || pb_byte_cnt[0]) + 3);
+				byte_cnt <= ((pb_byte_cnt[3:2] * 2) + (pb_byte_cnt[1] || pb_byte_cnt[0]));
+			end
+			default: begin 
+				received_byte <= (chosen_byte + 2); 
+				crc_addr_s <= (pb_byte_cnt + 3); 
+				byte_cnt <= pb_byte_cnt;
+			end
 		endcase
   end
+
+	////////////////////////////////////////////////////////////////////////////////
+	// CRC calc block
+	////////////////////////////////////////////////////////////////////////////////
 
 	// Mid-result crc register block
 	always @(posedge clk) begin
 		if(reset)
 			di_crc_mid_result_reg <= '0;
-		else if(pb0_start_top) 
+		else if(pb_start) 
 			di_crc_mid_result_reg <= '0;
 		else
 			di_crc_mid_result_reg <= di_crc_out_s;
@@ -75,8 +107,9 @@ module  checker_di_top(
 	// Block for crc byte calculation during build phase
 	crc_chk_calc pb_crc_check(
 		.crc_in(di_crc_mid_result_reg),
-		.data_in(inmem_data_b_o),
+		.data_in(di_crc_data_in_s),
 		.crc_out(di_crc_out_s));
+	////////////////////////////////////////////////////////////////////////////////
 
 	// registers
 	always_ff @(posedge clk) begin
@@ -87,6 +120,8 @@ module  checker_di_top(
 			di_crc_addr_reg <= '0;
 			// di_crc_ext_reg <=  '0;
 			di_crc_calc_reg <=  '0;
+
+			op1_data_cnt_reg <= '0;
 		end
 		else begin
 			di_state_reg <= di_state_next;
@@ -95,6 +130,8 @@ module  checker_di_top(
 			di_crc_addr_reg <= di_crc_addr_next;
 			// di_crc_ext_reg <=  di_crc_ext_next;
 			di_crc_calc_reg <=  di_crc_calc_next;
+
+			op1_data_cnt_reg <= op1_data_cnt_next;
 		end
 	end
 
@@ -109,17 +146,22 @@ module  checker_di_top(
 		chosen_byte_addr <= '0;
 		received_byte_addr <= '0;
 		di_err <= '0;
+		// default data for crc calculation
+		di_crc_data_in_s <= '0;
 
 		di_crc_addr_next <= di_crc_addr_reg;
 		// di_crc_ext_next <= di_crc_ext_reg;
 		di_crc_calc_next <= di_crc_calc_reg;
 		di_crc_err_s <= 1'b0;
 
+		op1_data_cnt_next <= op1_data_cnt_reg;
+
 		case(di_state_reg)
 			IDLE_DI: begin 
+				// starting address for crc data calculation
 				di_crc_addr_next <= pb_addr_in; // CHECKER_INPUT pb_addr_in
 
-				if(pb0_start_top && checker_en) begin
+				if(pb_start && checker_en) begin
 					di_state_next <= CHOOSE_BYTE;
 				end else
 					di_state_next <= IDLE_DI;
@@ -127,28 +169,59 @@ module  checker_di_top(
 			CHOOSE_BYTE: begin
 				chosen_byte_addr <= pb_addr_in + chosen_byte;
 				chosen_byte_data_next <= inmem_data_b_o; // CHECKER_INPUT inmem_data_b_o
-
-				di_state_next <= CRC_CALC_DI;
-			end
-			CRC_CALC_DI: begin
-				di_crc_addr_next <= di_crc_addr_reg + 1;
-
-				//store CRC
-				if(di_crc_addr_reg == pb_addr_in + pb_byte_cnt) begin
-					di_crc_calc_next <= di_crc_out_s;
-
+				// if crc calc disabled, use predefined value
+				if(pb_crc_en)
+					di_state_next <= CRC_CALC_DI;
+				else begin
+					di_crc_calc_next <= pb_crc_val;
 					di_state_next <= RECEIVE_BYTE;
 				end
+			end
+			CRC_CALC_DI: begin
 
-				di_state_next <= CRC_CALC_DI;
+				// crc data available in this state
+				di_crc_data_in_s <= inmem_data_b_o;
+
+				//store CRC
+				// means last data byte was read and therefore crc is ready
+				// BUG full data byte info (pb_byte_cnt) has to be used because some bytes are skipped, but still their location is beyond newly calculated byte_cnt
+				if(di_crc_addr_reg == pb_addr_in + pb_byte_cnt) begin
+					// store calculated CRC
+					di_crc_calc_next <= di_crc_out_s;
+					di_state_next <= RECEIVE_BYTE;
+				end
+				// address increment logic differs based on data_sel
+				else begin
+					case(pb_data_sel) 
+						OP0: begin 
+							di_crc_addr_next <= di_crc_addr_reg + 4;
+						end
+						OP1: begin
+							op1_data_cnt_next <= !op1_data_cnt_reg;
+						//BUG what if pb_addr_in[1] = 1? It will skip the next byte
+							if(op1_data_cnt_reg == 1'b0) begin
+								di_crc_addr_next <= di_crc_addr_reg + 1;
+							end
+							else begin
+								//skip 2 msb bytes and target lsb in new beat
+								di_crc_addr_next <= di_crc_addr_reg + 3;
+							end
+						end
+						default: begin 
+							di_crc_addr_next <= di_crc_addr_reg + 1;
+						end
+					endcase
+					di_state_next <= CRC_CALC_DI;
+				end
 			end
 			RECEIVE_BYTE: begin
-				if(pb0_irq_top) begin
-					received_byte_addr <= pb_addr_out + received_byte; // CHECKER_INPUT pb_addr_out
+				received_byte_addr <= pb_addr_out + received_byte; // CHECKER_INPUT pb_addr_out
+				if(pb_irq_top) begin
 					received_byte_data_next <= outmem_data_b_o; // CHECKER_INPUT outmem_data_b_o
 					if(chosen_byte_data != received_byte_data_next)
 						di_err <= 1'b1; // CHOOSE_OUTPUT di_err
-						di_state_next <= COMPARE_CRC_DI;
+
+					di_state_next <= COMPARE_CRC_DI;
 				end else
 					di_state_next <= RECEIVE_BYTE;
 			end
@@ -157,14 +230,25 @@ module  checker_di_top(
 			// no fear that written crc value will ever be overwritten by the tool
 			COMPARE_CRC_DI: begin
 				// crc address in outgoing memory of a built packet
-				received_byte_addr <= pb_addr_out + pb_byte_cnt + 3; // 2 for header, 1 for crc
+				//BUG byte_cnt depens on data_sel
+				received_byte_addr <= pb_addr_out + crc_addr_s; // 2 for header, 1 for crc
 				// check crc
-				if(di_crc_calc_reg != outmem_data_b_o)
+				if(di_crc_calc_reg != outmem_data_b_o[7:0])
 					di_crc_err_s <= 1'b1; // CHOOSE_OUTPUT di_crc_err_s
 
 				di_state_next <= IDLE_DI;
 			end
 		endcase
 	end 
+
+	// Port assignments
+	assign inmem_addr_di = chosen_byte_addr;
+	assign inmem_addr_crc = di_crc_addr_reg;
+	assign outmem_addr_di_crc = received_byte_addr;
+	assign state_di = di_state_reg;
+	assign di_err = di_err;
+	assign di_crc_err = di_crc_err_s;
+
+	cov_no_zero_data: cover property(chosen_byte_data != '0);
 
 endmodule

@@ -6,7 +6,7 @@ check_cov -init
 # only data integrity checker analysis
 # check_cov -init -type {proof bound} -model all -exclude_instance { * } -include_instance {subsys.chk_data_integrity} 
 # check_cov -init -type {bound}
-analyze -sv09 checker_top.sv bind_top.sv checker_data_integrity.sv checker_axi.sv checker_fair_int.sv crc_chk_calc.sv
+analyze -sv09 {checker_top.sv bind_top.sv checker_data_integrity.sv checker_axi.sv checker_fair_int.sv crc_chk_calc.sv checker_di_top.sv}
 
 # src
 analyze -vhdl top.vhd top_subsystem.vhd interconnect.vhd arbiter_rr.vhd int_fsm.vhd controller.vhd external_regs.vhd data_memory.vhd master_axi_cont.vhd packet_builder.vhd packet_parser.vhd 
@@ -36,27 +36,27 @@ abstract -init_value subsys.system_regs.pb0_ctrl0_s
 # Addr_in register
 abstract -init_value subsys.system_regs.pb0_ctrl2_s
 assume -bound 1 -env -name asm_iva_pb0_addr_in {subsys.system_regs.pb0_ctrl2_s < x"13"}
-assume -bound 1 -env -name asm_iva_top_pb0_addr_in {subsys.system_regs.pb0_ctrl2_s = chk_top.pb_addr_in}
+assume -bound 1 -env -name asm_iva_top_pb0_addr_in {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl2_s = chk_top.pb_addr_in}
 
 # Config register
 abstract -init_value subsys.system_regs.pb0_ctrl3_s
 assume -bound 1 -env -name asm_iva_pb0_data_sel {subsys.system_regs.pb0_ctrl3_s(31 downto 28) < x"3" }
 
-assume -bound 1 -env -name asm_iva_top_pb0_byte_cnt {subsys.system_regs.pb0_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
-assume -bound 1 -env -name asm_iva_top_pb0_pkt_type {subsys.system_regs.pb0_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
-assume -bound 1 -env -name asm_iva_top_pb0_ecc_en {subsys.system_regs.pb0_ctrl3_s(8) = chk_top.pb_ecc_en}
-assume -bound 1 -env -name asm_iva_top_pb0_crc_en {subsys.system_regs.pb0_ctrl3_s(9) = chk_top.pb_crc_en}
-assume -bound 1 -env -name asm_iva_top_pb0_ins_ecc_err {subsys.system_regs.pb0_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
-assume -bound 1 -env -name asm_iva_top_pb0_ins_crc_err {subsys.system_regs.pb0_ctrl3_s(12) = chk_top.pb_ins_crc_err}
-assume -bound 1 -env -name asm_iva_top_pb0_ecc_val {subsys.system_regs.pb0_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
-assume -bound 1 -env -name asm_iva_top_pb0_crc_val {subsys.system_regs.pb0_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
-assume -bound 1 -env -name asm_iva_top_pb0_sop_val {subsys.system_regs.pb0_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
-assume -bound 1 -env -name asm_iva_top_pb0_data_sel {subsys.system_regs.pb0_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
+assume -bound 1 -env -name asm_iva_top_pb0_byte_cnt {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
+assume -bound 1 -env -name asm_iva_top_pb0_pkt_type {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
+assume -bound 1 -env -name asm_iva_top_pb0_ecc_en {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(8) = chk_top.pb_ecc_en}
+assume -bound 1 -env -name asm_iva_top_pb0_crc_en {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(9) = chk_top.pb_crc_en}
+assume -bound 1 -env -name asm_iva_top_pb0_ins_ecc_err {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
+assume -bound 1 -env -name asm_iva_top_pb0_ins_crc_err {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(12) = chk_top.pb_ins_crc_err}
+assume -bound 1 -env -name asm_iva_top_pb0_ecc_val {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
+assume -bound 1 -env -name asm_iva_top_pb0_crc_val {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
+assume -bound 1 -env -name asm_iva_top_pb0_sop_val {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
+assume -bound 1 -env -name asm_iva_top_pb0_data_sel {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
 
 # Addr_out register
 abstract -init_value subsys.system_regs.pb0_ctrl4_s
 assume -bound 1 -env -name asm_iva_pb0_addr_out {subsys.system_regs.pb0_ctrl4_s < x"13"}
-assume -bound 1 -env -name asm_iva_top_pb0_addr_out {subsys.system_regs.pb0_ctrl4_s = chk_top.pb_addr_out}
+assume -bound 1 -env -name asm_iva_top_pb0_addr_out {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl4_s = chk_top.pb_addr_out}
 
 ################################################################################
 # PB1 task
@@ -66,52 +66,88 @@ abstract -init_value subsys.system_regs.pb1_ctrl0_s
 # Addr_in register
 abstract -init_value subsys.system_regs.pb1_ctrl2_s
 assume -bound 1 -env -name asm_iva_pb1_addr_in {subsys.system_regs.pb1_ctrl2_s < x"13"}
-# assume -bound 1 -env -name asm_iva_top_pb1_addr_in {subsys.system_regs.pb1_ctrl2_s = chk_top.pb_addr_in}
+assume -bound 1 -env -name asm_iva_top_pb1_addr_in {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl2_s = chk_top.pb_addr_in}
 
 # Config register
 abstract -init_value subsys.system_regs.pb1_ctrl3_s
 assume -bound 1 -env -name asm_iva_pb1_data_sel {subsys.system_regs.pb1_ctrl3_s(31 downto 28) < x"3" }
-
-# assume -bound 1 -env -name asm_iva_top_pb1_byte_cnt {subsys.system_regs.pb1_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
-# assume -bound 1 -env -name asm_iva_top_pb1_pkt_type {subsys.system_regs.pb1_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
-# assume -bound 1 -env -name asm_iva_top_pb1_ecc_en {subsys.system_regs.pb1_ctrl3_s(8) = chk_top.pb_ecc_en}
-# assume -bound 1 -env -name asm_iva_top_pb1_crc_en {subsys.system_regs.pb1_ctrl3_s(9) = chk_top.pb_crc_en}
-# assume -bound 1 -env -name asm_iva_top_pb1_ins_ecc_err {subsys.system_regs.pb1_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
-# assume -bound 1 -env -name asm_iva_top_pb1_ins_crc_err {subsys.system_regs.pb1_ctrl3_s(12) = chk_top.pb_ins_crc_err}
-# assume -bound 1 -env -name asm_iva_top_pb1_ecc_val {subsys.system_regs.pb1_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
-# assume -bound 1 -env -name asm_iva_top_pb1_crc_val {subsys.system_regs.pb1_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
-# assume -bound 1 -env -name asm_iva_top_pb1_sop_val {subsys.system_regs.pb1_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
-# assume -bound 1 -env -name asm_iva_top_pb1_data_sel {subsys.system_regs.pb1_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
+assume -bound 1 -env -name asm_iva_top_pb1_byte_cnt {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
+assume -bound 1 -env -name asm_iva_top_pb1_pkt_type {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
+assume -bound 1 -env -name asm_iva_top_pb1_ecc_en {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(8) = chk_top.pb_ecc_en}
+assume -bound 1 -env -name asm_iva_top_pb1_crc_en {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(9) = chk_top.pb_crc_en}
+assume -bound 1 -env -name asm_iva_top_pb1_ins_ecc_err {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
+assume -bound 1 -env -name asm_iva_top_pb1_ins_crc_err {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(12) = chk_top.pb_ins_crc_err}
+assume -bound 1 -env -name asm_iva_top_pb1_ecc_val {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
+assume -bound 1 -env -name asm_iva_top_pb1_crc_val {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
+assume -bound 1 -env -name asm_iva_top_pb1_sop_val {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
+assume -bound 1 -env -name asm_iva_top_pb1_data_sel {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
 
 # Addr_out register
 abstract -init_value subsys.system_regs.pb1_ctrl4_s
 assume -bound 1 -env -name asm_iva_pb1_addr_out {subsys.system_regs.pb1_ctrl4_s < x"13"}
-# assume -bound 1 -env -name asm_iva_top_pb1_addr_out {subsys.system_regs.pb1_ctrl4_s = chk_top.pb_addr_out}
+assume -bound 1 -env -name asm_iva_top_pb1_addr_out {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl4_s = chk_top.pb_addr_out}
 ################################################################################
 
+################################################################################
+# PP task
+################################################################################
+# Start register
+abstract -init_value subsys.system_regs.pp_ctrl0_s
+# Addr_hdr register
+abstract -init_value subsys.system_regs.pp_ctrl2_s
+assume -bound 1 -env -name asm_iva_pp_addr_hdr {subsys.system_regs.pp_ctrl2_s < x"13"}
+assume -bound 1 -env -name asm_iva_top_pp_addr_hdr {subsys.system_regs.pp_ctrl2_s = chk_top.pp_addr_hdr}
+
+# Ignore ecc errs register
+abstract -init_value subsys.system_regs.pp_ctrl3_s
+assume -bound 1 -env -name asm_iva_pp_ignore_ecc_err {subsys.system_regs.pp_ctrl3_s = chk_top.pp_ignore_ecc_err}
+
+################################################################################
+# INMEM 
+################################################################################
+abstract -init_value inmem.inmem_bram.ram_s
+
+################################################################################
 # TASKs
 ## Create crc debug task
 task -create crc_debug -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.chk_top.ast_crc_err <embedded>::top.chk_top.ast_crc_err:precondition1 <embedded>::top.chk_top.ast_crc_no_err <embedded>::top.chk_top.ast_crc_no_err:precondition1 <embedded>::top.chk_top.ast_crc_err_when_ecc_err_exists <embedded>::top.chk_top.ast_crc_err_when_ecc_err_exists:precondition1 <embedded>::top.chk_top.ast_crc_no_err_when_ecc_err_exists <embedded>::top.chk_top.ast_crc_no_err_when_ecc_err_exists:precondition1
+################################################################################
 ## Create iva debug task
 task -create iva_debug -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
-<embedded>::top.chk_top.cov_pp_pb1_work  
 <embedded>::top.chk_top.cov_pp_pb0_work 
+<embedded>::top.chk_top.cov_pp_pb1_work  
 <embedded>::top.chk_top.cov_pb0_pb1_work 
-<embedded>::top.chk_top.cov_pb0_pb1_work2 
+<embedded>::top.chk_top.cov_pb0_pb1_long_work 
 <embedded>::top.chk_top.cov_pb0_work 
-<embedded>::top.chk_top.ast_di 
-<embedded>::top.chk_top.ast_crc_di
+
+<embedded>::top.chk_top.cov_pb0_check
+<embedded>::top.chk_top.cov_pb1_check
+<embedded>::top.chk_top.cov_2pb0
+<embedded>::top.chk_top.cov_2pb1
+<embedded>::top.chk_top.cov_2pp
+
+<embedded>::top.chk_top.pb0_di.cov_no_zero_data
+<embedded>::top.chk_top.pb1_di.cov_no_zero_data
+
+<embedded>::top.chk_top.ast_pb0_di 
+<embedded>::top.chk_top.ast_pb1_di 
+<embedded>::top.chk_top.ast_crc_pb0_di
+<embedded>::top.chk_top.ast_crc_pb1_di
 <embedded>::top.chk_top.ast_ecc_corr_err
 <embedded>::top.chk_top.ast_ecc_uncorr_err
 }
+# Check for conflicts, enable dead_end prop
+check_assumptions -show -dead_end
+# task -create dead_end -set -source_task iva_debug -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy iva_debug:::noDeadEnd
 
-## Inititiate using M engine
+################################################################################
+## PROVE
+# Inititiate using M engine
+#
 # prove -task crc_debug -engine_mode {M} -bg
 # prove -bg -task {crc_debug}
 prove -bg -task {iva_debug}
 # prove -bg -all
-
-## Create iva debug task
 ################################################################################
 
 ### Waive solved unreachable cover points
@@ -215,4 +251,5 @@ prove -bg -task {iva_debug}
 # 
 # Prove task with additional settings
 # prove -task <undet> -engine_mode {B N I} -per_property_time_limit 5m -per_property_time_limit_factor 0 -bg
+################################################################################
 #

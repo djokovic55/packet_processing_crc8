@@ -20,7 +20,8 @@ entity master_axi_cont is
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		AXI_WRITE_STRB_I    : in  std_logic_vector(3 downto 0);
-    AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
+		-- COI removal, not controller externally
+    -- AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
 
@@ -132,8 +133,7 @@ architecture implementation of master_axi_cont is
 
 
 	-- function called clogb2 that returns an integer which has the
-	--value of the ceiling of the log base 2
-
+	-- value of the ceiling of the log base 2
 	function clogb2 (bit_depth : integer) return integer is            
 	 	variable depth  : integer := bit_depth;                               
 	 	variable count  : integer := 1;                                       
@@ -153,12 +153,6 @@ architecture implementation of master_axi_cont is
 	   return(count);        	                                              
 	 end;                                                                    
 
-	
-	-- C_TRANSACTIONS_NUM is the width of the index counter for
-	-- number of beats in a burst write or burst read transaction.
-	--  constant  C_TRANSACTIONS_NUM : integer := clogb2(C_M_AXI_BURST_LEN-1);
-
-	-- //SECTION AXI4FULL signals
 	--AXI4 internal temp signals
 	signal axi_awaddr	: std_logic_vector(C_M_AXI_ADDR_WIDTH-1 downto 0);
 	signal axi_awvalid	: std_logic;
@@ -171,28 +165,14 @@ architecture implementation of master_axi_cont is
 	signal axi_rready	: std_logic;
 	--write beat count in a burst
 	signal write_index	: std_logic_vector(7 downto 0);
-	--read beat count in a burst
-	signal read_index	: std_logic_vector(7 downto 0);
-	--size of C_M_AXI_BURST_LEN length burst in bytes
-	-- signal burst_size_bytes	: std_logic_vector(C_TRANSACTIONS_NUM+2 downto 0);
-	--The burst counters are used to track the number of burst transfers of C_M_AXI_BURST_LEN burst length needed to transfer 2^C_MASTER_LENGTH bytes of data.
-	-- signal write_burst_counter	: std_logic_vector(C_NO_BURSTS_REQ downto 0);
-	-- signal read_burst_counter	: std_logic_vector(C_NO_BURSTS_REQ downto 0);
 
 	signal start_single_burst_write	: std_logic;
 	signal start_single_burst_read	: std_logic;
 
 	signal writes_done	: std_logic;
 	signal reads_done	: std_logic;
-	-- signal error_reg	: std_logic;
-	-- signal compare_done	: std_logic;
-	-- signal read_mismatch	: std_logic;
 	signal burst_write_active	: std_logic;
 	signal burst_read_active	: std_logic;
-	-- signal expected_rdata	: std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-	--Interface response error flags
-	-- signal write_resp_error	: std_logic;
-	-- signal read_resp_error	: std_logic;
 	signal wnext	: std_logic;
 	signal rnext	: std_logic;
 
@@ -214,7 +194,6 @@ begin
   AXI_WRITE_DONE_O <= axi_bready and M_AXI_BVALID;
   AXI_READ_VLD_O   <= rnext;
 
-
 	-----------------------------------------------------------------------------------------
 	--I/O CONNECTIONS. WRITE ADDRESS (AW)
 	-----------------------------------------------------------------------------------------
@@ -231,7 +210,6 @@ begin
 	-----------------------------------------------------------------------------------------
 	--WRITE DATA(W)
 	-----------------------------------------------------------------------------------------
-	M_AXI_WDATA	<= axi_wdata;
 	-- Burst pulses must not be complete
 	M_AXI_WSTRB	<= AXI_WRITE_STRB_I;
 	M_AXI_WLAST	<= axi_wlast;
@@ -256,10 +234,6 @@ begin
 	--READ AND READ RESPONSE (R)
 	-----------------------------------------------------------------------------------------
 	M_AXI_RREADY	<= axi_rready;
-	--Example design I/O
-	-- TXN_DONE	<= compare_done;
-	--Burst size in bytes
-	-- burst_size_bytes	<= std_logic_vector( to_unsigned((C_M_AXI_BURST_LEN * (C_M_AXI_DATA_WIDTH/8)),C_TRANSACTIONS_NUM+3) );
 	-----------------------------------------------------------------------------------------
 
 	-----------------------------------------------------------------------------------------
@@ -517,21 +491,6 @@ begin
 	  rnext <= M_AXI_RVALID and axi_rready;                                 
 	                                                                        
 	                                                                        
-	-- Burst length counter. Uses extra counter register bit to indicate    
-	-- terminal count to reduce decode logic                                
-	  process(M_AXI_ACLK)                                                   
-	  begin                                                                 
-	    if (rising_edge (M_AXI_ACLK)) then                                  
-	      if (M_AXI_ARESETN = '1' or init_read_txn_pulse = '1') then    
-	        read_index <= (others => '0');                                  
-	      else                                                              
-	        if (rnext = '1' and (unsigned(read_index) <= unsigned(AXI_BURST_LEN))) then   
-	          read_index <= std_logic_vector(unsigned(read_index) + 1);                               
-	        end if;                                                         
-	      end if;                                                           
-	    end if;                                                             
-	  end process;                                                          
-
 		axi_rready <= AXI_READ_RDY_I;
 	                                                                        
   start_burst_logic : process(M_AXI_ACLK)

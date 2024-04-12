@@ -9,7 +9,9 @@ port(
         
         start_crc : in std_logic;
         pulse_cnt_max : in std_logic_vector(1 downto 0);
+				-- for every data sel
         vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0);
+        data_sel : in std_logic_vector(3 downto 0);
 
         data_in : in std_logic_vector(31 downto 0);
         data_req: out std_logic;
@@ -40,7 +42,7 @@ architecture Behavioral of crc_top is
 
   -- crc signals
   signal crc_reg : std_logic_vector(7 downto 0);
-  signal crc_out_s, crc_data_in_s : std_logic_vector(7 downto 0);
+  signal crc_out_s : std_logic_vector(7 downto 0);
 
   signal q_s : std_logic_vector(31 downto 0);
 begin
@@ -71,12 +73,11 @@ begin
     if (rising_edge(clk)) then
       if(reset = '1') then
         q_s <= (others => '0');
-				crc_data_in_s <= (others => '0');
+				-- COI removal
       else
         if (shift_s = '0') then
           q_s <= data_in;
         else
-          crc_data_in_s <= q_s(7 downto 0);
           q_s <= std_logic_vector(to_unsigned(0, 8))&q_s(31 downto 8);
         end if;
       end if;
@@ -106,7 +107,8 @@ begin
   begin
 
     -- default values
-    state_next <= state_reg;
+		-- COI removal
+    -- state_next <= state_reg;
     pulse_cnt_next <= pulse_cnt_reg;
     shift_cnt_next <= shift_cnt_reg;
     shift_s <= '0';
@@ -146,26 +148,64 @@ begin
         state_next <= SHIFT;
         ---------------------------------------- 
       when SHIFT =>
-        shift_s <= '1';
-        shift_cnt_next <= std_logic_vector(unsigned(shift_cnt_reg) + 1);
 
-        if(to_integer(unsigned(shift_cnt_reg)) = 3) then
-          if(unsigned(pulse_cnt_reg) = unsigned(pulse_cnt_max)) then
-						shift_cnt_next <= (others => '0');
-            ---------------------------------------- 
-            state_next <= LAST_LOAD;
-            ---------------------------------------- 
-          else
-						shift_cnt_next <= (others => '0');
-            ---------------------------------------- 
-            state_next <= LOAD;
-            ---------------------------------------- 
-          end if;
-        else
-          ---------------------------------------- 
-          state_next <= SHIFT;
-          ---------------------------------------- 
-        end if;
+				shift_s <= '1';
+				--BUG crc calculation implemented only for op2
+				-- data sel case to be implemented, crc calc for op0 and op1
+				case data_sel is 
+					when x"0" =>
+						-- no icrement of shift_cnt_reg because only lsb byte is used for crc calc, so load every cycle
+						if(unsigned(pulse_cnt_reg) = unsigned(pulse_cnt_max)) then
+							shift_cnt_next <= (others => '0');
+							---------------------------------------- 
+							state_next <= LAST_LOAD;
+							---------------------------------------- 
+						else
+							shift_cnt_next <= (others => '0');
+							---------------------------------------- 
+							state_next <= LOAD;
+							---------------------------------------- 
+						end if;
+					when x"1" =>
+						if(to_integer(unsigned(shift_cnt_reg)) = 1) then
+							if(unsigned(pulse_cnt_reg) = unsigned(pulse_cnt_max)) then
+								shift_cnt_next <= (others => '0');
+								---------------------------------------- 
+								state_next <= LAST_LOAD;
+								---------------------------------------- 
+							else
+								shift_cnt_next <= (others => '0');
+								---------------------------------------- 
+								state_next <= LOAD;
+								---------------------------------------- 
+							end if;
+						else
+							shift_cnt_next <= std_logic_vector(unsigned(shift_cnt_reg) + 1);
+							---------------------------------------- 
+							state_next <= SHIFT;
+							---------------------------------------- 
+						end if;
+					when others =>
+						if(to_integer(unsigned(shift_cnt_reg)) = 3) then
+							if(unsigned(pulse_cnt_reg) = unsigned(pulse_cnt_max)) then
+								shift_cnt_next <= (others => '0');
+								---------------------------------------- 
+								state_next <= LAST_LOAD;
+								---------------------------------------- 
+							else
+								shift_cnt_next <= (others => '0');
+								---------------------------------------- 
+								state_next <= LOAD;
+								---------------------------------------- 
+							end if;
+						else
+							shift_cnt_next <= std_logic_vector(unsigned(shift_cnt_reg) + 1);
+							---------------------------------------- 
+							state_next <= SHIFT;
+							---------------------------------------- 
+						end if;
+				end case;
+					
       when LAST_LOAD =>
         -- load new pulse of 4 bytes 
         shift_s <= '0';

@@ -486,14 +486,16 @@ begin
   --------------------------------------------------------------------------------	
   -- I/O connections controller - regs, internal irqs
   --------------------------------------------------------------------------------	
-	int_irq_o(0) <= pb0_ctrl1_s;
-	int_irq_o(1) <= pb1_ctrl1_s;
+	-- NOT_IN_SPEC, irq signals directly forwarded from builder blocks
+	int_irq_o(0) <= pb0_irq_i;
+	int_irq_o(1) <= pb1_irq_i;
 	int_irq_o(2) <= pp_ctrl1_s;
 
 	--------------------------------------------------------------------------------	
 	-- I/O connections PB0 and top assignments
 	--------------------------------------------------------------------------------	
-	pb0_irq_top <= pb0_ctrl1_s;
+	-- NOT_IN_SPEC, irq signals directly forwarded from builder blocks
+	pb0_irq_top <= pb0_irq_i;
 	pb0_busy_top <= pb0_busy_i; 
 
 	pb0_start_o <= pb0_ctrl0_s; 
@@ -536,7 +538,8 @@ begin
 	--------------------------------------------------------------------------------	
 	-- I/O connections PB1 and top assignments
 	--------------------------------------------------------------------------------	
-	pb1_irq_top <= pb1_ctrl1_s;
+	-- NOT_IN_SPEC, irq signals directly forwarded from builder blocks
+	pb1_irq_top <= pb1_irq_i;
 	pb1_busy_top <= pb1_busy_i; 
 
 	pb1_start_o <= pb1_ctrl0_s; 
@@ -777,6 +780,9 @@ begin
 				end if;
 			elsif(pb1_irq_i = '1') then 
 				pb1_ctrl1_s <= '1';
+			-- added logic to solve controller irq reset bug, not in spec
+			else
+				pb1_ctrl1_s <= '0';
 			end if;
 		end if;
 	end process;

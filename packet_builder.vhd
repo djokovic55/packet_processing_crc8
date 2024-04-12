@@ -145,7 +145,8 @@ architecture Behavioral of packet_builder is
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		AXI_WRITE_STRB_I    : in  std_logic_vector(3 downto 0);
-    AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
+		-- COI removal
+    -- AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
 
@@ -265,13 +266,11 @@ architecture Behavioral of packet_builder is
     -- FIFO Write Interface
     wr_en_i   : in  std_logic;
     wr_data_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-    full_o    : out std_logic;
  
     -- FIFO Read Interface
     rd_pt_rst : in std_logic;
     rd_en_i   : in  std_logic;
-    rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-    empty_o   : out std_logic
+    rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0)
     );
   end component;
 
@@ -283,6 +282,7 @@ architecture Behavioral of packet_builder is
     start_crc : in std_logic;
     pulse_cnt_max : in std_logic_vector(1 downto 0);
     vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0);
+		data_sel : in std_logic_vector(3 downto 0);
 
     data_in : in std_logic_vector(31 downto 0);
     data_req: out std_logic;
@@ -355,7 +355,6 @@ architecture Behavioral of packet_builder is
   signal axi_write_init_s    : std_logic;
   signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
   signal axi_write_strb_s    : std_logic_vector(3 downto 0);
-  signal axi_write_vld_s     : std_logic;
   signal axi_write_rdy_s     : std_logic;
   signal axi_write_done_s    : std_logic;
 
@@ -550,7 +549,8 @@ begin
   begin
 
     -- default values
-    state_next <= state_reg;
+		-- COI removal
+    -- state_next <= state_reg;
     crc_next <= crc_reg;
     pulse_cnt_next <= pulse_cnt_reg;
     pulse_data_next <= pulse_data_reg;
@@ -564,7 +564,6 @@ begin
 
     axi_write_address_s <= (others => '0');
     axi_write_data_s <= (others => '0');
-    axi_write_vld_s <= '0';
     axi_write_strb_s <= (others => '0');
     axi_write_init_s <= '0';
 
@@ -594,8 +593,6 @@ begin
     case state_reg is
       when IDLE =>
         busy_s <= '1';
-				pulse_cnt_next <= (others => '0');
-
 				-- reset all registers
 				crc_next <= (others => '0');
 				pulse_cnt_next <= (others => '0');
@@ -936,7 +933,6 @@ fifo_out_wr_en_s <= '1';
         -- set W channel
         axi_write_data_s <= fifo_out_rd_data_s;
         axi_write_strb_s <= "1111";
-        axi_write_vld_s <= '1';
 
         -- start burst 
         axi_write_init_s <= '1';
@@ -981,8 +977,8 @@ fifo_out_wr_en_s <= '1';
 
         -- set W channel
         axi_write_data_s <= fifo_out_rd_data_s;
-        axi_write_strb_s <= "1111";
-        axi_write_vld_s <= '1';
+				-- COI removal
+        -- axi_write_strb_s <= "1111";
 
         case(vld_bytes_last_pulse_cnt_reg) is 
           when "00" =>
@@ -996,7 +992,6 @@ fifo_out_wr_en_s <= '1';
         end case;
 
         if(axi_write_done_s = '1') then
-					axi_write_vld_s <= '0';
           irq_o <= '1';
           ---------------------------------------- 
           state_next <= IDLE;
@@ -1014,31 +1009,29 @@ fifo_out_wr_en_s <= '1';
   -- Module instantiations
   --------------------------------------------------------------------------------
   fifo_in: fifo
+	generic map(FIFO_DEPTH => 4)
   port map(
 
     clk => M_AXI_ACLK,      
     reset => fifo_in_rst_s, 
     wr_en_i => fifo_in_wr_en_s,   
     wr_data_i => fifo_in_wr_data_s, 
-    full_o => fifo_in_full_s,    
     rd_pt_rst => fifo_in_rd_pt_rst_s, 
     rd_en_i => fifo_in_rd_en_s,   
-    rd_data_o => fifo_in_rd_data_s, 
-    empty_o => fifo_in_empty_s   
+    rd_data_o => fifo_in_rd_data_s 
   );
 
   fifo_out: fifo
+	generic map(FIFO_DEPTH => 5)
   port map(
 
     clk => M_AXI_ACLK,      
     reset => fifo_out_rst_s, 
     wr_en_i => fifo_out_wr_en_s,   
     wr_data_i => fifo_out_wr_data_next, 
-    full_o => fifo_out_full_s,    
     rd_pt_rst => '0',
     rd_en_i => fifo_out_rd_en_s,   
-    rd_data_o => fifo_out_rd_data_s, 
-    empty_o => fifo_out_empty_s   
+    rd_data_o => fifo_out_rd_data_s
   );
 
   crc_calc: crc_top
@@ -1048,6 +1041,7 @@ fifo_out_wr_en_s <= '1';
     start_crc => start_crc_s,
     pulse_cnt_max => byte_cnt_i(3 downto 2),
     vld_bytes_last_pulse_cnt => byte_cnt_i(1 downto 0),
+    data_sel => data_sel_i,
 
     data_in => shift_data_in_s,
     data_req => shift_data_req_s,
@@ -1077,7 +1071,8 @@ fifo_out_wr_en_s <= '1';
     AXI_WRITE_INIT_I    => axi_write_init_s, 
     AXI_WRITE_DATA_I    => axi_write_data_s, 
     AXI_WRITE_STRB_I    => axi_write_strb_s,
-    AXI_WRITE_VLD_I     => axi_write_vld_s, 
+		-- COI removal
+    -- AXI_WRITE_VLD_I     => axi_write_vld_s, 
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 
     AXI_READ_ADDRESS_I => axi_read_address_s, 

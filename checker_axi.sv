@@ -106,6 +106,13 @@ checker  checker_axi(
 		xlast && (!xready || !xvalid) |=> xlast;
   endproperty
 
+  property axi_size (axvalid, axsize);
+		axvalid |-> axsize == 2;
+  endproperty
+
+  property axi_resp (xresp, xvalid);
+		xvalid |-> xresp == 0;
+  endproperty
 
   //FIXME awready prop are not defined
 
@@ -130,6 +137,8 @@ checker  checker_axi(
   ast_aw_stable_awsize: assert property (stable_before_handshake(awvalid, awready, awsize));
   ast_aw_stable_awburst: assert property (stable_before_handshake(awvalid, awready, awburst));
   ast_aw_awvalid_until_awready: assert property (valid_before_handshake(awvalid, awready));
+
+	ast_aw_valid_awsize: assert property(axi_size(awsize, awvalid));
   // ast_awready_max_wait: assert property (handshake_max_wait(awvalid, awready, 1'b1));
 
 
@@ -153,7 +162,7 @@ checker  checker_axi(
   ast_w_wvalid_until_wready: assert property (valid_before_handshake(wvalid, wready));
 
   //SECTION B channel prop
-	// ast_b_no_slave_error: assert property(bvalid && bready |-> bresp == 2'b00);
+	ast_b_no_slave_error: assert property(axi_resp(bresp, bvalid));
 	
 
   //SECTION AR channel prop
@@ -164,6 +173,7 @@ checker  checker_axi(
   ast_ar_stable_arburst: assert property (stable_before_handshake(arvalid, arready, arburst));
 
   ast_ar_arvalid_until_arready: assert property (valid_before_handshake(arvalid, arready));
+	ast_ar_valid_arsize: assert property(axi_size(arsize, arvalid));
   //ast_arready_max_wait: assert property (handshake_max_wait(arvalid, arready, 1'b1));
 
   // cov_arvalid_c: cover property (arvalid);
@@ -187,7 +197,7 @@ checker  checker_axi(
 	// FIXME Cannot be proved because rready is always true
   // ast_r_rvalid_until_rready: assert property (valid_before_handshake(rvalid, rready));
 
-	// ast_r_no_slave_error: assert property(rvalid && rready |-> rresp == 2'b00);
+	ast_r_no_slave_error: assert property(axi_resp(rresp, rvalid));
 
   // cov_r_rvalid: cover property (rvalid);
   // cov_r_rready: cover property (rready);

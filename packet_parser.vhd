@@ -142,7 +142,8 @@ architecture Behavioral of packet_parser is
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		AXI_WRITE_STRB_I    : in  std_logic_vector(3 downto 0);
-    AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
+		-- COI removal
+    -- AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
 
@@ -262,13 +263,11 @@ architecture Behavioral of packet_parser is
     -- FIFO Write Interface
     wr_en_i   : in  std_logic;
     wr_data_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-    full_o    : out std_logic;
  
     -- FIFO Read Interface
     rd_pt_rst : in std_logic;
     rd_en_i   : in  std_logic;
-    rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-    empty_o   : out std_logic
+    rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0)
     );
   end component;
 
@@ -280,6 +279,7 @@ architecture Behavioral of packet_parser is
     start_crc : in std_logic;
     pulse_cnt_max : in std_logic_vector(1 downto 0);
     vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0);
+		data_sel : in std_logic_vector(3 downto 0);
 
     data_in : in std_logic_vector(31 downto 0);
     data_req: out std_logic;
@@ -304,7 +304,6 @@ end component hamming_check;
   signal axi_write_init_s    : std_logic;
   signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
   signal axi_write_strb_s    : std_logic_vector(3 downto 0);
-  signal axi_write_vld_s     : std_logic;
   signal axi_write_rdy_s     : std_logic;
   signal axi_write_done_s    : std_logic;
 
@@ -336,13 +335,11 @@ end component hamming_check;
   -- Fifo in - WRITE
   signal fifo_in_wr_en_s   : std_logic;
   signal fifo_in_wr_data_s : std_logic_vector(31 downto 0);
-  signal fifo_in_full_s    : std_logic;
 
   signal fifo_in_rd_pt_rst_s   : std_logic;
   signal fifo_reset_s   : std_logic;
   signal fifo_in_rd_en_s   : std_logic;
   signal fifo_in_rd_data_s : std_logic_vector(31 downto 0);
-  signal fifo_in_empty_s   : std_logic;
   --------------------------------------------------------------------------------
 
   -- crc8 signals
@@ -436,7 +433,8 @@ begin
     -- [x] pkt_type, pkt_byte_cnt and other outputs logic
 
     -- default values
-    state_next <= state_reg;
+		-- COI removal
+    -- state_next <= state_reg;
     crc_next <= crc_reg;
     header_next <= header_reg;
     
@@ -454,7 +452,6 @@ begin
 
     axi_write_address_s <= (others => '0');
     axi_write_data_s <= (others => '0');
-    axi_write_vld_s <= '0';
     axi_write_strb_s <= (others => '0');
     axi_write_init_s <= '0';
 
@@ -516,18 +513,18 @@ begin
           -- header won't be stored in fifo, then in its register
           header_next <= axi_read_data_s(15 downto 0);
           -- parse packet type
-          hamming_data_in_s(7 downto 4) <= axi_read_data_s(11 downto 8);
+          hamming_data_in_s(7 downto 4) <= header_next(11 downto 8);
           -- parse byte count
-          hamming_data_in_s(3 downto 0) <= axi_read_data_s(7 downto 4);
+          hamming_data_in_s(3 downto 0) <= header_next(7 downto 4);
           -- parse parity bits
-          hamming_parity_in_s <= axi_read_data_s(3 downto 0);
+          hamming_parity_in_s <= header_next(3 downto 0);
           -- parse msb parity bit
-          hamming_msb_parity_bit_s <= axi_read_data_s(12);
+          hamming_msb_parity_bit_s <= header_next(12);
 
 
           -- KEY informations which must be correct
-          pkt_byte_cnt_o_next <= axi_read_data_s(7 downto 4);
-          pkt_type_o_next <= axi_read_data_s(11 downto 8);
+          pkt_byte_cnt_o_next <= header_next(7 downto 4);
+          pkt_type_o_next <= header_next(11 downto 8);
 
           -- IMPORTANT check for single or double ecc errors
           if(unsigned(hamming_parity_check_out_s) = "0000") then
@@ -667,6 +664,7 @@ begin
   -- Module instantiations
   --------------------------------------------------------------------------------
   fifo_in: fifo
+	generic map(FIFO_DEPTH => 5)
   port map(
 
     clk => M_AXI_ACLK,      
@@ -675,11 +673,9 @@ begin
     -- reset => M_AXI_ARESETN, 
     wr_en_i => fifo_in_wr_en_s,   
     wr_data_i => fifo_in_wr_data_s, 
-    full_o => fifo_in_full_s,    
     rd_pt_rst => fifo_in_rd_pt_rst_s, 
     rd_en_i => fifo_in_rd_en_s,   
-    rd_data_o => fifo_in_rd_data_s, 
-    empty_o => fifo_in_empty_s   
+    rd_data_o => fifo_in_rd_data_s
   );
 
   crc_calc: crc_top
@@ -689,6 +685,8 @@ begin
     start_crc => start_crc_s,
     pulse_cnt_max => pkt_byte_cnt_o_reg(3 downto 2),
     vld_bytes_last_pulse_cnt => pkt_byte_cnt_o_reg(1 downto 0),
+		-- set op2, as it always needs to read all received bytes 
+    data_sel => "0010",
 
     data_in => shift_data_in_s,
     data_req => shift_data_req_s,
@@ -715,7 +713,6 @@ begin
     AXI_WRITE_ADDRESS_I => axi_write_address_s, 
     AXI_WRITE_INIT_I    => axi_write_init_s, 
     AXI_WRITE_DATA_I    => axi_write_data_s, 
-    AXI_WRITE_VLD_I     => axi_write_vld_s, 
     AXI_WRITE_STRB_I    => axi_write_strb_s,
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 

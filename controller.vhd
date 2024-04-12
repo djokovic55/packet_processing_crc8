@@ -131,7 +131,8 @@ architecture Behavioral of controller is
     AXI_WRITE_ADDRESS_I : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);  -- address added to base address
     AXI_WRITE_DATA_I    : in  std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
 		AXI_WRITE_STRB_I    : in  std_logic_vector(3 downto 0);
-    AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
+		-- COI removal
+    -- AXI_WRITE_VLD_I     : in  std_logic;  --  indicates that write data is valid
     AXI_WRITE_RDY_O     : out std_logic;  -- indicates that controler is ready to accept data
     AXI_WRITE_DONE_O    : out std_logic;  -- indicates that burst has finished
 
@@ -251,13 +252,11 @@ architecture Behavioral of controller is
     -- FIFO Write Interface
     wr_en_i   : in  std_logic;
     wr_data_i : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-    full_o    : out std_logic;
  
     -- FIFO Read Interface
     rd_pt_rst : in std_logic;
     rd_en_i   : in  std_logic;
-    rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0);
-    empty_o   : out std_logic
+    rd_data_o : out std_logic_vector(DATA_WIDTH-1 downto 0)
     );
   end component;
 
@@ -267,7 +266,6 @@ architecture Behavioral of controller is
     signal axi_write_init_reg, axi_write_init_next : std_logic;    --starts write transaction
     signal axi_write_data_s    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
     signal axi_write_data_next, axi_write_data_reg    : std_logic_vector(C_M_AXI_DATA_WIDTH-1 downto 0);
-    signal axi_write_vld_s     : std_logic;  --  indicates that write data is valid
     signal axi_write_rdy_s     : std_logic;  -- indicates that controler is ready to                                          -- accept data
     signal axi_write_done_s    : std_logic;  -- indicates that burst has finished
     signal axi_write_strb_s    : std_logic_vector(3 downto 0);
@@ -295,12 +293,10 @@ architecture Behavioral of controller is
     -- fifo signals
     signal fifo_wr_en_s   : std_logic;
     signal fifo_wr_data_s : std_logic_vector(31 downto 0);
-    signal fifo_full_s    : std_logic;
 
     signal fifo_rd_pt_rst_s   : std_logic;
     signal fifo_rd_en_s   : std_logic;
     signal fifo_rd_data_s : std_logic_vector(31 downto 0);
-    signal fifo_empty_s   : std_logic;
 
     signal fifo_rst_s   : std_logic;
 
@@ -417,7 +413,6 @@ begin
       pb_status_cnt_next <= pb_status_cnt_reg;
       
       axi_write_data_next <= axi_write_data_reg;
-      axi_write_vld_s <= '0';
       axi_write_strb_s <= (others => '0');
       axi_read_rdy_s <= '0';
 
@@ -626,7 +621,6 @@ begin
             axi_write_data_s <= fifo_rd_data_s;
             axi_burst_len_s(1 downto 0) <= cnt_max_reg;
             -- data is valid because write_data is ready in write_data_reg
-            axi_write_vld_s <= '1';
             axi_write_strb_s <= (others => '1');
 
             if(axi_write_rdy_s = '1') then
@@ -645,7 +639,6 @@ begin
             end if;
           when START_TASK =>
               axi_write_data_s(0) <= '1';
-              axi_write_vld_s <= '1';
               axi_write_strb_s <= (others => '1');
 
 
@@ -662,7 +655,6 @@ begin
               end if;
           when INC_DROP_CNT =>
               axi_write_data_s(0) <= '1';
-              axi_write_vld_s <= '1';
               axi_write_strb_s <= (others => '1');
 
               if(axi_write_done_s = '1') then
@@ -681,7 +673,6 @@ begin
               end if;
           when INTR_CLEAR =>
               axi_write_data_s(0) <= '1';
-              axi_write_vld_s <= '1';
 
               if(axi_write_done_s = '1') then
                 ---------------------------------------- 
@@ -711,7 +702,8 @@ begin
     AXI_WRITE_ADDRESS_I => axi_write_address_reg, 
     AXI_WRITE_INIT_I    => axi_write_init_reg, 
     AXI_WRITE_DATA_I    => axi_write_data_s, 
-    AXI_WRITE_VLD_I     => axi_write_vld_s, 
+		-- COI removal
+    -- AXI_WRITE_VLD_I     => axi_write_vld_s, 
     AXI_WRITE_STRB_I     => axi_write_strb_s, 
     AXI_WRITE_RDY_O     => axi_write_rdy_s, 
     AXI_WRITE_DONE_O    => axi_write_done_s, 
@@ -766,11 +758,9 @@ begin
     reset => fifo_rst_s, 
     wr_en_i => fifo_wr_en_s,   
     wr_data_i => fifo_wr_data_s, 
-    full_o => fifo_full_s,    
     rd_pt_rst => fifo_rd_pt_rst_s, 
     rd_en_i => fifo_rd_en_s,   
-    rd_data_o => fifo_rd_data_s, 
-    empty_o => fifo_empty_s   
+    rd_data_o => fifo_rd_data_s
   );
 
 end architecture Behavioral;
