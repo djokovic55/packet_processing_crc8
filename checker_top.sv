@@ -365,7 +365,7 @@ module  checker_top(
 						ecc_uncorr_err_pp_next <= '0;
 					end
 
-					if(pp_start_top) begin
+					if(pp_start_top && pp_checker_en) begin
 						crc_err_next <= '0;
 						addr_next <= pp_addr_hdr_top;
 						state_next <= HEADER_READ;
@@ -465,8 +465,8 @@ module  checker_top(
 	ast_crc_err_when_ecc_err_exists: assert property(pp_irq_top && pp_pkt_crc_err_top && !pp_pkt_ecc_uncorr_top && pp_pkt_ecc_corr_top |-> crc_err_reg);
 	ast_crc_no_err_when_ecc_err_exists: assert property(pp_irq_top && !pp_pkt_crc_err_top && !pp_pkt_ecc_uncorr_top && pp_pkt_ecc_corr_top |-> !crc_err_reg);
 
-	ast_ecc_corr_err: assert property(pp_pkt_ecc_corr_top |-> ecc_corr_err_pp_reg);
-	ast_ecc_uncorr_err: assert property(pp_pkt_ecc_uncorr_top |-> ecc_uncorr_err_pp_reg);
+	ast_ecc_corr_err: assert property(pp_checker_en && pp_pkt_ecc_corr_top |-> ecc_corr_err_pp_reg);
+	ast_ecc_uncorr_err: assert property(pp_checker_en && pp_pkt_ecc_uncorr_top |-> ecc_uncorr_err_pp_reg);
 
 	////////////////////////////////////////////////////////////////////////////////	
 	////////////////////////////////////////////////////////////////////////////////	
@@ -486,17 +486,19 @@ module  checker_top(
     pb_data_sel == 4'h2 |-> chosen_byte <= pb_byte_cnt);
 
 	////////////////////////////////////////////////////////////////////////////////	
-	// Builder checkers enable signals
+	// Checkers enable logic
 	////////////////////////////////////////////////////////////////////////////////	
 	logic pb0_checker_en;
-	logic pb1_cecker_en;
+	logic pb1_checker_en;
+	logic pp_checker_en;
+	logic[2:0] chk_en;
 
-  asm_pb0_chk_en_stability: assume property(pp_busy_top |-> $stable(pb0_checker_en));
-  asm_pb1_chk_en_stability: assume property(pp_busy_top |-> $stable(pb1_checker_en));
-	asm_only_one_active_pb_chk: assume property(not(pb0_checker_en && pb1_checker_en));
-	// asm_one_active_pb_chk: assume property(!pb0_busy_top || !pb1_busy_top |-> not(!pb0_checker_en && !pb1_checker_en));
-	// asm_one_active_pb_chk: assume property(pp_busy_top |-> not(!pb0_checker_en && !pb1_checker_en));
-	asm_none_active_pb_chk_when_pp: assume property(!pp_busy_top |-> (!pb0_checker_en && !pb1_checker_en));
+	assign chk_en = {pb0_checker_en, pb1_checker_en, pp_checker_en};
+
+  asm_pb0_chk_en_stability: assume property($stable(pb0_checker_en));
+  asm_pb1_chk_en_stability: assume property($stable(pb1_checker_en));
+  asm_pp_chk_en_stability: assume property($stable(pp_checker_en));
+	asm_only_one_active_chk: assume property($onehot(chk_en));
 
 	////////////////////////////////////////////////////////////////////////////////	
 	// PB1 CHECKER
@@ -606,7 +608,7 @@ module  checker_top(
 
 	// MEM ADDR selection
 	always_comb begin
-		if(!pp_busy_top)
+		if(!pp_busy_top && pp_checker_en)
 			inmem_addr_b_s <= addr_reg;
 		else if(!pb0_busy_top && pb0_checker_en)
 			if(state_pb0_di == CHOOSE_BYTE)

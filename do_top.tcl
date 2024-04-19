@@ -3,6 +3,8 @@ clear -all
 # verif
 
 check_cov -init
+set_proof_structure_support_embedded_on_case_split on
+
 # only data integrity checker analysis
 # check_cov -init -type {proof bound} -model all -exclude_instance { * } -include_instance {subsys.chk_data_integrity} 
 # check_cov -init -type {bound}
@@ -136,18 +138,49 @@ task -create iva_debug -set -source_task <embedded> -copy_stopats -copy_ratings 
 <embedded>::top.chk_top.ast_ecc_corr_err
 <embedded>::top.chk_top.ast_ecc_uncorr_err
 }
-# Check for conflicts, enable dead_end prop
+################################################################################
+# CHECK FOR CONFLICTS, ENABLE DEAD_END PROP
+################################################################################
 check_assumptions -show -dead_end
 # task -create dead_end -set -source_task iva_debug -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy iva_debug:::noDeadEnd
 
+
+################################################################################
+# CONVERGENCE, PROOF STRUCTURE cmds
+################################################################################
+task -create di_convergence -set -source_task iva_debug -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy iva_debug::top.chk_top.ast_pb0_di
+
+stopat subsys.parser.*
+stopat subsys.packet_builder1.*
+
+stopat subsys.intcon.pp_req
+assume -name asm_no_pp_req {subsys.intcon.pp_req = '0'}
+stopat subsys.intcon.pb1_req
+assume -name asm_no_pb1_req {subsys.intcon.pb1_req = '0'}
+
+assume -name asm_op0_only {chk_top.pb_data_sel = x"0"}
+assume -name asm_b0_only {chk_top.pb_byte_cnt = x"0"}
+
+proof_structure -init DI_PB0_CS_IVA_SBP -copy_all -from di_convergence
+proof_structure -create case_split -from DI_PB0_CS_IVA_SBP -condition {chk_top.pb_byte_cnt = x"0"} -op_name OP_B -imp_name {OP0_B0 OP0_B0.completeness_check_0}
+#
 ################################################################################
 ## PROVE
+################################################################################
 # Inititiate using M engine
 #
 # prove -task crc_debug -engine_mode {M} -bg
 # prove -bg -task {crc_debug}
-prove -bg -task {iva_debug}
+# prove -bg -task {iva_debug}
 # prove -bg -all
+################################################################################
+
+################################################################################
+## DEEP BUG HUNTING
+################################################################################
+## prove the existing trace as initial value for another formal proof.
+#
+# prove -from iva_debug::top.chk_top.cov_2pb0 -task . -bg
 ################################################################################
 
 ### Waive solved unreachable cover points
