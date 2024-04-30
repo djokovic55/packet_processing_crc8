@@ -5,8 +5,8 @@ module  checker_top(
 
   // ex_reg top interface 
   output pb_irq,
-  output[31:0] pb_addr_in,
-  output[3:0] pb_byte_cnt,
+  output[31:0] pb_addr_in, // assumed
+  output[3:0] pb_byte_cnt,// assumed
   output[3:0] pb_pkt_type,
   output pb_ecc_en,
   output pb_crc_en,
@@ -15,8 +15,8 @@ module  checker_top(
   output[3:0] pb_ecc_val,
   output[7:0] pb_crc_val,
   output[2:0] pb_sop_val,
-  output[3:0] pb_data_sel,
-  output[31:0] pb_addr_out,
+  output[3:0] pb_data_sel,// assumed
+  output[31:0] pb_addr_out,// assumed
 
   output pp_irq,
   output[31:0] pp_addr_hdr,
@@ -169,34 +169,34 @@ module  checker_top(
     // IMPORTANT Assert valid register values
   // ast_no_crc_err: assert property(pp_pkt_crc_err_top == 1'b0);
 
-  ast_pb0_addr_in: assert property(pb0_start_top |-> pb0_addr_in_top == pb_addr_in);
-  ast_pb0_byte_cnt: assert property(pb0_start_top |-> pb0_byte_cnt_top == pb_byte_cnt);
-  ast_pb0_pkt_type: assert property(pb0_start_top |-> pb0_pkt_type_top == pb_pkt_type);
-  ast_pb0_ecc_en: assert property(pb0_start_top |-> pb0_ecc_en_top == pb_ecc_en);
-  ast_pb0_crc_en: assert property(pb0_start_top |-> pb0_crc_en_top == pb_crc_en);
-  ast_pb0_ins_ecc_err: assert property(pb0_start_top |-> pb0_ins_ecc_err_top == pb_ins_ecc_err);
-  ast_pb0_ins_crc_err: assert property(pb0_start_top |-> pb0_ins_crc_err_top == pb_ins_crc_err);
-  ast_pb0_ecc_val: assert property(pb0_start_top |-> pb0_ecc_val_top == pb_ecc_val);
-  ast_pb0_crc_val: assert property(pb0_start_top |-> pb0_crc_val_top == pb_crc_val);
-  ast_pb0_sop_val: assert property(pb0_start_top |-> pb0_sop_val_top == pb_sop_val);
-  ast_pb0_data_sel: assert property(pb0_start_top |-> pb0_data_sel_top == pb_data_sel);
-  ast_pb0_addr_out: assert property(pb0_start_top |-> pb0_addr_out_top == pb_addr_out);
+  ast_top_reg_pb0_addr_in: assert property(pb0_start_top |-> pb0_addr_in_top == pb_addr_in);
+  ast_top_reg_pb0_byte_cnt: assert property(pb0_start_top |-> pb0_byte_cnt_top == pb_byte_cnt);
+  ast_top_reg_pb0_pkt_type: assert property(pb0_start_top |-> pb0_pkt_type_top == pb_pkt_type);
+  ast_top_reg_pb0_ecc_en: assert property(pb0_start_top |-> pb0_ecc_en_top == pb_ecc_en);
+  ast_top_reg_pb0_crc_en: assert property(pb0_start_top |-> pb0_crc_en_top == pb_crc_en);
+  ast_top_reg_pb0_ins_ecc_err: assert property(pb0_start_top |-> pb0_ins_ecc_err_top == pb_ins_ecc_err);
+  ast_top_reg_pb0_ins_crc_err: assert property(pb0_start_top |-> pb0_ins_crc_err_top == pb_ins_crc_err);
+  ast_top_reg_pb0_ecc_val: assert property(pb0_start_top |-> pb0_ecc_val_top == pb_ecc_val);
+  ast_top_reg_pb0_crc_val: assert property(pb0_start_top |-> pb0_crc_val_top == pb_crc_val);
+  ast_top_reg_pb0_sop_val: assert property(pb0_start_top |-> pb0_sop_val_top == pb_sop_val);
+  ast_top_reg_pb0_data_sel: assert property(pb0_start_top |-> pb0_data_sel_top == pb_data_sel);
+  ast_top_reg_pb0_addr_out: assert property(pb0_start_top |-> pb0_addr_out_top == pb_addr_out);
 
-  ast_pb1_addr_in: assert property(pb1_start_top |-> pb1_addr_in_top == pb_addr_in);
-  ast_pb1_byte_cnt: assert property(pb1_start_top |-> pb1_byte_cnt_top == pb_byte_cnt);
-  ast_pb1_pkt_type: assert property(pb1_start_top |-> pb1_pkt_type_top == pb_pkt_type);
-  ast_pb1_ecc_en: assert property(pb1_start_top |-> pb1_ecc_en_top == pb_ecc_en);
-  ast_pb1_crc_en: assert property(pb1_start_top |-> pb1_crc_en_top == pb_crc_en);
-  ast_pb1_ins_ecc_err: assert property(pb1_start_top |-> pb1_ins_ecc_err_top == pb_ins_ecc_err);
-  ast_pb1_ins_crc_err: assert property(pb1_start_top |-> pb1_ins_crc_err_top == pb_ins_crc_err);
-  ast_pb1_ecc_val: assert property(pb1_start_top |-> pb1_ecc_val_top == pb_ecc_val);
-  ast_pb1_crc_val: assert property(pb1_start_top |-> pb1_crc_val_top == pb_crc_val);
-  ast_pb1_sop_val: assert property(pb1_start_top |-> pb1_sop_val_top == pb_sop_val);
-  ast_pb1_data_sel: assert property(pb1_start_top |-> pb1_data_sel_top == pb_data_sel);
-  ast_pb1_addr_out: assert property(pb1_start_top |-> pb1_addr_out_top == pb_addr_out);
+  ast_top_reg_pb1_addr_in: assert property(pb1_start_top |-> pb1_addr_in_top == pb_addr_in);
+  ast_top_reg_pb1_byte_cnt: assert property(pb1_start_top |-> pb1_byte_cnt_top == pb_byte_cnt);
+  ast_top_reg_pb1_pkt_type: assert property(pb1_start_top |-> pb1_pkt_type_top == pb_pkt_type);
+  ast_top_reg_pb1_ecc_en: assert property(pb1_start_top |-> pb1_ecc_en_top == pb_ecc_en);
+  ast_top_reg_pb1_crc_en: assert property(pb1_start_top |-> pb1_crc_en_top == pb_crc_en);
+  ast_top_reg_pb1_ins_ecc_err: assert property(pb1_start_top |-> pb1_ins_ecc_err_top == pb_ins_ecc_err);
+  ast_top_reg_pb1_ins_crc_err: assert property(pb1_start_top |-> pb1_ins_crc_err_top == pb_ins_crc_err);
+  ast_top_reg_pb1_ecc_val: assert property(pb1_start_top |-> pb1_ecc_val_top == pb_ecc_val);
+  ast_top_reg_pb1_crc_val: assert property(pb1_start_top |-> pb1_crc_val_top == pb_crc_val);
+  ast_top_reg_pb1_sop_val: assert property(pb1_start_top |-> pb1_sop_val_top == pb_sop_val);
+  ast_top_reg_pb1_data_sel: assert property(pb1_start_top |-> pb1_data_sel_top == pb_data_sel);
+  ast_top_reg_pb1_addr_out: assert property(pb1_start_top |-> pb1_addr_out_top == pb_addr_out);
 
-  ast_pp_addr_hdr: assert property(pp_start_top |-> pp_addr_hdr_top == pp_addr_hdr);
-  ast_pp_ignore_ecc_err: assert property(pp_start_top |-> pp_ignore_ecc_err_top == pp_ignore_ecc_err);
+  ast_top_reg_pp_addr_hdr: assert property(pp_start_top |-> pp_addr_hdr_top == pp_addr_hdr);
+  ast_top_reg_pp_ignore_ecc_err: assert property(pp_start_top |-> pp_ignore_ecc_err_top == pp_ignore_ecc_err);
 
 
 	////////////////////////////////////////////////////////////////////////////////	
