@@ -34,6 +34,8 @@ module  checker_top(
   output[13:0] outmem_addr_b_i,
   output outmem_we_b_i,
   input[31:0] outmem_data_b_o,
+	// cont top status
+	input cont_busy_top,
 
   // regs top interface
   input pb0_start_top,
@@ -166,8 +168,49 @@ module  checker_top(
   cov_crc_err: cover property(pp_pkt_crc_err_top == 1'b1);
   cov_no_crc_err: cover property(pp_pkt_crc_err_top == 1'b0);
 
-    // IMPORTANT Assert valid register values
   // ast_no_crc_err: assert property(pp_pkt_crc_err_top == 1'b0);
+	////////////////////////////////////////////////////////////////////////////////	
+	// LIVENESS props
+	////////////////////////////////////////////////////////////////////////////////	
+	
+	// asm_pb_irq_stable: assume property(pb_irq && !(pb0_start_top || pb1_start_top) |=> pb_irq)
+	// asm_pp_irq_stable: assume property(pp_irq && !(pp_start_top) |=> pp_irq)
+
+	// Build task has priority over parse task
+	// One cycle latency of ext_irqs in controller because of ex_regs
+
+	// 1. Building has priority
+	// 2. No internal int req, because it leads to intr clear state
+	// 3. Two builders are available, which makes it impossible (due to controller's long latency) that both of them are busy
+	// 	3a. But if IVA is enabled then it must be taken into account
+
+
+	// ast_pb_start_live: assert property(pb_irq && !(pb0_irq_top || pb1_irq_top) ##1 !pp_irq_top && !cont_busy_top |=> s_eventually (pb0_start_top || pb1_start_top));
+	// ast_pb_start_live: assert property(pb_irq && !pp_irq_top ##1 !(pb0_irq_top || pb1_irq_top) && !cont_busy_top |=> s_eventually (pb0_start_top || pb1_start_top));
+
+	ast_pb_start_live: assert property(pb_irq && !(pb0_busy_top && pb1_busy_top)[*2] ##1 !(pp_irq_top || pb0_irq_top || pb1_irq_top) && !cont_busy_top |=> s_eventually (pb0_start_top || pb1_start_top));
+
+	ast_pb0_finish_live: assert property(pb0_start_top |=> s_eventually pb0_irq_top);
+	ast_pb1_finish_live: assert property(pb1_start_top |=> s_eventually pb1_irq_top);
+
+	// 1. Build task req low
+	// 2. No internal int req, because it leads to intr clear state
+	// 3. Parser must be free, because it leads to task drop
+	// 4. In very first cycle block cannot be busy which then triggers property even though on the next cycle blocks start processing because of iva start
+
+	// ast_pp_start_live: assert property(pp_irq && pp_busy_top && !pb_irq && !(pb0_irq_top || pb1_irq_top) ##1 !pp_irq_top && !cont_busy_top |=> s_eventually pp_start_top);
+	// ast_pp_start_live: assert property(pp_irq && pp_busy_top && !pb_irq && !pp_irq_top ##1 !(pb0_irq_top || pb1_irq_top) && !cont_busy_top |=> s_eventually pp_start_top);
+
+	ast_pp_start_live: assert property(pp_irq && !pb_irq && pp_busy_top[*2] ##1 !(pp_irq_top || pb0_irq_top || pb1_irq_top) && !cont_busy_top |=> s_eventually pp_start_top);
+
+	ast_pp_finish_live: assert property(pp_start_top |=> s_eventually pp_irq_top);
+
+
+
+
+	////////////////////////////////////////////////////////////////////////////////	
+	// IMPORTANT Assert valid register values
+	////////////////////////////////////////////////////////////////////////////////	
 
   ast_top_reg_pb0_addr_in: assert property(pb0_start_top |-> pb0_addr_in_top == pb_addr_in);
   ast_top_reg_pb0_byte_cnt: assert property(pb0_start_top |-> pb0_byte_cnt_top == pb_byte_cnt);

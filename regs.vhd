@@ -600,7 +600,9 @@ begin
 	pp_ignore_ecc_err_o <= pp_ctrl3_s; 
 	pp_ignore_ecc_err_top <= pp_ctrl3_s; 
 
-	pp_irq_top <= pp_irq_i; 
+	-- BUG irq directly forwarded on top whereas reg value goes to main cont
+	-- pass reg value insted
+	pp_irq_top <= pp_ctrl1_s; 
 
 	pp_busy_top <= pp_busy_i;
 	pp_pkt_ecc_corr_top <= pp_pkt_ecc_corr_i;

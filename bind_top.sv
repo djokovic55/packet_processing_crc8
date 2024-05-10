@@ -35,6 +35,9 @@ bind top checker_top chk_top(
   .outmem_we_b_i(outmem_we_b_i),
   .outmem_data_b_o(outmem_data_b_o),
 
+	// cont top stutus
+	.cont_busy_top(cont_busy_top),
+
   // regs top interface
   .pb0_start_top(pb0_start_top),
   .pb0_busy_top(pb0_busy_top),

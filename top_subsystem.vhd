@@ -11,6 +11,8 @@ entity top_subsystem is
   port (
     clk                           : in std_logic;                        
     reset                         : in std_logic;                          
+-- cont status top
+				cont_busy_top : out std_logic;
 
         -- ex_reg top interface 
         pb_irq_i : in std_logic;
@@ -543,6 +545,8 @@ architecture rtl of top_subsystem is
         C_M_AXI_DATA_WIDTH	: integer	:= 32
     );
     port (
+
+				busy : out std_logic;
 
         -- INTERRUPT PORTS
         ext_irq : in std_logic_vector(1 downto 0);
@@ -1713,6 +1717,8 @@ begin
     C_M_AXI_ADDR_WIDTH => ADDR_WIDTH
   ) 
   port map(
+	
+				busy => cont_busy_top,
         ext_irq => ext_irq_s,
         int_irq => int_irq_s,
 

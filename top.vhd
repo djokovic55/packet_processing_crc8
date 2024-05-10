@@ -44,6 +44,9 @@ entity top is
         outmem_we_b_i	: in std_logic_vector(3 downto 0);
         outmem_data_b_o	: out std_logic_vector(31 downto 0);
 
+				-- controller top status
+				cont_busy_top : out std_logic;
+				
         -- regs top interface
         pb0_start_top : out std_logic;
         pb0_busy_top : out std_logic;
@@ -105,6 +108,7 @@ component top_subsystem is
     ADDR_WIDTH : integer := 32
   );
   port (
+				cont_busy_top : out std_logic;
         clk : in std_logic;
         reset : in std_logic;
 
@@ -535,6 +539,7 @@ begin
     clk                           => clk,                        
     reset                         => reset,                          
 
+		cont_busy_top 								=> cont_busy_top,
         -- ex_reg top interface 
     pb_irq_i                      => pb_irq_i ,                             
     pb_addr_in_i                  => pb_addr_in_i ,                                 

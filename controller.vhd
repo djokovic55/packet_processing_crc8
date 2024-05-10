@@ -10,6 +10,7 @@ entity controller is
     );
     port (
 
+				busy : out std_logic;
         -- INTERRUPT PORTS
         ext_irq : in std_logic_vector(1 downto 0);
         --FIXME internal interrupt handling
@@ -399,6 +400,8 @@ begin
       
       -- default values
       state_next <= state_reg;
+			-- controller is busy in all states except IDLE
+			busy <= '1';
 
       axi_base_address_next <= axi_base_address_reg;
       axi_write_address_next <= axi_write_address_reg; 
@@ -431,6 +434,8 @@ begin
       case state_reg is
   
           when IDLE =>
+						-- controller is ready to accept new requests
+						busy <= '0';
           
             -- reset fifo
             fifo_rst_s <= '1';

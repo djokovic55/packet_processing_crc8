@@ -287,7 +287,12 @@ if {$inmem_iva == 1} {
 check_assumptions -show -dead_end
 # task -create dead_end -set -source_task iva_debug -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy iva_debug:::noDeadEnd
 
+################################################################################
+# Liveness task
+################################################################################
+# task -create <embedded>_live -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.chk_top.ast_pb_start_live <embedded>::top.chk_top.ast_pp_start_live <embedded>::top.chk_top.ast_pb_start_live:precondition1 <embedded>::top.chk_top.ast_pp_start_live:precondition1
 
+task -create iva_debug_live -set -source_task iva_debug -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy iva_debug::top.chk_top.ast_pb_start_live iva_debug::top.chk_top.ast_pb0_finish_live iva_debug::top.chk_top.ast_pb1_finish_live iva_debug::top.chk_top.ast_pp_start_live iva_debug::top.chk_top.ast_pp_finish_live iva_debug::top.chk_top.ast_pp_finish_live:precondition1 iva_debug::top.chk_top.ast_pb_start_live:precondition1 iva_debug::top.chk_top.ast_pb0_finish_live:precondition1 iva_debug::top.chk_top.ast_pp_start_live:precondition1 iva_debug::top.chk_top.ast_pb1_finish_live:precondition1
 ################################################################################
 # CONVERGENCE, PROOF STRUCTURE cmds
 ################################################################################
@@ -305,6 +310,8 @@ check_assumptions -show -dead_end
 # prove -bg -task {crc_debug}
 # prove -bg -task {iva_debug}
 # prove -bg -all
+# prove -bg -task {<embedded>_live}
+prove -bg -task {iva_debug_live}
 ################################################################################
 
 ################################################################################

@@ -35,5 +35,6 @@ checker checker_fair_int(
     end
 
   ast_fairness: assert property(gnt[chosen_agent_a] |-> !agent_b_should_be_granted);
-  ast_no_deadlock: assert property(not(busy[*20]));
+  ast_no_deadlock: assert property(busy |=> s_eventually !busy);
+
 endchecker
