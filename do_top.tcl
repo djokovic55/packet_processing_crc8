@@ -77,8 +77,8 @@ if {$csa == 1} {
 	<embedded>::top.chk_top.ast_pb1_di 
 	<embedded>::top.chk_top.ast_crc_pb0_di
 	<embedded>::top.chk_top.ast_crc_pb1_di
-	<embedded>::top.chk_top.ast_ecc_corr_err
-	<embedded>::top.chk_top.ast_ecc_uncorr_err
+	<embedded>::top.chk_top.ast_pp_ecc_corr_err
+	<embedded>::top.chk_top.ast_pp_ecc_uncorr_err
 	}
 
 ################################################################################
@@ -117,6 +117,7 @@ if {$csa == 1} {
 ################################################################################
 # PB1 task
 ################################################################################
+#
 # Start register
 	stopat subsys.system_regs.pb1_ctrl0_s
 	assume -name asm_stopat_top_pb1_start {chk_top.pb1_busy_top = 0 |->  subsys.system_regs.pb1_ctrl0_s = 0}
@@ -311,7 +312,7 @@ task -create iva_debug_live -set -source_task iva_debug -copy_stopats -copy_rati
 # prove -bg -task {iva_debug}
 # prove -bg -all
 # prove -bg -task {<embedded>_live}
-prove -bg -task {iva_debug_live}
+# prove -bg -task {iva_debug_live}
 ################################################################################
 
 ################################################################################
