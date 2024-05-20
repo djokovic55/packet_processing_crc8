@@ -616,10 +616,47 @@ module  checker_top(
 	ast_pb0_di:                            assert property(!di_err_pb0);
 	ast_crc_pb0_di:                        assert property(!di_crc_err_pb0);
 
+	ast_pb0_op2_di:                        assert property(pb_data_sel == 2 |-> !di_err_pb0);
 
-	////////////////////////////////////////////////////////////////////////////////	
-	// Memory interface B arbitration logic between DI and CRC checkers
-	////////////////////////////////////////////////////////////////////////////////	
+
+////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////
+// logic[3:0] cont_state;
+logic[31:0] cont_ctrl2;
+
+logic ext_intr;
+logic pb0_busy;
+
+parameter [31:0] REGS_BASE_ADDR = 32'h00100000;
+parameter [31:0] EX_REGS_BASE_ADDR = 32'h00200000;
+
+typedef enum {IDLE_C, PB_STATUS_READ_C, PP_STATUS_READ_C, CTRL_READ_C, CTRL_SETUP_C, START_TASK_C, INC_DROP_CNT_C, INTR_CLEAR_C} cont_state;
+
+//axi
+logic cont_rd_vld;
+
+// Level 1, assert conf read
+assign cont_state = subsys.main_controller.state_reg;
+assign cont_ctrl2 = subsys.main_controller.regs_conf_fifo.fifo_data_s[0];
+assign ext_intr = subsys.exreg.ext_pb_ctrl1_s;
+assign pb_busy = !subsys.main_controller.axi_read_data_next[0];
+assign cont_rd_vld = subsys.main_controller.axi_read_vld_s;
+
+// Assert ctrl2_read, pb_addr_in conf should be stored in fifo[0] in CTRL_SETUP state 
+ast_ctrl2_read_help: assert property(subsys.main_controller.cnt_max_reg == 2 && cont_state == CTRL_SETUP_C |-> cont_ctrl2 == pb_addr_in);
+ast_idle_pbsr_help: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |=> cont_state == PB_STATUS_READ_C);
+ast_pbsr_cr_help: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |=> cont_state == CTRL_READ_C); 
+ast_cr_cs_help: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |=> cont_state == CTRL_SETUP_C); 
+
+// Assert base address
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////	
+// Memory interface B arbitration logic between DI and CRC checkers
+////////////////////////////////////////////////////////////////////////////////	
 
 	logic[13:0] inmem_addr_b_s;
   const logic[2:0] CHOOSE_BYTE = 3'h1;
