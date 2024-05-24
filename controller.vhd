@@ -612,8 +612,8 @@ begin
               if(axi_read_last_s = '1') then
                 axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
 
-		-- start new trans one cycle earlier
-		axi_write_init_next <= '1';
+								-- start new trans one cycle earlier
+								axi_write_init_next <= '1';
 
                 -- Read data is stored inside fifo - regs config
                 ---------------------------------------- 
@@ -633,14 +633,14 @@ begin
               fifo_rd_en_s <= '1';
 
             elsif(axi_write_done_s = '1') then 
-	      axi_write_address_next <= start_addr_reg;
+							axi_write_address_next <= start_addr_reg;
 
-	      -- start new trans one cycle earlier
-	      axi_write_init_next <= '1';
-	      -- axi_write_data_next <= x"00000001";
-	      ---------------------------------------- 
-	      state_next <= START_TASK;
-	      ---------------------------------------- 
+							-- start new trans one cycle earlier
+							axi_write_init_next <= '1';
+							-- axi_write_data_next <= x"00000001";
+							---------------------------------------- 
+							state_next <= START_TASK;
+							---------------------------------------- 
             end if;
           when START_TASK =>
               axi_write_data_s(0) <= '1';
@@ -651,9 +651,9 @@ begin
                 axi_base_address_next <= std_logic_vector(REGS_BASE_ADDR);
                 axi_write_address_next <= clear_intr_addr_reg;
                 
-		-- start new trans one cycle earlier
-		axi_write_init_next <= '1';
-		-- write data takes previous value
+								-- start new trans one cycle earlier
+								axi_write_init_next <= '1';
+								-- write data takes previous value
                 ---------------------------------------- 
                 state_next <= INTR_CLEAR;
                 ---------------------------------------- 
@@ -666,8 +666,8 @@ begin
                 axi_base_address_next <= std_logic_vector(EX_REGS_BASE_ADDR);
                 axi_write_address_next <= clear_intr_addr_reg;
                 
-		-- start new trans one cycle earlier
-		axi_write_init_next <= '1';
+								-- start new trans one cycle earlier
+								axi_write_init_next <= '1';
                 ---------------------------------------- 
                 state_next <= INTR_CLEAR;
                 ---------------------------------------- 

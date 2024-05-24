@@ -622,16 +622,16 @@ module  checker_top(
 ////////////////////////////////////////////////////////////////////////////////
 // HELPERS
 ////////////////////////////////////////////////////////////////////////////////
-// logic[3:0] cont_state;
+typedef enum {IDLE_C, PB_STATUS_READ_C, PP_STATUS_READ_C, CTRL_READ_C, CTRL_SETUP_C, START_TASK_C, INC_DROP_CNT_C, INTR_CLEAR_C} cont_state_type;
+cont_state_type cont_state;
 logic[31:0] cont_ctrl2;
 
 logic ext_intr;
 logic pb0_busy;
+logic[31:0] base_addr;
 
 parameter [31:0] REGS_BASE_ADDR = 32'h00100000;
 parameter [31:0] EX_REGS_BASE_ADDR = 32'h00200000;
-
-typedef enum {IDLE_C, PB_STATUS_READ_C, PP_STATUS_READ_C, CTRL_READ_C, CTRL_SETUP_C, START_TASK_C, INC_DROP_CNT_C, INTR_CLEAR_C} cont_state;
 
 //axi
 logic cont_rd_vld;
@@ -642,16 +642,36 @@ assign cont_ctrl2 = subsys.main_controller.regs_conf_fifo.fifo_data_s[0];
 assign ext_intr = subsys.exreg.ext_pb_ctrl1_s;
 assign pb_busy = !subsys.main_controller.axi_read_data_next[0];
 assign cont_rd_vld = subsys.main_controller.axi_read_vld_s;
+assign base_addr = subsys.main_controller.axi_base_address_next;
 
 // Assert ctrl2_read, pb_addr_in conf should be stored in fifo[0] in CTRL_SETUP state 
+
 ast_ctrl2_read_help: assert property(subsys.main_controller.cnt_max_reg == 2 && cont_state == CTRL_SETUP_C |-> cont_ctrl2 == pb_addr_in);
-ast_idle_pbsr_help: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |=> cont_state == PB_STATUS_READ_C);
-ast_pbsr_cr_help: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |=> cont_state == CTRL_READ_C); 
-ast_cr_cs_help: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |=> cont_state == CTRL_SETUP_C); 
+ast_idle_pbsr_cfsm_help: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |=> cont_state == PB_STATUS_READ_C);
+ast_pbsr_cr_cfsm_help: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |=> cont_state == CTRL_READ_C); 
+ast_cr_cs_cfsm_help: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |=> cont_state == CTRL_SETUP_C); 
 
 // Assert base address
+ast_idle_base_addr_help: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |-> base_addr == REGS_BASE_ADDR);
+ast_pbsr_base_addr_help: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |-> base_addr == EX_REGS_BASE_ADDR); 
+ast_cr_base_addr_help: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |-> base_addr == REGS_BASE_ADDR); 
 
+// Assert axi data
+ast_ctrl2_ex_slave_axi_help: assert property(subsys.main_controller.cnt_max_reg == 2 && subsys.exreg.ex_regs_cont.axi_arlen_cntr == 0 && subsys.exreg.ex_regs_cont.axi_rvalid && cont_state == CTRL_READ_C |-> subsys.exreg.ex_regs_cont.axi_rdata == pb_addr_in);
 
+// Axi transaction Init Flow
+// axi read
+ast_init_ctrl_read_axi_help:                assert property(cont_state == PB_STATUS_READ_C ##1 cont_state == CTRL_READ_C |-> subsys.main_controller.axi_read_init_reg);
+
+ast_init_read_txn_ff_axi_help:              assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |=> subsys.main_controller.master_axi_cont_ctrl.init_read_txn_ff);
+ast_init_read_txn_pulse_axi_help:           assert property(subsys.main_controller.master_axi_cont_ctrl.init_read_txn_ff |-> subsys.main_controller.master_axi_cont_ctrl.init_read_txn_pulse);
+ast_start_single_burst_read_axi_help:       assert property(subsys.main_controller.master_axi_cont_ctrl.init_read_txn_pulse |=> subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read);
+ast_arvalid_axi_help:                       assert property(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read |=> subsys.main_controller.master_axi_cont_ctrl.axi_arvalid);
+
+ast_no_ssb_read_axi_help:               		assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read && 
+                                                                                                   													!subsys.main_controller.master_axi_cont_ctrl.burst_read_active);
+
+ast_single_init_axi_help: assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |=> !subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I);
 
 
 ///////////////////////////////////////////////////////////////////////////////	

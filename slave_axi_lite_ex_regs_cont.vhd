@@ -405,12 +405,12 @@ architecture arch_imp of slave_axi_lite_ex_regs_cont is
 	    else
 
 	      if(axi_arready = '0' and S_AXI_ARVALID = '1' and axi_arv_arr_flag = '0') then
-		axi_arlen_cntr <= (others => '0');
+					axi_arlen_cntr <= (others => '0');
 	        axi_araddr <= S_AXI_ARADDR(C_S_AXI_ADDR_WIDTH - 1 downto 0); ---- start address of transfer
 	        axi_arburst <= S_AXI_ARBURST;
 	        axi_arlen <= S_AXI_ARLEN;
 	      elsif(axi_rvalid = '1' and S_AXI_RREADY = '1' and unsigned(axi_arlen_cntr) < unsigned(axi_arlen)) then
-		axi_arlen_cntr <= std_logic_vector(unsigned(axi_arlen_cntr) + 1);
+					axi_arlen_cntr <= std_logic_vector(unsigned(axi_arlen_cntr) + 1);
 		case (axi_arburst) is
 		  when "00" =>  -- fixed burst
 		  -- The read address for all the beats in the transaction are fixed

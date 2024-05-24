@@ -751,19 +751,34 @@ begin
 	-- assign all internal signal directly to all slaves
 	m_axi_int_wdata_inmem <= int_wdata;
 	m_axi_int_wstrb_inmem <= int_wstrb;
-	m_axi_int_wlast_inmem <= int_wlast;
 
 	m_axi_int_wdata_outmem <= int_wdata;
 	m_axi_int_wstrb_outmem <= int_wstrb;
-	m_axi_int_wlast_outmem <= int_wlast;
 	
 	m_axi_int_wdata_reg <= int_wdata;
 	m_axi_int_wstrb_reg <= int_wstrb;
-	m_axi_int_wlast_reg <= int_wlast;
 
 	m_axi_int_wdata_exreg <= int_wdata;
 	m_axi_int_wstrb_exreg <= int_wstrb;
-	m_axi_int_wlast_exreg <= int_wlast;
+
+	-- FIX wlast stability bug 
+	wlast_demux_dec : process (int_wlast, aw_valid_dec)
+	begin
+		m_axi_int_wlast_inmem <= '0';
+		m_axi_int_wlast_outmem <= '0';
+		m_axi_int_wlast_reg <= '0';
+		m_axi_int_wlast_exreg <= '0';
+		case(aw_valid_dec) is 
+			when "00" =>
+				m_axi_int_wlast_inmem <= int_wlast;
+			when "01" =>
+				m_axi_int_wlast_outmem <= int_wlast;
+			when "10" =>
+				m_axi_int_wlast_reg <= int_wlast;
+			when others =>
+				m_axi_int_wlast_exreg <= int_wlast;
+		end case;
+	end process;
 
 	wvalid_demux_dec : process (int_wvalid, aw_valid_dec)
 	begin

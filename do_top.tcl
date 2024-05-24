@@ -38,9 +38,9 @@ reset reset
 # Apstraction variables
 ################################################################################
 
-set csa 1
-set iva 1
-set inmem_iva 1
+set csa 0
+set iva 0
+set inmem_iva 0
 
 ################################################################################
 # Apstraction - PB1 always busy
@@ -293,29 +293,29 @@ check_assumptions -show -dead_end
 ################################################################################
 # task -create <embedded>_live -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy <embedded>::top.chk_top.ast_pb_start_live <embedded>::top.chk_top.ast_pp_start_live <embedded>::top.chk_top.ast_pb_start_live:precondition1 <embedded>::top.chk_top.ast_pp_start_live:precondition1
 
-task -create iva_debug_live -set -source_task iva_debug -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy iva_debug::top.chk_top.ast_pb_start_live iva_debug::top.chk_top.ast_pb0_finish_live iva_debug::top.chk_top.ast_pb1_finish_live iva_debug::top.chk_top.ast_pp_start_live iva_debug::top.chk_top.ast_pp_finish_live iva_debug::top.chk_top.ast_pp_finish_live:precondition1 iva_debug::top.chk_top.ast_pb_start_live:precondition1 iva_debug::top.chk_top.ast_pb0_finish_live:precondition1 iva_debug::top.chk_top.ast_pp_start_live:precondition1 iva_debug::top.chk_top.ast_pb1_finish_live:precondition1
+# task -create iva_debug_live -set -source_task iva_debug -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy iva_debug::top.chk_top.ast_pb_start_live iva_debug::top.chk_top.ast_pb0_finish_live iva_debug::top.chk_top.ast_pb1_finish_live iva_debug::top.chk_top.ast_pp_start_live iva_debug::top.chk_top.ast_pp_finish_live iva_debug::top.chk_top.ast_pp_finish_live:precondition1 iva_debug::top.chk_top.ast_pb_start_live:precondition1 iva_debug::top.chk_top.ast_pb0_finish_live:precondition1 iva_debug::top.chk_top.ast_pp_start_live:precondition1 iva_debug::top.chk_top.ast_pb1_finish_live:precondition1
 ################################################################################
 # CONVERGENCE, PROOF STRUCTURE cmds
 ################################################################################
 
 # proof_structure -init CSA_CASE_SPLIT -copy_all -from di_convergence
 # proof_structure -create case_split -from DI_PB0_CS_IVA_SBP -condition {chk_top.pb_byte_cnt = x"0"} -op_name OP_B -imp_name {OP0_B0 OP0_B0.completeness_check_0}
+#
 ################################################################################
-# HELPER TASK
+# HELPER TASK - moved to create_task.tcl - critical
 ################################################################################
-task -create lv1_help -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
-	<embedded>::top.chk_top.ast_ctrl2_read_help 
-	<embedded>::top.chk_top.ast_ctrl2_read_help:precondition1
-
-	<embedded>::top.chk_top.ast_idle_pbsr_help 
-	<embedded>::top.chk_top.ast_idle_pbsr_help:precondition1
-
-	<embedded>::top.chk_top.ast_pbsr_cr_help 
-	<embedded>::top.chk_top.ast_pbsr_cr_help:precondition1
-
-	<embedded>::top.chk_top.ast_cr_cs_help 
-	<embedded>::top.chk_top.ast_cr_cs_help:precondition1
-}
+#task -create lv1_help -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
+#	<embedded>::top.chk_top.ast_ctrl2_read_help 
+#	<embedded>::top.chk_top.ast_ctrl2_read_help:precondition1
+#	<embedded>::top.chk_top.ast_idle_pbsr_help 
+#	<embedded>::top.chk_top.ast_idle_pbsr_help:precondition1
+#	<embedded>::top.chk_top.ast_pbsr_cr_help 
+#	<embedded>::top.chk_top.ast_pbsr_cr_help:precondition1
+#	<embedded>::top.chk_top.ast_cr_cs_help 
+#	<embedded>::top.chk_top.ast_cr_cs_help:precondition1
+#	<embedded>::top.chk_top.ast_ctrl2_ex_slave_help 
+#	<embedded>::top.chk_top.ast_ctrl2_ex_slave_help:precondition1
+#}
 
 ################################################################################
 ## PROVE
