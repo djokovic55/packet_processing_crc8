@@ -629,12 +629,29 @@ logic[31:0] cont_ctrl2;
 logic ext_intr;
 logic pb0_busy;
 logic[31:0] base_addr;
+logic[31:0] cont_read_addr;
+logic pb_task, pp_task;
 
+// base slave addresses
 parameter [31:0] REGS_BASE_ADDR = 32'h00100000;
 parameter [31:0] EX_REGS_BASE_ADDR = 32'h00200000;
+// registers addresses
 
 //axi
 logic cont_rd_vld;
+parameter [3:0] CONT = 4'b0001;
+parameter [3:0] PB0 = 4'b0010;
+parameter [3:0] PB1 = 4'b0100;
+parameter [3:0] PP = 4'b1000;
+logic[3:0] gnt;
+
+parameter [31:0] PB0_STS = 32'h00000004;
+parameter [31:0] PB1_STS = 32'h0000001c;
+parameter [31:0] PP_STS = 32'h00000034;
+
+parameter [31:0] EXT_PB_CTRL2 = 32'h00000004;
+parameter [31:0] EXT_PB_CTRL3 = 32'h00000008;
+parameter [31:0] EXT_PB_CTRL4 = 32'h0000000c;
 
 // Level 1, assert conf read
 assign cont_state = subsys.main_controller.state_reg;
@@ -643,18 +660,47 @@ assign ext_intr = subsys.exreg.ext_pb_ctrl1_s;
 assign pb_busy = !subsys.main_controller.axi_read_data_next[0];
 assign cont_rd_vld = subsys.main_controller.axi_read_vld_s;
 assign base_addr = subsys.main_controller.axi_base_address_next;
+assign cont_read_addr = subsys.main_controller.axi_read_address_reg;
+
+
+assign pb_task = subsys.main_controller.cnt_max_reg == 2 ? 1 : 0;
+assign pp_task = subsys.main_controller.cnt_max_reg == 1 ? 1 : 0;
+assign gnt = subsys.intcon.gnt;
 
 // Assert ctrl2_read, pb_addr_in conf should be stored in fifo[0] in CTRL_SETUP state 
+////////////////////////////////////////////////////////////////////////////////
+ast_ctrl2_read_lv1_target: assert property(subsys.main_controller.cnt_max_reg == 2 && cont_state == CTRL_SETUP_C |-> cont_ctrl2 == pb_addr_in);
+////////////////////////////////////////////////////////////////////////////////
 
-ast_ctrl2_read_help: assert property(subsys.main_controller.cnt_max_reg == 2 && cont_state == CTRL_SETUP_C |-> cont_ctrl2 == pb_addr_in);
 ast_idle_pbsr_cfsm_help: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |=> cont_state == PB_STATUS_READ_C);
 ast_pbsr_cr_cfsm_help: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |=> cont_state == CTRL_READ_C); 
 ast_cr_cs_cfsm_help: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |=> cont_state == CTRL_SETUP_C); 
+
+ast_pbsr_past_cfsm_help: assert property(cont_state == PB_STATUS_READ_C |-> $past(cont_state) == IDLE_C || $past(cont_state) == PB_STATUS_READ_C);
+ast_pbcr_past_cfsm_help: assert property(cont_state == CTRL_READ_C |-> $past(cont_state) == PB_STATUS_READ_C || $past(cont_state) == PP_STATUS_READ_C || $past(cont_state) == CTRL_READ_C);
+ast_idle_from_reset_help: assert property(@(posedge clk) disable iff(0) $fell(reset) |-> cont_state == IDLE_C);
+
+cov_idle_from_reset_help: cover property(@(posedge clk) disable iff(0) $fell(reset) ##0 cont_state == IDLE_C ##2 cont_state == IDLE_C);
 
 // Assert base address
 ast_idle_base_addr_help: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |-> base_addr == REGS_BASE_ADDR);
 ast_pbsr_base_addr_help: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |-> base_addr == EX_REGS_BASE_ADDR); 
 ast_cr_base_addr_help: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |-> base_addr == REGS_BASE_ADDR); 
+
+// Assert gnt helpers - FALSE ASSUMPTIONS
+// ast_pbsr_gnt_help: assert property(cont_state == PB_STATUS_READ_C && subsys.main_controller.M_AXI_ARVALID |=> gnt == CONT);
+// ast_pbcr_gnt_help: assert property(cont_state == CTRL_READ_C && subsys.main_controller.M_AXI_ARVALID |=> gnt == CONT);
+
+// Assert base addr reg
+ast_pbsr_base_addr_reg_help: assert property(cont_state == PB_STATUS_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> base_addr == REGS_BASE_ADDR);
+ast_pbcr_base_addr_reg_help: assert property(cont_state == CTRL_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> base_addr == EX_REGS_BASE_ADDR);
+
+// Assert read addr
+ast_pbsr_cont_read_addr_help: assert property(pb_task && cont_state == PB_STATUS_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> 
+															cont_read_addr == PB0_STS || cont_read_addr == PB1_STS);
+
+ast_pbcr_cont_read_addr_help: assert property(pb_task && cont_state == CTRL_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> 
+															cont_read_addr == EXT_PB_CTRL2 || cont_read_addr == EXT_PB_CTRL3 || cont_read_addr == EXT_PB_CTRL4);
 
 // Assert axi data
 ast_ctrl2_ex_slave_axi_help: assert property(subsys.main_controller.cnt_max_reg == 2 && subsys.exreg.ex_regs_cont.axi_arlen_cntr == 0 && subsys.exreg.ex_regs_cont.axi_rvalid && cont_state == CTRL_READ_C |-> subsys.exreg.ex_regs_cont.axi_rdata == pb_addr_in);
@@ -662,6 +708,7 @@ ast_ctrl2_ex_slave_axi_help: assert property(subsys.main_controller.cnt_max_reg 
 // Axi transaction Init Flow
 // axi read
 ast_init_ctrl_read_axi_help:                assert property(cont_state == PB_STATUS_READ_C ##1 cont_state == CTRL_READ_C |-> subsys.main_controller.axi_read_init_reg);
+// ast_init_ctrl_read_axi_help:                assert property(cont_state == CTRL_READ_C |-> subsys.main_controller.axi_read_init_reg);
 
 ast_init_read_txn_ff_axi_help:              assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |=> subsys.main_controller.master_axi_cont_ctrl.init_read_txn_ff);
 ast_init_read_txn_pulse_axi_help:           assert property(subsys.main_controller.master_axi_cont_ctrl.init_read_txn_ff |-> subsys.main_controller.master_axi_cont_ctrl.init_read_txn_pulse);
@@ -672,6 +719,24 @@ ast_no_ssb_read_axi_help:               		assert property(subsys.main_controller
                                                                                                    													!subsys.main_controller.master_axi_cont_ctrl.burst_read_active);
 
 ast_single_init_axi_help: assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |=> !subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I);
+// HOW TO ASSERT ARVALID?
+// ast_rtxn_pbsr_axi_help: assert property(cont_state == PB_STATUS_READ_C |-> s_eventually subsys.main_controller.M_AXI_ARVALID);
+// ast_rtxn_pbcr_axi_help: assert property(cont_state == CTRL_READ_C |-> s_eventually subsys.main_controller.M_AXI_ARVALID);
+
+// RLAST cannot arrive if before address channnel 
+ast_pbsr_no_rvalid_before_hs_axi_help: assert property(cont_state == PB_STATUS_READ_C && !subsys.system_regs.regs_cont.axi_arv_arr_flag |-> !subsys.main_controller.M_AXI_RVALID || !subsys.main_controller.M_AXI_RLAST);
+ast_pbcr_no_rvalid_before_hs_axi_help: assert property(cont_state == CTRL_READ_C && !subsys.exreg.ex_regs_cont.axi_arv_arr_flag |-> !subsys.main_controller.M_AXI_RVALID || !subsys.main_controller.M_AXI_RLAST);
+
+// can be moved to axi checker because it does not depend on cont_state
+ast_ex_regs_rchannel_flag1_axi_help: assert property(subsys.exreg.ex_regs_cont.axi_arvalid && subsys.exreg.ex_regs_cont.axi_arready |=> subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
+ast_ex_regs_rchannel_flag2_axi_help: assert property(subsys.exreg.ex_regs_cont.axi_rlast |-> subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
+ast_ex_regs_rchannel_flag3_axi_help: assert property(subsys.exreg.ex_regs_cont.axi_rlast |=> !subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
+
+// ast_arvalid_when_rlast_axi_help: assert property(subsys.main_controller.M_AXI_RLAST |=> $past(subsys.main_controller.M_AXI_ARVALID, 10));
+// cov_pbsr_first_cycle: cover property($changed(cont_state) && cont_state == IDLE_C);
+
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////	

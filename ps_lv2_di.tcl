@@ -1,5 +1,6 @@
 
-task -create lv1_ctrl2_help -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
+task -create lv2_ctrl2_help -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
+	<embedded>::top.chk_top.ast_top_reg_pb0_addr_in
 	<embedded>::top.chk_top.ast_ctrl2_read_lv1_target 
 	<embedded>::top.chk_top.ast_ctrl2_read_lv1_target:precondition1
 	
@@ -23,12 +24,14 @@ assert -set_helper *_r_*
 assert -set_helper *_ar_*
 assert -set_helper *_w_*
 assert -set_helper *_aw_*
+assert -set_helper *lv1_target
 assert -mark_proven *_help
 assert -mark_proven *_w_*
 assert -mark_proven *_aw_*
 assert -mark_proven *_ar_*
 assert -mark_proven *_r_*
-prove -property *target -sst 8 -set helper
+assert -mark_proven *lv1_target
+prove -property *ast_top_reg_pb0_addr_in -sst 18 -set helper
 #assert -remove *_aw_*
 #assert -remove *_w_*
 #assert -remove lv1_ctrl2_help::top.chk_top.ast_ctrl2_ex_slave_axi_help

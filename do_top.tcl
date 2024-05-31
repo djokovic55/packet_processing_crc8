@@ -316,6 +316,12 @@ check_assumptions -show -dead_end
 #	<embedded>::top.chk_top.ast_ctrl2_ex_slave_help 
 #	<embedded>::top.chk_top.ast_ctrl2_ex_slave_help:precondition1
 #}
+################################################################################
+## END
+################################################################################
+# assume -bound 1 -name asm_iva_cont_state_sst {subsys.main_controller.state_reg = 0}
+# include create_task.tcl
+# include ps_lv2_di.tcl
 
 ################################################################################
 ## PROVE
