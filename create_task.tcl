@@ -14,6 +14,7 @@ task -create lv1_ctrl2_help -set -source_task <embedded> -copy_stopats -copy_rat
 	<embedded>::top.chk_top.ast*read_addr_help 
 
 	<embedded>::top.chk_top.ast*axi_help 
+	<embedded>::top.chk_top.ast*fifo_help 
 	<embedded>::top.subsys.intcon.chk_axi_prot_ctrl.ast_axi* 
 	<embedded>::top.subsys.intcon.chk_axi_prot_exreg.ast_axi* 
 }
