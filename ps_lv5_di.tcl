@@ -1,5 +1,7 @@
 
-task -create lv3_help -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
+task -create lv5_help -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
+	<embedded>::top.chk_top.ast_pb0_di
+	<embedded>::top.subsys.chk_data_integrity.ast_packet_integrity
 	<embedded>::top.chk_top.ast_lv3_target
 
 	<embedded>::top.chk_top.ast_top_reg_pb0_addr_in
@@ -22,23 +24,28 @@ task -create lv3_help -set -source_task <embedded> -copy_stopats -copy_ratings -
 	<embedded>::top.subsys.intcon.chk_axi_prot_exreg.ast_axi* 
 }
 cover -remove *
-assert -set_helper *_help
-assert -set_helper *_r_*
-assert -set_helper *_ar_*
-assert -set_helper *_w_*
-assert -set_helper *_aw_*
-assert -set_helper *lv1_target
-assert -set_helper *ast_top_reg_pb0_addr_in
+# assert -set_helper *_help
+# assert -set_helper *_r_*
+# assert -set_helper *_ar_*
+# assert -set_helper *_w_*
+# assert -set_helper *_aw_*
+# assert -set_helper *lv1_target
+# assert -set_helper *ast_top_reg_pb0_addr_in
+# assert -set_helper *ast_lv3_target
+# assert -set_helper *ast_packet_integrity
 
-assert -mark_proven *_help
-assert -mark_proven *_w_*
-assert -mark_proven *_aw_*
-assert -mark_proven *_ar_*
-assert -mark_proven *_r_*
-assert -mark_proven *lv1_target
-assert -mark_proven *ast_top_reg_pb0_addr_in
+# assert -mark_proven *_help
+# assert -mark_proven *_w_*
+# assert -mark_proven *_aw_*
+# assert -mark_proven *_ar_*
+# assert -mark_proven *_r_*
+# assert -mark_proven *lv1_target
+# assert -mark_proven *ast_top_reg_pb0_addr_in
+# assert -mark_proven *ast_lv3_target
+# assert -mark_proven *ast_packet_integrity
 
-prove -property *ast_lv3_target -sst 10 -set helper
+# prove -property *ast_pb0_di -sst 10 -set helper
+
 #assert -remove *_aw_*
 #assert -remove *_w_*
 #assert -remove lv1_ctrl2_help::top.chk_top.ast_ctrl2_ex_slave_axi_help

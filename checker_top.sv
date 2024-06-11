@@ -629,6 +629,7 @@ typedef enum {IDLE_PB, INMEM_READ_PB, CRC_LOOP_PB,
                    BUILD_FIRST_PULSE_OP2_PB, BUILD_PULSE_OP2_PB, BUILD_LAST_PULSE_OP2_PB, 
                    OUTMEM_WRITE_PB, OUTMEM_WRITE_LAST_PB} pb_state_type;
 cont_state_type cont_state;
+cont_state_type cont_state_next;
 pb_state_type pb0_state;
 
 cont_state_type pb0_state;
@@ -891,11 +892,40 @@ ast_winit_lv2_help: assert property($rose(subsys.main_controller.master_axi_cont
 ast_cs_lv2_help: assert property(cont_state == START_TASK_C && subsys.main_controller.axi_write_init_reg |-> $past(subsys.main_controller.axi_write_done_s));
 ast_hs_cs2_lv2_help: assert property(pb_task && cont_state == CTRL_SETUP_C && subsys.main_controller.axi_write_done_s |-> $past(subsys.main_controller.M_AXI_WREADY, 3));
 
+// pb0 task
+ast_cs_ctrl2_pb0_lv2_help: assert property(pb_task && subsys.main_controller.M_AXI_AWADDR[7:0] == 8 && cont_state == START_TASK_C |-> pb0_addr_in_top == pb_addr_in);
+
 ////////////////////////////////////////////////////////////////////////////////
 // lv 3 target
 ////////////////////////////////////////////////////////////////////////////////
 
-ast_b0_lv3_target: assert property(pb0_state == INMEM_READ_PB && subsys.packet_builder0.axi_read_last_s |=> pb0_fifo_in[0][7:0] == inmem[pb_addr_in]);
+// ast_b0_lv3_target: assert property(pb0_state == INMEM_READ_PB && subsys.packet_builder0.axi_read_last_s |=> pb0_fifo_in[0][7:0] == inmem[pb_addr_in]);
+
+logic[3:0] pb0_fifo_in_byte_addr;
+logic[7:0] pb0_fifo_in_byte_data;
+
+asm_pb0_fifo_in_byte_addr_stability: assume property($stable(pb0_fifo_in_byte_addr));
+asm_pb0_fifo_in_byte_addr: assume property(pb0_fifo_in_byte_addr <= pb_byte_cnt);
+
+always_comb begin
+	case(pb0_fifo_in_byte_addr[1:0])
+		2'b00: begin 
+			pb0_fifo_in_byte_data <= pb0_fifo_in[pb0_fifo_in_byte_addr[3:2]][7:0];
+		end
+		2'b01: begin 
+			pb0_fifo_in_byte_data <= pb0_fifo_in[pb0_fifo_in_byte_addr[3:2]][15:8];
+		end
+		2'b10: begin 
+			pb0_fifo_in_byte_data <= pb0_fifo_in[pb0_fifo_in_byte_addr[3:2]][23:16];
+		end
+		2'b11: begin 
+			pb0_fifo_in_byte_data <= pb0_fifo_in[pb0_fifo_in_byte_addr[3:2]][31:24];
+		end
+	endcase
+end
+
+ast_lv3_target: assert property(pb0_state == INMEM_READ_PB && subsys.packet_builder0.axi_read_last_s |=> pb0_fifo_in_byte_data == inmem[pb_addr_in + pb0_fifo_in_byte_addr]);
+
 
 
 
