@@ -321,7 +321,8 @@ check_assumptions -show -dead_end
 ################################################################################
 # assume -bound 1 -name asm_iva_cont_state_sst {subsys.main_controller.state_reg = 0}
 # include create_task.tcl
-include ps_lv5_di.tcl
+#
+include ps_lv3_di.tcl
 
 ################################################################################
 ## PROVE

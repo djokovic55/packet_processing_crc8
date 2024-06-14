@@ -6,45 +6,35 @@ task -create lv5_help -set -source_task <embedded> -copy_stopats -copy_ratings -
 
 	<embedded>::top.chk_top.ast_top_reg_pb0_addr_in
 	<embedded>::top.chk_top.ast_ctrl2_read_lv1_target 
-	<embedded>::top.chk_top.ast_ctrl2_read_lv1_target:precondition1
 
-	<embedded>::top.chk_top.ast*reset_help 
-	<embedded>::top.chk_top.ast*cfsm_help 
-	<embedded>::top.chk_top.ast*base_addr_help 
+	<embedded>::top.chk_top.ast*help* 
 
-	<embedded>::top.chk_top.ast*gnt_help 
-	<embedded>::top.chk_top.ast*base_addr_reg_help 
-	<embedded>::top.chk_top.ast*read_addr_help 
-
-	<embedded>::top.chk_top.ast*axi_help 
-	<embedded>::top.chk_top.ast*fifo_help 
-
-	<embedded>::top.chk_top.ast*lv2_help 
 	<embedded>::top.subsys.intcon.chk_axi_prot_ctrl.ast_axi* 
 	<embedded>::top.subsys.intcon.chk_axi_prot_exreg.ast_axi* 
 }
 cover -remove *
-# assert -set_helper *_help
-# assert -set_helper *_r_*
-# assert -set_helper *_ar_*
-# assert -set_helper *_w_*
-# assert -set_helper *_aw_*
-# assert -set_helper *lv1_target
-# assert -set_helper *ast_top_reg_pb0_addr_in
-# assert -set_helper *ast_lv3_target
-# assert -set_helper *ast_packet_integrity
+ assert -set_helper *_help*
+ assert -set_helper *_r_*
+ assert -set_helper *_ar_*
+ assert -set_helper *_w_*
+ assert -set_helper *_aw_*
+ assert -set_helper *lv1_target
+ assert -set_helper *ast_top_reg_pb0_addr_in
+ assert -set_helper *ast_lv3_target
+ assert -set_helper *ast_packet_integrity
 
-# assert -mark_proven *_help
-# assert -mark_proven *_w_*
-# assert -mark_proven *_aw_*
-# assert -mark_proven *_ar_*
-# assert -mark_proven *_r_*
-# assert -mark_proven *lv1_target
-# assert -mark_proven *ast_top_reg_pb0_addr_in
-# assert -mark_proven *ast_lv3_target
-# assert -mark_proven *ast_packet_integrity
+ assert -mark_proven *_help*
+ assert -mark_proven *_w_*
+ assert -mark_proven *_aw_*
+ assert -mark_proven *_ar_*
+ assert -mark_proven *_r_*
+ assert -mark_proven *lv1_target
+ assert -mark_proven *ast_top_reg_pb0_addr_in
+ assert -mark_proven *ast_lv3_target
+ assert -mark_proven *ast_packet_integrity
 
 # prove -property *ast_pb0_di -sst 10 -set helper
+# prove -property *ast_pb0_di -with_helpers
 
 #assert -remove *_aw_*
 #assert -remove *_w_*

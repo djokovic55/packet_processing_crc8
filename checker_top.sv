@@ -638,6 +638,7 @@ logic[31:0] cont_ctrl2;
 logic ext_intr;
 logic pb0_busy;
 logic[31:0] base_addr;
+logic[31:0] base_addr_reg;
 logic[31:0] cont_read_addr;
 logic pb_task, pp_task;
 
@@ -673,6 +674,7 @@ assign ext_intr = subsys.exreg.ext_pb_ctrl1_s;
 assign pb_busy = !subsys.main_controller.axi_read_data_next[0];
 assign cont_rd_vld = subsys.main_controller.axi_read_vld_s;
 assign base_addr = subsys.main_controller.axi_base_address_next;
+assign base_addr_reg = subsys.main_controller.axi_base_address_reg;
 assign cont_read_addr = subsys.main_controller.axi_read_address_reg;
 
 
@@ -700,69 +702,69 @@ cov_test_array: cover property(pb0_fifo_in[0] == 10);
 ast_ctrl2_read_lv1_target: assert property(subsys.main_controller.cnt_max_reg == 2 && cont_state == CTRL_SETUP_C |-> cont_ctrl2 == pb_addr_in);
 ////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////
 // Helper impact: LOW
-ast_idle_pbsr_cfsm_help: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |=> cont_state == PB_STATUS_READ_C);
-ast_pbsr_cr_cfsm_help: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |=> cont_state == CTRL_READ_C); 
-ast_cr_cs_cfsm_help: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |=> cont_state == CTRL_SETUP_C); 
+////////////////////////////////////////////////////////////////////////////////
+ast_idle_pbsr_cfsm_help_lv3: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |=> cont_state == PB_STATUS_READ_C);
+ast_pbsr_cr_cfsm_help_lv3: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |=> cont_state == CTRL_READ_C); 
+ast_cr_cs_cfsm_help_lv3: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |=> cont_state == CTRL_SETUP_C); 
+ast_pbsr_past_cfsm_help_lv3: assert property(cont_state == PB_STATUS_READ_C |-> $past(cont_state) == IDLE_C || $past(cont_state) == PB_STATUS_READ_C);
+ast_pbcr_past_cfsm_help_lv3: assert property(cont_state == CTRL_READ_C |-> $past(cont_state) == PB_STATUS_READ_C || $past(cont_state) == PP_STATUS_READ_C || $past(cont_state) == CTRL_READ_C);
+ast_idle_from_reset_help_lv3: assert property(@(posedge clk) disable iff(0) $fell(reset) |-> cont_state == IDLE_C);
 
-// Helper impact: LOW
-ast_pbsr_past_cfsm_help: assert property(cont_state == PB_STATUS_READ_C |-> $past(cont_state) == IDLE_C || $past(cont_state) == PB_STATUS_READ_C);
-ast_pbcr_past_cfsm_help: assert property(cont_state == CTRL_READ_C |-> $past(cont_state) == PB_STATUS_READ_C || $past(cont_state) == PP_STATUS_READ_C || $past(cont_state) == CTRL_READ_C);
-ast_idle_from_reset_help: assert property(@(posedge clk) disable iff(0) $fell(reset) |-> cont_state == IDLE_C);
+cov_idle_from_reset_help_lv3: cover property(@(posedge clk) disable iff(0) $fell(reset) ##0 cont_state == IDLE_C ##2 cont_state == IDLE_C);
 
-cov_idle_from_reset_help: cover property(@(posedge clk) disable iff(0) $fell(reset) ##0 cont_state == IDLE_C ##2 cont_state == IDLE_C);
-
-// Helper impact: LOW
 // Assert base address
-ast_idle_base_addr_help: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |-> base_addr == REGS_BASE_ADDR);
-ast_pbsr_base_addr_help: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |-> base_addr == EX_REGS_BASE_ADDR); 
-ast_cr_base_addr_help: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |-> base_addr == REGS_BASE_ADDR); 
-
-// Assert gnt helpers - FALSE ASSUMPTIONS
-// ast_pbsr_gnt_help: assert property(cont_state == PB_STATUS_READ_C && subsys.main_controller.M_AXI_ARVALID |=> gnt == CONT);
-// ast_pbcr_gnt_help: assert property(cont_state == CTRL_READ_C && subsys.main_controller.M_AXI_ARVALID |=> gnt == CONT);
-
+ast_idle_base_addr_help_lv3: assert property(subsys.main_controller.int_irq == 0 && subsys.main_controller.ext_irq == 1 && cont_state == IDLE_C |-> base_addr == REGS_BASE_ADDR);
+ast_pbsr_base_addr_help_lv3: assert property(ext_intr && !pb_busy && cont_rd_vld && cont_state == PB_STATUS_READ_C |-> base_addr == EX_REGS_BASE_ADDR); 
+ast_cr_base_addr_help_lv3: assert property(subsys.main_controller.axi_read_last_s && cont_state == CTRL_READ_C |-> base_addr == REGS_BASE_ADDR); 
 // Assert base addr reg
-ast_pbsr_base_addr_reg_help: assert property(cont_state == PB_STATUS_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> base_addr == REGS_BASE_ADDR);
-ast_pbcr_base_addr_reg_help: assert property(cont_state == CTRL_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> base_addr == EX_REGS_BASE_ADDR);
-
+ast_pbsr_base_addr_reg_help_lv3: assert property(cont_state == PB_STATUS_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> base_addr == REGS_BASE_ADDR);
+ast_pbcr_base_addr_reg_help_lv3: assert property(cont_state == CTRL_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> base_addr == EX_REGS_BASE_ADDR);
 // Assert read addr
-ast_pbsr_cont_read_addr_help: assert property(pb_task && cont_state == PB_STATUS_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> 
+ast_pbsr_cont_read_addr_help_lv3: assert property(pb_task && cont_state == PB_STATUS_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> 
 															cont_read_addr == PB0_STS || cont_read_addr == PB1_STS);
-
-ast_pbcr_cont_read_addr_help: assert property(pb_task && cont_state == CTRL_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> 
+ast_pbcr_cont_read_addr_help_lv3: assert property(pb_task && cont_state == CTRL_READ_C && ((subsys.main_controller.M_AXI_ARVALID || subsys.main_controller.M_AXI_RVALID) && !subsys.main_controller.M_AXI_RLAST) |-> 
 															cont_read_addr == EXT_PB_CTRL2 || cont_read_addr == EXT_PB_CTRL3 || cont_read_addr == EXT_PB_CTRL4);
 
+////////////////////////////////////////////////////////////////////////////////
+// Helper impact: HIGH
+////////////////////////////////////////////////////////////////////////////////
+// new props for base addr and read_addr
+ast_pbsr_base_addr_help_high: assert property(cont_state == PB_STATUS_READ_C |-> base_addr_reg == REGS_BASE_ADDR); 
+ast_cr_base_addr_help_high: assert property(cont_state == CTRL_READ_C |-> base_addr_reg == EX_REGS_BASE_ADDR); 
+ast_pbsr_cont_read_addr_help_high: assert property(pb_task && cont_state == PB_STATUS_READ_C |-> cont_read_addr == PB0_STS || cont_read_addr == PB1_STS);
+ast_pbcr_cont_read_addr_help_high: assert property(pb_task && cont_state == CTRL_READ_C |-> cont_read_addr == 4);
+////////////////////////////////////////////////////////////////////////////////
+
 // Assert axi data
-ast_ctrl2_ex_slave_axi_help: assert property(subsys.main_controller.cnt_max_reg == 2 && subsys.exreg.ex_regs_cont.axi_arlen_cntr == 0 && subsys.exreg.ex_regs_cont.axi_rvalid && cont_state == CTRL_READ_C |-> subsys.exreg.ex_regs_cont.axi_rdata == pb_addr_in);
+ast_ctrl2_ex_slave_axi_help_lv3: assert property(subsys.main_controller.cnt_max_reg == 2 && subsys.exreg.ex_regs_cont.axi_arlen_cntr == 0 && subsys.exreg.ex_regs_cont.axi_rvalid && cont_state == CTRL_READ_C |-> subsys.exreg.ex_regs_cont.axi_rdata == pb_addr_in);
 
 // Helper impact: MEDIUM
 // Axi transaction Init Flow
 // axi read
-ast_init_ctrl_read_axi_help:                assert property(cont_state == PB_STATUS_READ_C ##1 cont_state == CTRL_READ_C |-> subsys.main_controller.axi_read_init_reg);
+ast_init_ctrl_read_axi_help_lv3:                assert property(cont_state == PB_STATUS_READ_C ##1 cont_state == CTRL_READ_C |-> subsys.main_controller.axi_read_init_reg);
+ast_init_read_txn_ff_axi_help_lv3:              assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |=> subsys.main_controller.master_axi_cont_ctrl.init_read_txn_ff);
+ast_init_read_txn_pulse_axi_help_lv3:           assert property(subsys.main_controller.master_axi_cont_ctrl.init_read_txn_ff |-> subsys.main_controller.master_axi_cont_ctrl.init_read_txn_pulse);
+ast_start_single_burst_read_axi_help_lv3:       assert property(subsys.main_controller.master_axi_cont_ctrl.init_read_txn_pulse |=> subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read);
+ast_arvalid_axi_help_lv3:                       assert property(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read |=> subsys.main_controller.master_axi_cont_ctrl.axi_arvalid);
+ast_no_ssb_read_axi_help_lv3:               		assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read && !subsys.main_controller.master_axi_cont_ctrl.burst_read_active);
+ast_single_read_init_axi_help_lv3: assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |=> !subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I);
 
-ast_init_read_txn_ff_axi_help:              assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |=> subsys.main_controller.master_axi_cont_ctrl.init_read_txn_ff);
-ast_init_read_txn_pulse_axi_help:           assert property(subsys.main_controller.master_axi_cont_ctrl.init_read_txn_ff |-> subsys.main_controller.master_axi_cont_ctrl.init_read_txn_pulse);
-ast_start_single_burst_read_axi_help:       assert property(subsys.main_controller.master_axi_cont_ctrl.init_read_txn_pulse |=> subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read);
-ast_arvalid_axi_help:                       assert property(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read |=> subsys.main_controller.master_axi_cont_ctrl.axi_arvalid);
-
-ast_no_ssb_read_axi_help:               		assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_read && !subsys.main_controller.master_axi_cont_ctrl.burst_read_active);
-
-ast_single_read_init_axi_help: assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I |=> !subsys.main_controller.master_axi_cont_ctrl.AXI_READ_INIT_I);
 // HOW TO ASSERT ARVALID?
-// ast_rtxn_pbsr_axi_help: assert property(cont_state == PB_STATUS_READ_C |-> s_eventually subsys.main_controller.M_AXI_ARVALID);
-// ast_rtxn_pbcr_axi_help: assert property(cont_state == CTRL_READ_C |-> s_eventually subsys.main_controller.M_AXI_ARVALID);
+// ast_rtxn_pbsr_axi_help_lv3: assert property(cont_state == PB_STATUS_READ_C |-> s_eventually subsys.main_controller.M_AXI_ARVALID);
+// ast_rtxn_pbcr_axi_help_lv3: assert property(cont_state == CTRL_READ_C |-> s_eventually subsys.main_controller.M_AXI_ARVALID);
 
 // RLAST cannot arrive if before address channnel 
-ast_pbsr_no_rvalid_before_hs_axi_help: assert property(cont_state == PB_STATUS_READ_C && !subsys.system_regs.regs_cont.axi_arv_arr_flag |-> !subsys.main_controller.M_AXI_RVALID || !subsys.main_controller.M_AXI_RLAST);
-ast_pbcr_no_rvalid_before_hs_axi_help: assert property(cont_state == CTRL_READ_C && !subsys.exreg.ex_regs_cont.axi_arv_arr_flag |-> !subsys.main_controller.M_AXI_RVALID || !subsys.main_controller.M_AXI_RLAST);
+ast_pbsr_no_rvalid_before_hs_axi_help_lv3: assert property(cont_state == PB_STATUS_READ_C && !subsys.system_regs.regs_cont.axi_arv_arr_flag |-> !subsys.main_controller.M_AXI_RVALID || !subsys.main_controller.M_AXI_RLAST);
+ast_pbcr_no_rvalid_before_hs_axi_help_lv3: assert property(cont_state == CTRL_READ_C && !subsys.exreg.ex_regs_cont.axi_arv_arr_flag |-> !subsys.main_controller.M_AXI_RVALID || !subsys.main_controller.M_AXI_RLAST);
 
 // can be moved to axi checker because it does not depend on cont_state
-ast_ex_regs_rchannel_flag1_axi_help: assert property(subsys.exreg.ex_regs_cont.axi_arvalid && subsys.exreg.ex_regs_cont.axi_arready |=> subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
-ast_ex_regs_rchannel_flag2_axi_help: assert property(subsys.exreg.ex_regs_cont.axi_rlast |-> subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
-ast_ex_regs_rchannel_flag3_axi_help: assert property(subsys.exreg.ex_regs_cont.axi_rlast |=> !subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
+ast_ex_regs_rchannel_flag1_axi_help_lv3: assert property(subsys.exreg.ex_regs_cont.axi_arvalid && subsys.exreg.ex_regs_cont.axi_arready |=> subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
+ast_ex_regs_rchannel_flag2_axi_help_lv3: assert property(subsys.exreg.ex_regs_cont.axi_rlast |-> subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
+ast_ex_regs_rchannel_flag3_axi_help_lv3: assert property(subsys.exreg.ex_regs_cont.axi_rlast |=> !subsys.exreg.ex_regs_cont.axi_arv_arr_flag);
 
-// ast_arvalid_when_rlast_axi_help: assert property(subsys.main_controller.M_AXI_RLAST |=> $past(subsys.main_controller.M_AXI_ARVALID, 10));
+// ast_arvalid_when_rlast_axi_help_lv3: assert property(subsys.main_controller.M_AXI_RLAST |=> $past(subsys.main_controller.M_AXI_ARVALID, 10));
 // cov_pbsr_first_cycle: cover property($changed(cont_state) && cont_state == IDLE_C);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -770,53 +772,55 @@ ast_ex_regs_rchannel_flag3_axi_help: assert property(subsys.exreg.ex_regs_cont.a
 ////////////////////////////////////////////////////////////////////////////////
 
 // controller's axi write init flow
-ast_init_ctrl_write_axi_help:                assert property(cont_state == IDLE_C ##1 cont_state == PB_STATUS_READ_C |-> !subsys.main_controller.axi_write_init_reg);
+ast_init_ctrl_write_axi_help_lv3:                assert property(cont_state == IDLE_C ##1 cont_state == PB_STATUS_READ_C |-> !subsys.main_controller.axi_write_init_reg);
 
-ast_init_write_txn_ff_axi_help:              assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_WRITE_INIT_I |=> subsys.main_controller.master_axi_cont_ctrl.init_write_txn_ff);
-ast_init_write_txn_pulse_axi_help:           assert property(subsys.main_controller.master_axi_cont_ctrl.init_write_txn_ff |-> subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse);
-ast_start_single_burst_write_axi_help:       assert property(subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse |=> subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write);
-ast_awvalid_axi_help:                       assert property(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write |=> subsys.main_controller.master_axi_cont_ctrl.axi_awvalid);
+ast_init_write_txn_ff_axi_help_lv3:              assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_WRITE_INIT_I |=> subsys.main_controller.master_axi_cont_ctrl.init_write_txn_ff);
+ast_init_write_txn_pulse_axi_help_lv3:           assert property(subsys.main_controller.master_axi_cont_ctrl.init_write_txn_ff |-> subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse);
+ast_start_single_burst_write_axi_help_lv3:       assert property(subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse |=> subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write);
+ast_awvalid_axi_help_lv3:                       assert property(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write |=> subsys.main_controller.master_axi_cont_ctrl.axi_awvalid);
 
-ast_no_ssb_write_axi_help:               		assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_WRITE_INIT_I |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write && !subsys.main_controller.master_axi_cont_ctrl.burst_write_active);
+ast_no_ssb_write_axi_help_lv3:               		assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_WRITE_INIT_I |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write && !subsys.main_controller.master_axi_cont_ctrl.burst_write_active);
 
-ast_single_write_init_axi_help: assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_WRITE_INIT_I |=> !subsys.main_controller.master_axi_cont_ctrl.AXI_WRITE_INIT_I);
+ast_single_write_init_axi_help_lv3: assert property(subsys.main_controller.master_axi_cont_ctrl.AXI_WRITE_INIT_I |=> !subsys.main_controller.master_axi_cont_ctrl.AXI_WRITE_INIT_I);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper impact: MEDIUM
 ////////////////////////////////////////////////////////////////////////////////
 // 9. No write in read states
 
-ast_idle_no_next_write_axi_help: assert property(cont_state_next == PB_STATUS_READ_C  |-> !subsys.main_controller.axi_write_init_next);
-ast_pbsr_no_write_init_reg_axi_help: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.axi_write_init_reg);
-ast_pbsr_no_write_init_pulse_axi_help: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse);
-ast_pbsr_no_write_active_axi_help: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.burst_write_active);
-ast_pbsr_no_write_init_start_axi_help: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write);
-ast_pbsr_no_awvalid_axi_help: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.M_AXI_AWVALID);
+ast_idle_no_next_write_axi_help_lv3: assert property(cont_state_next == PB_STATUS_READ_C  |-> !subsys.main_controller.axi_write_init_next);
 
-ast_pbsr_no_next_write_axi_help: assert property(cont_state_next == CTRL_READ_C  |-> !subsys.main_controller.axi_write_init_next);
+ast_pbsr_no_write_init_reg_axi_help_lv3: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.axi_write_init_reg);
 
-ast_pbcr_no_write_init_reg_axi_help: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.axi_write_init_reg);
-ast_pbcr_no_write_init_pulse_axi_help: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse);
-ast_pbcr_no_write_active_axi_help: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.burst_write_active);
-ast_pbcr_no_write_init_start_axi_help: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write);
+ast_pbsr_no_write_init_pulse_axi_help_lv3: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse);
+ast_pbsr_no_write_active_axi_help_lv3: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.burst_write_active);
+ast_pbsr_no_write_init_start_axi_help_lv3: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write);
+ast_pbsr_no_awvalid_axi_help_high: assert property(cont_state == PB_STATUS_READ_C  |-> !subsys.main_controller.M_AXI_AWVALID);
+ast_pbsr_no_next_write_axi_help_lv3: assert property(cont_state_next == CTRL_READ_C  |-> !subsys.main_controller.axi_write_init_next);
 
-ast_pbcr_no_awvalid_axi_help: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.M_AXI_AWVALID);
+ast_pbcr_no_write_init_reg_axi_help_lv3: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.axi_write_init_reg);
+
+ast_pbcr_no_write_init_pulse_axi_help_lv3: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse);
+ast_pbcr_no_write_active_axi_help_lv3: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.burst_write_active);
+ast_pbcr_no_write_init_start_axi_help_lv3: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write);
+ast_pbcr_no_awvalid_axi_help_high: assert property(cont_state == CTRL_READ_C  |-> !subsys.main_controller.M_AXI_AWVALID);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper impact: HIGH -> if asserted, have high impact to many cycles in the past, constraining large amount of invalid states from being analyzed
 ////////////////////////////////////////////////////////////////////////////////
 // 10. handshake props 
-ast_pbsr_handshake_axi_help: assert property(cont_state == PB_STATUS_READ_C && subsys.main_controller.M_AXI_RLAST |-> subsys.main_controller.M_AXI_RVALID);
-ast_pbsr_handshake_stop_axi_help: assert property(cont_state == PB_STATUS_READ_C && subsys.main_controller.M_AXI_RVALID |=> !subsys.main_controller.M_AXI_RVALID);
+ast_pbsr_handshake_axi_help_lv3: assert property(cont_state == PB_STATUS_READ_C && subsys.main_controller.M_AXI_RLAST |-> subsys.main_controller.M_AXI_RVALID);
+ast_pbsr_handshake_stop_axi_help_high: assert property(cont_state == PB_STATUS_READ_C && subsys.main_controller.M_AXI_RVALID |=> !subsys.main_controller.M_AXI_RVALID);
 
-ast_pbcr_handshake_axi_help: assert property(pb_task && cont_state == CTRL_READ_C && subsys.main_controller.M_AXI_RLAST |-> subsys.main_controller.M_AXI_RVALID && $past(subsys.main_controller.M_AXI_RVALID) && $past(subsys.main_controller.M_AXI_RVALID, 2));
-ast_pbcr_handshake_stop_axi_help: assert property(pb_task && cont_state == CTRL_READ_C && subsys.main_controller.M_AXI_RVALID[*3] |=> !subsys.main_controller.M_AXI_RVALID);
+ast_pbcr_handshake_axi_help_lv3: assert property(pb_task && cont_state == CTRL_READ_C && subsys.main_controller.M_AXI_RLAST |-> subsys.main_controller.M_AXI_RVALID && $past(subsys.main_controller.M_AXI_RVALID) && $past(subsys.main_controller.M_AXI_RVALID, 2));
+ast_pbcr_handshake_stop_axi_help_high: assert property(pb_task && cont_state == CTRL_READ_C && subsys.main_controller.M_AXI_RVALID[*3] |=> !subsys.main_controller.M_AXI_RVALID);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper impact: HIGH
 ////////////////////////////////////////////////////////////////////////////////
 // 11. Fifo
-ast_cont_wptr_fifo_help: assert property(cont_state == CTRL_READ_C && $rose(subsys.main_controller.M_AXI_RVALID) |-> subsys.main_controller.regs_conf_fifo.write_index_s == 0);
+ast_cont_wptr_fifo_help_high: assert property(cont_state == CTRL_READ_C && $rose(subsys.main_controller.M_AXI_RVALID) |-> subsys.main_controller.regs_conf_fifo.write_index_s == 0);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // level 2 target
@@ -838,62 +842,69 @@ property cont_base_addr_write(wvalid, address);
 endproperty
 
 // 12. base address of controller, pb0, pb1 and pp
-ast_cont_read_base_addr_lv2_help: assert property(cont_base_addr_read(subsys.main_controller.M_AXI_RVALID, subsys.main_controller.M_AXI_ARADDR));
-ast_cont_write_base_addr_lv2_help: assert property(cont_base_addr_read(subsys.main_controller.M_AXI_WVALID, subsys.main_controller.M_AXI_AWADDR));
+ast_cont_read_base_addr_lv2_help_high: assert property(cont_base_addr_read(subsys.main_controller.M_AXI_RVALID, subsys.main_controller.M_AXI_ARADDR));
+ast_cont_write_base_addr_lv2_help_high: assert property(cont_base_addr_read(subsys.main_controller.M_AXI_WVALID, subsys.main_controller.M_AXI_AWADDR));
 
-ast_pb0_read_base_addr_lv2_help: assert property(blocks_base_addr_read(subsys.packet_builder0.M_AXI_RVALID, subsys.packet_builder0.M_AXI_ARADDR));
-ast_pb0_write_base_addr_lv2_help: assert property(blocks_base_addr_write(subsys.packet_builder0.M_AXI_WVALID, subsys.packet_builder0.M_AXI_AWADDR));
-ast_pb1_read_base_addr_lv2_help: assert property(blocks_base_addr_read(subsys.packet_builder1.M_AXI_RVALID, subsys.packet_builder1.M_AXI_ARADDR));
-ast_pb1_write_base_addr_lv2_help: assert property(blocks_base_addr_write(subsys.packet_builder1.M_AXI_WVALID, subsys.packet_builder1.M_AXI_AWADDR));
+ast_pb0_read_base_addr_lv2_help_high: assert property(blocks_base_addr_read(subsys.packet_builder0.M_AXI_RVALID, subsys.packet_builder0.M_AXI_ARADDR));
+ast_pb0_write_base_addr_lv2_help_high: assert property(blocks_base_addr_write(subsys.packet_builder0.M_AXI_WVALID, subsys.packet_builder0.M_AXI_AWADDR));
+ast_pb1_read_base_addr_lv2_help_high: assert property(blocks_base_addr_read(subsys.packet_builder1.M_AXI_RVALID, subsys.packet_builder1.M_AXI_ARADDR));
+ast_pb1_write_base_addr_lv2_help_high: assert property(blocks_base_addr_write(subsys.packet_builder1.M_AXI_WVALID, subsys.packet_builder1.M_AXI_AWADDR));
 
-ast_pp_read_base_addr_lv2_help: assert property(blocks_base_addr_read(subsys.parser.M_AXI_RVALID, subsys.parser.M_AXI_ARADDR));
-ast_pp_no_write_lv2_help: assert property(!subsys.parser.M_AXI_WVALID && !subsys.parser.M_AXI_AWVALID);
+ast_pp_read_base_addr_lv2_help_high: assert property(blocks_base_addr_read(subsys.parser.M_AXI_RVALID, subsys.parser.M_AXI_ARADDR));
+
+ast_pp_no_write_lv2_help_high: assert property(!subsys.parser.M_AXI_WVALID && !subsys.parser.M_AXI_AWVALID);
 
 // 13. start address must be on the bus when start is asserted
-ast_cont_addr_st_lv2_help: assert property(pb0_start_top |-> subsys.main_controller.M_AXI_AWADDR == (REGS_BASE_ADDR + PB0_START));
+ast_cont_addr_st_lv2_help_high: assert property(pb0_start_top |-> subsys.main_controller.M_AXI_AWADDR == (REGS_BASE_ADDR + PB0_START));
 
 // 14. start can be only asserted from START_TASK
-ast_cont_state_st_lv2_help: assert property(pb0_start_top |-> cont_state  == START_TASK_C);
+ast_cont_state_st_lv2_help_lv3: assert property(pb0_start_top |-> cont_state  == START_TASK_C);
 // 15. 
-ast_rise_wvalid_st_lv2_help: assert property(pb0_start_top |-> $past(subsys.main_controller.M_AXI_WVALID));
-ast_rise_wlast_st_lv2_help: assert property(pb0_start_top |-> $past(subsys.main_controller.M_AXI_WLAST));
-ast_rise_wready_st_lv2_help: assert property(pb0_start_top |-> $past(subsys.main_controller.M_AXI_WREADY));
-ast_hs_stop_st_lv2_help: assert property(cont_state == START_TASK_C && subsys.main_controller.M_AXI_WREADY |=> !subsys.main_controller.M_AXI_WREADY);
-ast_write_done_st_lv2_help: assert property(pb0_start_top |-> $rose(subsys.main_controller.axi_write_done_s));
+ast_rise_wvalid_st_lv2_help_lv3: assert property(pb0_start_top |-> $past(subsys.main_controller.M_AXI_WVALID));
+ast_rise_wlast_st_lv2_help_lv3: assert property(pb0_start_top |-> $past(subsys.main_controller.M_AXI_WLAST));
+ast_rise_wready_st_lv2_help_lv3: assert property(pb0_start_top |-> $past(subsys.main_controller.M_AXI_WREADY));
+ast_hs_stop_st_lv2_help_lv3: assert property(cont_state == START_TASK_C && subsys.main_controller.M_AXI_WREADY |=> !subsys.main_controller.M_AXI_WREADY);
+ast_write_done_st_lv2_help_lv3: assert property(pb0_start_top |-> $rose(subsys.main_controller.axi_write_done_s));
 
 // 16.  not verified
-ast_hs_cs_lv2_help: assert property(pb_task && cont_state == CTRL_SETUP_C && subsys.main_controller.axi_write_done_s |-> $past(subsys.main_controller.M_AXI_WREADY, 1) &&  $past(subsys.main_controller.M_AXI_WREADY, 2) && $past(subsys.main_controller.M_AXI_WREADY, 3));
-ast_hs2_cs_lv2_help: assert property(cont_state == CTRL_SETUP_C && subsys.main_controller.axi_write_done_s |-> $past(!subsys.main_controller.M_AXI_WREADY, 4));
-ast_hs_stop_cs_lv2_help: assert property(cont_state == CTRL_SETUP_C && subsys.main_controller.M_AXI_WREADY[*3] |=> !subsys.main_controller.M_AXI_WREADY);
+ast_hs_cs_lv2_help_lv3: assert property(pb_task && cont_state == CTRL_SETUP_C && subsys.main_controller.axi_write_done_s |-> $past(subsys.main_controller.M_AXI_WREADY, 1) &&  $past(subsys.main_controller.M_AXI_WREADY, 2) && $past(subsys.main_controller.M_AXI_WREADY, 3));
+ast_hs2_cs_lv2_help_lv3: assert property(cont_state == CTRL_SETUP_C && subsys.main_controller.axi_write_done_s |-> $past(!subsys.main_controller.M_AXI_WREADY, 4));
+ast_hs_stop_cs_lv2_help_lv3: assert property(cont_state == CTRL_SETUP_C && subsys.main_controller.M_AXI_WREADY[*3] |=> !subsys.main_controller.M_AXI_WREADY);
 
 // 18. connect ctrl_setup with start_task
-ast_winit_cs_lv2_help: assert property(cont_state == START_TASK_C && subsys.main_controller.axi_write_init_reg |-> $past(cont_state) == CTRL_SETUP_C);
+ast_winit_cs_lv2_help_lv3: assert property(cont_state == START_TASK_C && subsys.main_controller.axi_write_init_reg |-> $past(cont_state) == CTRL_SETUP_C);
 
 // 19. regs wchannel flag low when write done, eqv write_done and bvalid
-ast_regs_wchannel_flag_lv2_help: assert property(subsys.main_controller.axi_write_done_s |-> !subsys.system_regs.regs_cont.axi_awv_awr_flag);
-ast_eqv_write_done_bvalid_lv2_help: assert property(subsys.main_controller.axi_write_done_s == subsys.main_controller.M_AXI_BVALID);
+ast_regs_wchannel_flag_lv2_help_lv3: assert property(subsys.main_controller.axi_write_done_s |-> !subsys.system_regs.regs_cont.axi_awv_awr_flag);
+ast_eqv_write_done_bvalid_lv2_help_lv3: assert property(subsys.main_controller.axi_write_done_s == subsys.main_controller.M_AXI_BVALID);
 
 // 20. state change after reset
-ast_cont_state_after_start_lv2_help: assert property(pb0_start_top |=> $changed(cont_state));
+ast_cont_state_after_start_lv2_help_lv3: assert property(pb0_start_top |=> $changed(cont_state));
 
 // 21. wready eqv, cont st gnt
-ast_eqv_wready_st_lv2_help: assert property(subsys.main_controller.M_AXI_AWADDR[31:8] == REGS_BASE_ADDR[31:8] |-> subsys.main_controller.M_AXI_WREADY == subsys.system_regs.S_AXI_WREADY);
-ast_gnt_st_lv2_help: assert property(subsys.main_controller.M_AXI_WREADY |-> $past(gnt, 2) == CONT);
+ast_eqv_wready_st_lv2_help_lv3: assert property(subsys.main_controller.M_AXI_AWADDR[31:8] == REGS_BASE_ADDR[31:8] |-> subsys.main_controller.M_AXI_WREADY == subsys.system_regs.S_AXI_WREADY);
+ast_gnt_st_lv2_help_lv3: assert property(subsys.main_controller.M_AXI_WREADY |-> $past(gnt, 2) == CONT);
 
+////////////////////////////////////////////////////////////////////////////////
+// Helper impact: MEDIUM-HIGH
+////////////////////////////////////////////////////////////////////////////////
 // 22. assert pb_task when start
-ast_pb_task_lv2_help: assert property(pb0_start_top |-> subsys.main_controller.cnt_max_reg == 2 && pb_task);
+ast_pb_task_lv2_help_high: assert property(pb0_start_top |-> subsys.main_controller.cnt_max_reg == 2 && pb_task);
 
 // 23. write_init_flow
-ast_wstart_lv2_help: assert property($rose(subsys.main_controller.M_AXI_AWVALID) |-> $past(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write) && $past(!subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write, 2));
-ast_wpulse_lv2_help: assert property($rose(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write) |-> $past(subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse) && $past(!subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse, 2));
-ast_winit_lv2_help: assert property($rose(subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse) |-> $past(subsys.main_controller.axi_write_init_reg) && $past(!subsys.main_controller.axi_write_init_reg, 2));
+ast_wstart_lv2_help_lv3: assert property($rose(subsys.main_controller.M_AXI_AWVALID) |-> $past(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write) && $past(!subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write, 2));
+ast_wpulse_lv2_help_lv3: assert property($rose(subsys.main_controller.master_axi_cont_ctrl.start_single_burst_write) |-> $past(subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse) && $past(!subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse, 2));
+ast_winit_lv2_help_lv3: assert property($rose(subsys.main_controller.master_axi_cont_ctrl.init_write_txn_pulse) |-> $past(subsys.main_controller.axi_write_init_reg) && $past(!subsys.main_controller.axi_write_init_reg, 2));
 
-
-ast_cs_lv2_help: assert property(cont_state == START_TASK_C && subsys.main_controller.axi_write_init_reg |-> $past(subsys.main_controller.axi_write_done_s));
-ast_hs_cs2_lv2_help: assert property(pb_task && cont_state == CTRL_SETUP_C && subsys.main_controller.axi_write_done_s |-> $past(subsys.main_controller.M_AXI_WREADY, 3));
+ast_cs_lv2_help_lv3: assert property(cont_state == START_TASK_C && subsys.main_controller.axi_write_init_reg |-> $past(subsys.main_controller.axi_write_done_s));
+ast_hs_cs2_lv2_help_lv3: assert property(pb_task && cont_state == CTRL_SETUP_C && subsys.main_controller.axi_write_done_s |-> $past(subsys.main_controller.M_AXI_WREADY, 3));
 
 // pb0 task
-ast_cs_ctrl2_pb0_lv2_help: assert property(pb_task && subsys.main_controller.M_AXI_AWADDR[7:0] == 8 && cont_state == START_TASK_C |-> pb0_addr_in_top == pb_addr_in);
+
+////////////////////////////////////////////////////////////////////////////////
+// Helper impact: HIGH
+////////////////////////////////////////////////////////////////////////////////
+ast_cs_ctrl2_pb0_lv2_help_high: assert property(pb_task && subsys.main_controller.M_AXI_AWADDR[7:0] == 8 && cont_state == START_TASK_C |-> pb0_addr_in_top == pb_addr_in);
 
 ////////////////////////////////////////////////////////////////////////////////
 // lv 3 target
@@ -925,6 +936,35 @@ always_comb begin
 end
 
 ast_lv3_target: assert property(pb0_state == INMEM_READ_PB && subsys.packet_builder0.axi_read_last_s |=> pb0_fifo_in_byte_data == inmem[pb_addr_in + pb0_fifo_in_byte_addr]);
+
+// helpers assertion logic from lv1
+ast_pb0_wptr_fifo_help_lv3_new: assert property(pb0_state == INMEM_READ_PB && $rose(subsys.packet_builder0.M_AXI_RVALID) |-> subsys.packet_builder0.fifo_in.write_index_s == 0);
+ast_imr_handshake_stop1_axi_help_lv3_new: assert property(pb_byte_cnt[3:2] == 0 && pb0_state == INMEM_READ_PB && subsys.packet_builder0.M_AXI_RVALID[*1] |=> !subsys.packet_builder0.M_AXI_RVALID);
+ast_imr_handshake_stop2_axi_help_lv3_new: assert property(pb_byte_cnt[3:2] == 1 && pb0_state == INMEM_READ_PB && subsys.packet_builder0.M_AXI_RVALID[*2] |=> !subsys.packet_builder0.M_AXI_RVALID);
+ast_imr_handshake_stop3_axi_help_lv3_new: assert property(pb_byte_cnt[3:2] == 2 && pb0_state == INMEM_READ_PB && subsys.packet_builder0.M_AXI_RVALID[*3] |=> !subsys.packet_builder0.M_AXI_RVALID);
+ast_imr_handshake_stop4_axi_help_lv3_new: assert property(pb_byte_cnt[3:2] == 3 && pb0_state == INMEM_READ_PB && subsys.packet_builder0.M_AXI_RVALID[*4] |=> !subsys.packet_builder0.M_AXI_RVALID);
+
+ast_imr_no_awvalid_axi_help_lv3_new: assert property(pb0_state == INMEM_READ_PB  |-> !subsys.packet_builder0.M_AXI_AWVALID);
+
+ast_imr_pb0_base_addr_help_lv3_new: assert property(pb0_state == INMEM_READ_PB |-> subsys.packet_builder0.axi_base_address_s == INMEM_BASE_ADDR); 
+ast_imr_pb0_read_addr_help_lv3_new: assert property(pb0_state == INMEM_READ_PB |-> subsys.packet_builder0.axi_read_address_s == pb_addr_in);
+
+ast_imr_rvalid_help_lv3_new: assert property(pb0_state == INMEM_READ_PB && subsys.packet_builder0.axi_read_last_s |-> subsys.packet_builder0.M_AXI_RVALID && subsys.packet_builder0.fifo_in_wr_en_s);
+
+// 25.	Based on byte_cnt, assert burst_len, handshake props just like in lv1 and lv2
+ast_imr_handshake1_axi_help_lv3_new: assert property(pb_byte_cnt[3:2] == 0 && pb0_state == INMEM_READ_PB && subsys.packet_builder0.M_AXI_RLAST |-> subsys.packet_builder0.M_AXI_RVALID);
+ast_imr_handshake2_axi_help_lv3_new: assert property(pb_byte_cnt[3:2] == 1 && pb0_state == INMEM_READ_PB && subsys.packet_builder0.M_AXI_RLAST |-> subsys.packet_builder0.M_AXI_RVALID && $past(subsys.packet_builder0.M_AXI_RVALID));
+ast_imr_handshake3_axi_help_lv3_new: assert property(pb_byte_cnt[3:2] == 2 && pb0_state == INMEM_READ_PB && subsys.packet_builder0.M_AXI_RLAST |-> subsys.packet_builder0.M_AXI_RVALID && $past(subsys.packet_builder0.M_AXI_RVALID, 2));
+ast_imr_handshake4_axi_help_lv3_new: assert property(pb_byte_cnt[3:2] == 3 && pb0_state == INMEM_READ_PB && subsys.packet_builder0.M_AXI_RLAST |-> subsys.packet_builder0.M_AXI_RVALID && $past(subsys.packet_builder0.M_AXI_RVALID, 3));
+
+cov_imr_read1: cover property(pb0_irq_top && pb_byte_cnt == 3);
+cov_imr_read2: cover property(pb0_irq_top && pb_byte_cnt == 7);
+cov_imr_read3: cover property(pb0_irq_top && pb_byte_cnt == 11);
+cov_imr_read4: cover property(pb0_irq_top && pb_byte_cnt == 15);
+
+// 26. Pb_addr_in must be in slave while rising edge on rvalid, rvalid is low while arvalid
+ast_imr_addr_in_help_lv3_new: assert property($rose(inmem.slave_axi_cont_inmem.S_AXI_RVALID) && pb0_state == INMEM_READ_PB |-> inmem.slave_axi_cont_inmem.axi_araddr == pb_addr_in);
+ast_imr_ar_rvalid_help_lv3_new: assert property(subsys.packet_builder0.M_AXI_ARVALID |-> !subsys.packet_builder0.M_AXI_RVALID);
 
 
 
