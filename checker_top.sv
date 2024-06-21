@@ -1008,20 +1008,20 @@ assign wbyte_cnt_op0 = pb_byte_cnt[3:2] + 3;
 assign wbyte_cnt_op1 = (pb_byte_cnt[3:2] * 2) + (pb_byte_cnt[0] || pb_byte_cnt[1]) + 3;
 assign wbyte_cnt_op2 = pb_byte_cnt + 3;
 
-ast_pb0_lv4_new_target: assert property(pb0_checker_en && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |=> !subsys.chk_data_integrity.di_err);
-ast_pb1_lv4_new_target: assert property(pb1_checker_en && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |=> !subsys.chk_data_integrity.di_err);
-ast_pb_lv4_new_target: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |=> !subsys.chk_data_integrity.di_err);
+ast_pb0_lv4_new_target: assert property(pb0_checker_en && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |=> !subsys.packet_builder0.chk_data_integrity.di_err);
+ast_pb1_lv4_new_target: assert property(pb1_checker_en && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |=> !subsys.packet_builder0.chk_data_integrity.di_err);
+ast_pb_lv4_new_target: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |=> !subsys.packet_builder0.chk_data_integrity.di_err);
 
-cov_sanity1_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 4 && subsys.chk_data_integrity.chosen_packet_arrived && 
+cov_sanity1_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 4 && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && 
 									  subsys.packet_builder0.chk_data_integrity.received_byte_data == 10 && pb_data_sel == 1 && pb_byte_cnt == 10);
 
-cov_sanity2_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 2 && subsys.chk_data_integrity.chosen_packet_arrived && 
+cov_sanity2_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 2 && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && 
 									  subsys.packet_builder0.chk_data_integrity.received_byte_data == 13 && pb_data_sel == 2 && pb_byte_cnt == 15);
 
-cov_sanity3_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 15 && subsys.chk_data_integrity.chosen_packet_arrived && 
+cov_sanity3_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 15 && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && 
 									  subsys.packet_builder0.chk_data_integrity.received_byte_data == 8 && pb_data_sel == 2 && pb_byte_cnt == 15);
 
-cov_sanity4_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 8 && subsys.chk_data_integrity.chosen_packet_arrived && 
+cov_sanity4_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 8 && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && 
 									  subsys.packet_builder0.chk_data_integrity.received_byte_data == 2 && pb_data_sel == 0 && pb_byte_cnt == 15);
 // TODO Assertion logic from lv3 but for write transaction
 ast_pb0_rptr_fifo_lv4_help_high: assert property(pb0_state == OUTMEM_WRITE_PB && $rose(subsys.packet_builder0.M_AXI_WVALID) |-> subsys.packet_builder0.fifo_out.read_index_s == 0);
@@ -1080,8 +1080,8 @@ cov_omw_pb0_pb1: cover property((pb0_state == OUTMEM_WRITE_PB || pb0_state == OU
 
 ast_no_omw_pb0_pb1_lv4_help_high: assert property(!((pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) && (pb1_state == OUTMEM_WRITE_PB || pb1_state == OUTMEM_WRITE_LAST_PB)));
 
-ast_chosen_flag_lv4_help_high_new: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |-> subsys.chk_data_integrity.chosen_byte_flag);
-ast_rpulse_cnt_lv4_help_high: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |-> subsys.chk_data_integrity.rpulse_cnt == 0);
+ast_chosen_flag_lv4_help_high_new: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |-> subsys.packet_builder0.chk_data_integrity.chosen_byte_flag);
+ast_rpulse_cnt_lv4_help_high: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |-> subsys.packet_builder0.chk_data_integrity.rpulse_cnt == 0);
 // 31. In OUTMEM_WRITE_LAST are either wlast or bvalid asserted
 ast_owml_bvalid_or_wlast_lv4_help_high: assert property(pb0_state == OUTMEM_WRITE_LAST_PB |-> subsys.packet_builder0.M_AXI_WLAST || subsys.packet_builder0.M_AXI_BVALID);
 
