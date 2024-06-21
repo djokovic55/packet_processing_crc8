@@ -81,23 +81,39 @@ bind top checker_top chk_top(
   .pp_pkt_type_top(pp_pkt_type_top)
 );
 
-bind top.subsys checker_data_integrity chk_data_integrity(
-  .clk(clk),	
-  .reset(reset),
-  .byte_cnt(pb_byte_cnt_i),
-  .data_sel(pb_data_sel_i),
+// bind top.subsys checker_data_integrity chk_data_integrity(
+//   .clk(clk),	
+//   .reset(reset),
+//   .byte_cnt(pb_byte_cnt_i),
+//   .data_sel(pb_data_sel_i),
 
-  .wdata(m_axi_int_wdata_outmem),
-  .wvalid(m_axi_int_wvalid_outmem),
-  .wlast(m_axi_int_wlast_outmem),
-  .wready(m_axi_int_wready_outmem), 
+//   .wdata(m_axi_int_wdata_outmem),
+//   .wvalid(m_axi_int_wvalid_outmem),
+//   .wlast(m_axi_int_wlast_outmem),
+//   .wready(m_axi_int_wready_outmem), 
 
-  .rdata(m_axi_int_rdata_inmem),
-  .rlast(m_axi_int_rlast_inmem),
-  .rvalid(m_axi_int_rvalid_inmem),
-  .rready(m_axi_int_rready_inmem)
+//   .rdata(m_axi_int_rdata_inmem),
+//   .rlast(m_axi_int_rlast_inmem),
+//   .rvalid(m_axi_int_rvalid_inmem),
+//   .rready(m_axi_int_rready_inmem)
+// );
+
+bind top.subsys.packet_builder0 checker_data_integrity chk_data_integrity(
+  .clk(M_AXI_ACLK),	
+  .reset(M_AXI_ARESETN),
+  .byte_cnt(byte_cnt_i),
+  .data_sel(data_sel_i),
+
+  .wdata(m_axi_wdata),
+  .wvalid(m_axi_wvalid),
+  .wlast(m_axi_wlast),
+  .wready(m_axi_wready), 
+
+  .rdata(m_axi_rdata),
+  .rlast(m_axi_rlast),
+  .rvalid(m_axi_rvalid),
+  .rready(m_axi_rready)
 );
-
 
 bind top.subsys.intcon.arb_inst checker_fair_int chk_fairness(
   .clk(clk),

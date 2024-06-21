@@ -129,6 +129,7 @@ module checker_data_integrity(
 
   // Indication that chosen packet arrived at the output
   logic chosen_packet_arrived;
+  logic di_err;
   reg[7:0] received_byte_data;
 
 
@@ -137,19 +138,25 @@ module checker_data_integrity(
     if(reset) begin
       received_byte_data <= '0; 
       chosen_packet_arrived <= 1'b0;
+      di_err <= 1'b0;
     end
     else begin
 	  //default
-	  chosen_packet_arrived <= 1'b0; //generate pulse
+      chosen_packet_arrived <= 1'b0; //generate pulse
+      di_err <= 1'b0;
 
-	  // extract byte only when in OUTMEM_WRITE phase
+      if(chosen_packet_arrived) begin
+        if(received_byte_data != chosen_byte_data)
+          di_err <= 1'b1;
+      end
+
+      // extract byte only when in OUTMEM_WRITE phase
       if(received_byte[4:2] == wpulse_cnt && wnext) begin
 
         chosen_packet_arrived <= 1'b1;
-		if(chosen_packet_arrived)
-		  chosen_packet_arrived <= 1'b0;
 
         case(received_byte[1:0]) 
+          // Insert BUG
           2'b00: received_byte_data <= wdata[7:0];
           2'b01: received_byte_data <= wdata[15:8];
           2'b10: received_byte_data <= wdata[23:16];
@@ -160,6 +167,8 @@ module checker_data_integrity(
   end
 
   ast_packet_integrity: assert property(chosen_packet_arrived |-> received_byte_data == chosen_byte_data);
+  // ast_packet_integrity2: assert property(!di_err);
+
 
   cov_chosen_byte_occurence: cover property(rnext ##[0:15] chosen_byte_flag);
 
