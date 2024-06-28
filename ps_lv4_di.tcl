@@ -49,6 +49,6 @@ prove -property *pb0*_lv4_new_target* -sst 10 -set helper
 # prove -property *pb0*_lv4_new_target* -with_helpers
 
 # Check new helpers
-task -create lv4_G -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {<embedded>::top.chk_top.ast*_help_high_new*}
+task -create lv4_G -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {<embedded>::top.chk_top.*_help_high_new*}
 prove -bg -task {lv4_G}
 # task -create lv4_new_target -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {<embedded>::top.chk_top.*_lv4_new_target* <embedded>::top.subsys.chk_data_integrity.ast_packet_integrity}

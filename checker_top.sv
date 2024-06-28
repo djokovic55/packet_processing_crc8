@@ -613,7 +613,7 @@ module  checker_top(
 		.di_err(di_err_pb0),
 		.di_crc_err(di_crc_err_pb0));
 
-	ast_pb0_di:                            assert property(!di_err_pb0);
+	ast_pb0_di:                            assert property(pb0_checker_en |-> !di_err_pb0);
 	ast_crc_pb0_di:                        assert property(!di_crc_err_pb0);
 
 	ast_pb0_op2_di:                        assert property(pb_data_sel == 2 |-> !di_err_pb0);
@@ -628,12 +628,11 @@ typedef enum {IDLE_PB, INMEM_READ_PB, CRC_LOOP_PB,
                    BUILD_FIRST_PULSE_OP1_PB, BUILD_PULSE_OP1_PB, BUILD_LAST_PULSE_OP1_PB, 
                    BUILD_FIRST_PULSE_OP2_PB, BUILD_PULSE_OP2_PB, BUILD_LAST_PULSE_OP2_PB, 
                    OUTMEM_WRITE_PB, OUTMEM_WRITE_LAST_PB} pb_state_type;
+
 cont_state_type cont_state;
 cont_state_type cont_state_next;
 pb_state_type pb0_state;
-
-cont_state_type pb0_state;
-cont_state_type pb1_state;
+pb_state_type pb1_state;
 logic[31:0] cont_ctrl2;
 
 logic ext_intr;
@@ -981,16 +980,19 @@ ast_imr_ar_rvalid_lv3_help_high: assert property(subsys.packet_builder0.M_AXI_AR
 ////////////////////////////////////////////////////////////////////////////////
 // lv 4 target
 ////////////////////////////////////////////////////////////////////////////////
+cov_op0_packet_arrived0: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 0 && pb_data_sel == 0);
 cov_op0_packet_arrived1: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 3 && pb_data_sel == 0);
 cov_op0_packet_arrived2: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 7 && pb_data_sel == 0);
 cov_op0_packet_arrived3: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 11 && pb_data_sel == 0);
 cov_op0_packet_arrived4: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 15 && pb_data_sel == 0);
 
+cov_op1_packet_arrived0: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 0 && pb_data_sel == 1);
 cov_op1_packet_arrived1: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 3 && pb_data_sel == 1);
 cov_op1_packet_arrived2: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 7 && pb_data_sel == 1);
 cov_op1_packet_arrived3: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 11 && pb_data_sel == 1);
 cov_op1_packet_arrived4: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 15 && pb_data_sel == 1);
 
+cov_op2_packet_arrived0: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 0 && pb_data_sel == 2);
 cov_op2_packet_arrived1: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 3 && pb_data_sel == 2);
 cov_op2_packet_arrived2: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 7 && pb_data_sel == 2);
 cov_op2_packet_arrived3: cover property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && pb_byte_cnt == 11 && pb_data_sel == 2);
@@ -1024,7 +1026,7 @@ cov_sanity3_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integ
 cov_sanity4_lv4_new_target: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 8 && subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived && 
 									  subsys.packet_builder0.chk_data_integrity.received_byte_data == 2 && pb_data_sel == 0 && pb_byte_cnt == 15);
 // TODO Assertion logic from lv3 but for write transaction
-ast_pb0_rptr_fifo_lv4_help_high: assert property(pb0_state == OUTMEM_WRITE_PB && $rose(subsys.packet_builder0.M_AXI_WVALID) |-> subsys.packet_builder0.fifo_out.read_index_s == 0);
+// ast_pb0_rptr_fifo_lv4_help_high: assert property(pb0_state == OUTMEM_WRITE_PB && $rose(subsys.packet_builder0.M_AXI_WVALID) |-> subsys.packet_builder0.fifo_out.read_index_s == 0);
 
 // For single burst write transactions, wlast is not a single event
 ast_omw_handshake1_axi_op0_lv4_help_high: assert property(pb_data_sel == 0 && wbyte_cnt_op0[3:2] == 0 && (pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) && $fell(subsys.packet_builder0.M_AXI_WLAST) |-> $past(subsys.packet_builder0.M_AXI_WREADY));
@@ -1069,7 +1071,8 @@ ast_wpulse_when_pkt_arrives_lv4_help_high: assert property((pb0_state != OUTMEM_
 
 //29.	Upon wready rising edge fifo_out read ptr and wpulse_cnt must be 0. Data sel on top and in registers must be equal
 ast_wpulse_lv4_help_high: assert property((pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) && $rose(subsys.packet_builder0.M_AXI_WREADY) |-> subsys.packet_builder0.chk_data_integrity.wpulse_cnt == 0);
-ast_pb0_rptr_fifo2_lv4_help_high: assert property((pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) && $rose(subsys.packet_builder0.M_AXI_WVALID) |-> subsys.packet_builder0.fifo_out.read_index_s == 0);
+ast_pb0_rptr1_fifo2_lv4_help_high: assert property((pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) && $rose(subsys.packet_builder0.M_AXI_WVALID) |-> subsys.packet_builder0.fifo_out.read_index_s == 0);
+ast_pb0_rptr2_fifo2_lv4_help_high: assert property((pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) && $rose(subsys.packet_builder0.M_AXI_WREADY) |-> subsys.packet_builder0.fifo_out.read_index_s == 0);
 ast_omw_data_sel_lv4_help_high: assert property((pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) |-> pb_data_sel == subsys.packet_builder0.data_sel_i);
 
 // 30. No overlapping OUTMEM_WRITE states from PB0 and PB1. 
@@ -1079,12 +1082,247 @@ ast_omw_data_sel_lv4_help_high: assert property((pb0_state == OUTMEM_WRITE_PB ||
 cov_omw_pb0_pb1: cover property((pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) && (pb1_state == OUTMEM_WRITE_PB || pb1_state == OUTMEM_WRITE_LAST_PB));
 
 ast_no_omw_pb0_pb1_lv4_help_high: assert property(!((pb0_state == OUTMEM_WRITE_PB || pb0_state == OUTMEM_WRITE_LAST_PB) && (pb1_state == OUTMEM_WRITE_PB || pb1_state == OUTMEM_WRITE_LAST_PB)));
-
-ast_chosen_flag_lv4_help_high_new: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |-> subsys.packet_builder0.chk_data_integrity.chosen_byte_flag);
 ast_rpulse_cnt_lv4_help_high: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |-> subsys.packet_builder0.chk_data_integrity.rpulse_cnt == 0);
+ast_chosen_flag_lv4_help_high: assert property(subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived |-> subsys.packet_builder0.chk_data_integrity.chosen_byte_flag);
+
 // 31. In OUTMEM_WRITE_LAST are either wlast or bvalid asserted
 ast_owml_bvalid_or_wlast_lv4_help_high: assert property(pb0_state == OUTMEM_WRITE_LAST_PB |-> subsys.packet_builder0.M_AXI_WLAST || subsys.packet_builder0.M_AXI_BVALID);
 
+// 32.	Wready can’t be asserted during wvalid
+ast_pb0_no_wready_when_awvalid_lv4_help_high: assert property(subsys.packet_builder0.M_AXI_AWVALID |-> !subsys.packet_builder0.M_AXI_WREADY);
+// 		awready must be asserted before $rose(wready)
+ast_pb0_awready_lv4_help_high: assert property($rose(subsys.packet_builder0.M_AXI_WREADY) |-> $past(subsys.packet_builder0.M_AXI_AWREADY) && $past(!subsys.packet_builder0.M_AXI_AWREADY, 2));
+
+// 33.	Only one handshake in outmem write_last
+ast_omvl_single_hs_lv4_help_high: assert property(pb0_state == OUTMEM_WRITE_LAST_PB && subsys.packet_builder0.M_AXI_WVALID |=> !subsys.packet_builder0.M_AXI_WVALID);
+
+logic[3:0] cb_pb0;
+logic[7:0] cbd_pb0;
+logic cbf_pb0;
+
+logic[3:0] rb_pb0; 
+logic[7:0] rbd_pb0;
+logic rbf_pb0;
+
+// 34. Packet integrity check decomposition
+assign cb_pb0 = subsys.packet_builder0.chk_data_integrity.chosen_byte_top;
+assign cbd_pb0 = subsys.packet_builder0.chk_data_integrity.chosen_byte_data;
+assign cbf_pb0 = subsys.packet_builder0.chk_data_integrity.chosen_byte_flag;
+
+assign rb_pb0 = subsys.packet_builder0.chk_data_integrity.received_byte;
+assign rbd_pb0 = subsys.packet_builder0.chk_data_integrity.received_byte_data;
+assign rbf_pb0 = subsys.packet_builder0.chk_data_integrity.chosen_packet_arrived;
+
+// connect top config with unit checker
+assign subsys.packet_builder0.chk_data_integrity.chosen_byte_top = chosen_byte;
+assign subsys.packet_builder0.chk_data_integrity.data_sel_top = pb_data_sel;
+
+cov_34_test1_lv4_help_high: cover property(cb_pb0 == 1);
+cov_34_test1a_lv4_help_high: cover property(cb_pb0 != 0);
+cov_34_test2_lv4_help_high: cover property(rbf_pb0);
+cov_34_test3_lv4_help_high: cover property(subsys.packet_builder0.chk_data_integrity.chosen_byte == 1);
+cover_chosen_byte_top_lv4_help_high: cover property(chosen_byte == 1);
+
+// same for all ops
+ast_b0_lv4_help_high: assert property(cb_pb0 == 0 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[0][23:16]);
+// same for all op2 and op1
+ast_b1_lv4_help_high: assert property(cb_pb0 == 1 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[0][31:24]);
+// only op2
+ast_b2_lv4_help_high: assert property(cb_pb0 == 2 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][7:0]);
+ast_b3_lv4_help_high: assert property(cb_pb0 == 3 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][15:8]);
+// all three
+ast_b4_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 4 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][23:16]);
+ast_b4_op1_lv4_help_high: assert property(pb_data_sel == 1 && cb_pb0 == 4 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][7:0]);
+ast_b4_op0_lv4_help_high: assert property(pb_data_sel == 0 && cb_pb0 == 4 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[0][31:24]);
+// same for all op2 and op1
+ast_b5_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 5 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][31:24]);
+ast_b5_op1_lv4_help_high: assert property(pb_data_sel == 1 && cb_pb0 == 5 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][15:8]);
+// only op2
+ast_b6_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 6 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[2][7:0]);
+ast_b7_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 7 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[2][15:8]);
+// all three
+ast_b8_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 8 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[2][23:16]);
+ast_b8_op1_lv4_help_high: assert property(pb_data_sel == 1 && cb_pb0 == 8 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][23:16]);
+ast_b8_op0_lv4_help_high: assert property(pb_data_sel == 0 && cb_pb0 == 8 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][7:0]);
+// same for all op2 and op1
+ast_b9_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 9 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[2][31:24]);
+ast_b9_op1_lv4_help_high: assert property(pb_data_sel == 1 && cb_pb0 == 9 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][31:24]);
+// only op2
+ast_b10_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 10 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[3][7:0]);
+ast_b11_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 11 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[3][15:8]);
+// all three
+ast_b12_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 12 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[3][23:16]);
+ast_b12_op1_lv4_help_high: assert property(pb_data_sel == 1 && cb_pb0 == 12 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[2][7:0]);
+ast_b12_op0_lv4_help_high: assert property(pb_data_sel == 0 && cb_pb0 == 12 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[1][15:8]);
+// same for all op2 and op1
+ast_b13_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 13 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[3][31:24]);
+ast_b13_op1_lv4_help_high: assert property(pb_data_sel == 1 && cb_pb0 == 13 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[2][15:8]);
+// only op2
+ast_b14_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 14 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[4][7:0]);
+ast_b15_op2_lv4_help_high: assert property(pb_data_sel == 2 && cb_pb0 == 15 && rbf_pb0 |-> cbd_pb0 == pb0_fifo_out[4][15:8]);
+
+////////////////////////////////////////////////////////////////////////////////
+// lv 5 target
+////////////////////////////////////////////////////////////////////////////////
+
+cov_op0_pb0_irq0: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 0 && pb_data_sel == 0);
+cov_op0_pb0_irq1: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 3 && pb_data_sel == 0);
+cov_op0_pb0_irq2: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 7 && pb_data_sel == 0);
+cov_op0_pb0_irq3: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 11 && pb_data_sel == 0);
+cov_op0_pb0_irq4: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 15 && pb_data_sel == 0);
+
+cov_op1_pb0_irq0: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 0 && pb_data_sel == 1);
+cov_op1_pb0_irq1: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 3 && pb_data_sel == 1);
+cov_op1_pb0_irq2: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 7 && pb_data_sel == 1);
+cov_op1_pb0_irq3: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 11 && pb_data_sel == 1);
+cov_op1_pb0_irq4: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 15 && pb_data_sel == 1);
+
+cov_op2_pb0_irq0: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 0 && pb_data_sel == 2);
+cov_op2_pb0_irq1: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 3 && pb_data_sel == 2);
+cov_op2_pb0_irq2: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 7 && pb_data_sel == 2);
+cov_op2_pb0_irq3: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 11 && pb_data_sel == 2);
+cov_op2_pb0_irq4: cover property(pb0_checker_en && pb0_irq_top && pb_byte_cnt == 15 && pb_data_sel == 2);
+
+cov_crc_op0_pb0_irq0: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 0 && pb_data_sel == 0);
+cov_crc_op0_pb0_irq1: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 3 && pb_data_sel == 0);
+cov_crc_op0_pb0_irq2: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 7 && pb_data_sel == 0);
+cov_crc_op0_pb0_irq3: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 11 && pb_data_sel == 0);
+cov_crc_op0_pb0_irq4: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 15 && pb_data_sel == 0);
+
+cov_crc_op1_pb0_irq0: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 0 && pb_data_sel == 1);
+cov_crc_op1_pb0_irq1: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 3 && pb_data_sel == 1);
+cov_crc_op1_pb0_irq2: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 7 && pb_data_sel == 1);
+cov_crc_op1_pb0_irq3: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 11 && pb_data_sel == 1);
+cov_crc_op1_pb0_irq4: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 15 && pb_data_sel == 1);
+
+cov_crc_op2_pb0_irq0: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 0 && pb_data_sel == 2);
+cov_crc_op2_pb0_irq1: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 3 && pb_data_sel == 2);
+cov_crc_op2_pb0_irq2: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 7 && pb_data_sel == 2);
+cov_crc_op2_pb0_irq3: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 11 && pb_data_sel == 2);
+cov_crc_op2_pb0_irq4: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 15 && pb_data_sel == 2);
+
+
+typedef enum {IDLE_DI, CHOOSE_BYTE_DI, CRC_CALC_DI, RECEIVE_BYTE_DI, COMPARE_CRC_DI} di_State;
+
+di_State pb0_di_state_reg;
+
+// assign pb0_di_state_reg = pb0_di.di_state_reg;
+
+
+// 35.	Wlast must fall when pb0_irq
+ast_wlast_fall_pb0_irq_lv5_help_high: assert property(pb0_irq_top |-> $fell(subsys.packet_builder0.M_AXI_WLAST));
+
+// 36.	Byte can be chosen only in INMEM_READ state
+ast_chose_byte_state_lv5_help_high: assert property(pb0_di.di_state_reg == CHOOSE_BYTE_DI |-> pb0_state == INMEM_READ_PB);
+ast_no_crc_calc_lv5_help_high: assert property(!pb_crc_en |-> pb0_di.di_state_reg != CRC_CALC_DI && pb0_state != CRC_LOOP_PB);
+
+// 37.	Bvalid can not be asserted during awvalid 
+ast_no_bvalid_when_awvalid_lv5_help_high: assert property(subsys.packet_builder0.M_AXI_AWVALID |-> !subsys.packet_builder0.M_AXI_BVALID);
+
+// 38.	CRC calc in checker can be only during INMEM_READ or CRC_LOOP phase in builder
+// 		Receive byte state can start only during INMEM_READ or CRC_LOOP phase in builder
+ast_pb0_chk_states_dep1_lv5_help_high: assert property(pb0_di.di_state_reg == CRC_CALC_DI |-> pb0_state == INMEM_READ_PB || pb0_state == CRC_LOOP_PB);
+ast_pb0_chk_states_dep2_lv5_help_high: assert property($changed(pb0_di.di_state_reg) && pb0_di.di_state_reg == RECEIVE_BYTE_DI |-> pb0_state == INMEM_READ_PB || pb0_state == CRC_LOOP_PB);
+logic[5:0] op1_crc_addr_count; 
+logic[5:0] op1_crc_addr_count_temp1; 
+logic[5:0] op1_crc_addr_count_temp2; 
+
+assign op1_crc_addr_count_temp1 = pb_byte_cnt[3:2]*2;
+assign op1_crc_addr_count_temp2 = op1_crc_addr_count_temp1 + pb_byte_cnt[3:2];
+
+assign op1_crc_addr_count = pb_addr_in + pb_byte_cnt[3:2] + (pb_byte_cnt[0] || pb_byte_cnt[1]) + op1_crc_addr_count_temp2 + 2'h3;
+
+// 39.	Di_crc_addr_reg when pb0_irq should have the value byte_cnt + 1 + pb_addr_in, except in case of op0 and b0
+ast_di_crc_addr_op2_lv5_help_high: assert property(pb_crc_en && pb0_di.di_state_reg == RECEIVE_BYTE_DI && pb_data_sel == 2 |-> pb0_di.di_crc_addr_reg == pb_addr_in + pb_byte_cnt + 1);
+ast_di_crc_addr_op1_firstb_lv5_help_high: assert property(pb_crc_en && pb0_di.op1_data_cnt_reg && pb0_di.di_state_reg == RECEIVE_BYTE_DI && pb_data_sel == 1 |-> pb0_di.di_crc_addr_reg == pb_addr_in + pb_byte_cnt + 1);
+ast_di_crc_addr_op1_secondb_lv5_help_high: assert property(pb_crc_en && !pb0_di.op1_data_cnt_reg && pb0_di.di_state_reg == RECEIVE_BYTE_DI && pb_data_sel == 1 |-> pb0_di.di_crc_addr_reg == op1_crc_addr_count);
+ast_di_crc_addr_op0_b0_lv5_help_high: assert property(pb_crc_en && pb0_di.di_state_reg == RECEIVE_BYTE_DI && pb_data_sel == 0 |-> pb0_di.di_crc_addr_reg == pb_addr_in + 4*(pb_byte_cnt[3:2] + 1));
+ast_di_crc_addr_disabled_lv5_help_high: assert property(!pb_crc_en && pb0_di.di_state_reg == RECEIVE_BYTE_DI |-> pb0_di.di_crc_addr_reg == pb_addr_in);
+
+// 40. Use data decomposition from lv4 and assert that chosen_byte_data is equal with cbd_pb0
+// This way because cbd must be correct chosen_byte_data will also be
+//DISABLED, convergence key
+ast_cbd1_lv5_help: assert property(pb0_checker_en && pb0_irq_top |-> pb0_di.chosen_byte_data == cbd_pb0);
+ast_cbd2_lv5_help: assert property(pb0_checker_en && (pb0_state != IDLE_PB && pb0_state != INMEM_READ_PB) |-> pb0_di.chosen_byte_data == cbd_pb0);
+
+////////////////////////////////////////////////////////////////////////////////
+// LEVEL 5 decomposition
+////////////////////////////////////////////////////////////////////////////////
+
+ast_b0_lv5_help_high_new: assert property(pb0_checker_en && pb0_di.chosen_byte== 0 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[0][23:16]);
+// same for all op2 and op1
+ast_b1_lv5_help_high_new: assert property(pb0_checker_en && pb0_di.chosen_byte== 1 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[0][31:24]);
+// only op2
+ast_b2_lv5_help_high_new: assert property(pb0_checker_en && pb0_di.chosen_byte== 2 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][7:0]);
+ast_b3_lv5_help_high_new: assert property(pb0_checker_en && pb0_di.chosen_byte== 3 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][15:8]);
+// all three
+ast_b4_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 4 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][23:16]);
+ast_b4_op1_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 1 && pb0_di.chosen_byte == 4 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][7:0]);
+ast_b4_op0_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 0 && pb0_di.chosen_byte == 4 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[0][31:24]);
+// same for all op2 and op1
+ast_b5_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 5 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][31:24]);
+ast_b5_op1_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 1 && pb0_di.chosen_byte == 5 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][15:8]);
+// only op2
+ast_b6_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 6 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[2][7:0]);
+ast_b7_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 7 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[2][15:8]);
+// all three
+ast_b8_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 8 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[2][23:16]);
+ast_b8_op1_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 1 && pb0_di.chosen_byte == 8 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][23:16]);
+ast_b8_op0_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 0 && pb0_di.chosen_byte == 8 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][7:0]);
+// same for all op2 and op1
+ast_b9_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 9 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[2][31:24]);
+ast_b9_op1_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 1 && pb0_di.chosen_byte == 9 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][31:24]);
+// only op2
+ast_b10_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 10 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[3][7:0]);
+ast_b11_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 11 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[3][15:8]);
+// all three
+ast_b12_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 12 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[3][23:16]);
+ast_b12_op1_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 1 && pb0_di.chosen_byte == 12 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[2][7:0]);
+ast_b12_op0_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 0 && pb0_di.chosen_byte == 12 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[1][15:8]);
+// same for all op2 and op1
+ast_b13_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 13 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[3][31:24]);
+ast_b13_op1_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 1 && pb0_di.chosen_byte == 13 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[2][15:8]);
+// only op2
+ast_b14_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 14 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[4][7:0]);
+ast_b15_op2_lv5_help_high_new: assert property(pb0_checker_en && pb_data_sel == 2 && pb0_di.chosen_byte == 15 && pb0_irq_top |-> pb0_di.chosen_byte_data == pb0_fifo_out[4][15:8]);
+////////////////////////////////////////////////////////////////////////////////
+
+// 41. if awvalid then wvalid must be asserted
+ast_wvalid_when_awvalid_lv5_help_high: assert property(subsys.packet_builder0.M_AXI_AWVALID |-> subsys.packet_builder0.M_AXI_WVALID);
+
+// 42. Assert regs while processing blocks are active
+ast_reg_pb0_addr_in_lv5_help_high:              assert property(!pb0_busy_top |-> pb0_addr_in_top == pb_addr_in);
+ast_reg_pb0_byte_cnt_lv5_help_high:             assert property(!pb0_busy_top |-> pb0_byte_cnt_top == pb_byte_cnt);
+ast_reg_pb0_pkt_type_lv5_help_high:             assert property(!pb0_busy_top |-> pb0_pkt_type_top == pb_pkt_type);
+ast_reg_pb0_ecc_en_lv5_help_high:               assert property(!pb0_busy_top |-> pb0_ecc_en_top == pb_ecc_en);
+ast_reg_pb0_crc_en_lv5_help_high:               assert property(!pb0_busy_top |-> pb0_crc_en_top == pb_crc_en);
+ast_reg_pb0_ins_ecc_err_lv5_help_high:          assert property(!pb0_busy_top |-> pb0_ins_ecc_err_top == pb_ins_ecc_err);
+ast_reg_pb0_ins_crc_err_lv5_help_high:          assert property(!pb0_busy_top |-> pb0_ins_crc_err_top == pb_ins_crc_err);
+ast_reg_pb0_ecc_val_lv5_help_high:              assert property(!pb0_busy_top |-> pb0_ecc_val_top == pb_ecc_val);
+ast_reg_pb0_crc_val_lv5_help_high:              assert property(!pb0_busy_top |-> pb0_crc_val_top == pb_crc_val);
+ast_reg_pb0_sop_val_lv5_help_high:              assert property(!pb0_busy_top |-> pb0_sop_val_top == pb_sop_val);
+ast_reg_pb0_data_sel_lv5_help_high:             assert property(!pb0_busy_top |-> pb0_data_sel_top == pb_data_sel);
+ast_reg_pb0_addr_out_lv5_help_high:             assert property(!pb0_busy_top |-> pb0_addr_out_top == pb_addr_out);
+
+ast_reg_pb1_addr_in_lv5_help_high:              assert property(!pb1_busy_top |-> pb1_addr_in_top == pb_addr_in);
+ast_reg_pb1_byte_cnt_lv5_help_high:             assert property(!pb1_busy_top |-> pb1_byte_cnt_top == pb_byte_cnt);
+ast_reg_pb1_pkt_type_lv5_help_high:             assert property(!pb1_busy_top |-> pb1_pkt_type_top == pb_pkt_type);
+ast_reg_pb1_ecc_en_lv5_help_high:               assert property(!pb1_busy_top |-> pb1_ecc_en_top == pb_ecc_en);
+ast_reg_pb1_crc_en_lv5_help_high:               assert property(!pb1_busy_top |-> pb1_crc_en_top == pb_crc_en);
+ast_reg_pb1_ins_ecc_err_lv5_help_high:          assert property(!pb1_busy_top |-> pb1_ins_ecc_err_top == pb_ins_ecc_err);
+ast_reg_pb1_ins_crc_err_lv5_help_high:          assert property(!pb1_busy_top |-> pb1_ins_crc_err_top == pb_ins_crc_err);
+ast_reg_pb1_ecc_val_lv5_help_high:              assert property(!pb1_busy_top |-> pb1_ecc_val_top == pb_ecc_val);
+ast_reg_pb1_crc_val_lv5_help_high:              assert property(!pb1_busy_top |-> pb1_crc_val_top == pb_crc_val);
+ast_reg_pb1_sop_val_lv5_help_high:              assert property(!pb1_busy_top |-> pb1_sop_val_top == pb_sop_val);
+ast_reg_pb1_data_sel_lv5_help_high:             assert property(!pb1_busy_top |-> pb1_data_sel_top == pb_data_sel);
+ast_reg_pb1_addr_out_lv5_help_high:             assert property(!pb1_busy_top |-> pb1_addr_out_top == pb_addr_out);
+
+ast_reg_pp_addr_hdr_lv5_help_high:              assert property(!pp_busy_top |-> pp_addr_hdr_top == pp_addr_hdr);
+ast_reg_pp_ignore_ecc_err_lv5_help_high:        assert property(!pp_busy_top |-> pp_ignore_ecc_err_top == pp_ignore_ecc_err);
+
+
+cov_pb0_irq_final: cover property(pb_crc_en && pb0_checker_en && pb0_irq_top && pb_byte_cnt == 0 && pb_data_sel == 2 && 
+									 cbd_pb0 == 8'h7d && pb_addr_in == 7 && pb_addr_out == 7);
 
 ///////////////////////////////////////////////////////////////////////////////	
 // Memory interface B arbitration logic between DI and CRC checkers
@@ -1110,7 +1348,6 @@ always_comb begin
 			inmem_addr_b_s <= inmem_addr_pb0_di;
 		else
 			inmem_addr_b_s <= inmem_addr_pb0_crc;
-
 	else if(!pb1_busy_top && pb1_checker_en)
 		if(state_pb1_di == CHOOSE_BYTE)
 			inmem_addr_b_s <= inmem_addr_pb1_di;
@@ -1128,19 +1365,15 @@ asm_pp_write_data:                     assume property(!pp_busy_top |-> inmem_da
 // assume address value
 asm_inmem_addr:                        assume property(inmem_addr_b_i == inmem_addr_b_s);
 asm_in_addr_bound:                     assume property(addr_free <= 14'h12);
-
 // assume addr bound for inmem, addr_free has to be less than x"12" 
 asm_out_addr_bound:                    assume property(outmem_addr_b_i <= 14'h12);
 
 ////////////////////////////////////////////////////////////////////////////////
 //SECTION OUTMEM Interface Port B props
 ////////////////////////////////////////////////////////////////////////////////
-
 // outmem port B top interface, memory read only
 asm_outmem_en:                        assume property(outmem_en_b_i == 1'b1);
-
 asm_outmem_we:                        assume property(outmem_we_b_i == 1'b0);
-
 asm_pb0_outmem_addr_part1:             assume property(pb0_checker_en && !pb0_busy_top |-> outmem_addr_b_i == outmem_addr_pb0_di_crc);
 asm_pb0_outmem_addr_part2:             assume property((!pb0_busy_top ##1 pb0_busy_top) and pb0_checker_en |-> outmem_addr_b_i == outmem_addr_pb0_di_crc);
 asm_pb1_outmem_addr:                   assume property(pb1_checker_en and (!pb1_busy_top or (!pb1_busy_top ##1 pb1_busy_top)) |-> outmem_addr_b_i == outmem_addr_pb1_di_crc);

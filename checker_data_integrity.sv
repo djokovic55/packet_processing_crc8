@@ -53,18 +53,19 @@ module checker_data_integrity(
   // Packet IN interface
   //////////////////////////////////////////////////////////////////////////////// 
 
-  logic[3:0] chosen_byte;
+  logic[3:0] chosen_byte_top;
+  logic[3:0] data_sel_top;
 
-  asm_chosen_byte_stable: assume property($stable(chosen_byte));
+  // asm_chosen_byte_stable: assume property($stable(chosen_byte));
 
-  asm_chosen_byte_op0: assume property(disable iff(reset)
-    data_sel == 4'h0 |-> chosen_byte <= byte_cnt && chosen_byte[1:0] == 2'b0);
+  // asm_chosen_byte_op0: assume property(disable iff(reset)
+  //   data_sel == 4'h0 |-> chosen_byte <= byte_cnt && chosen_byte[1:0] == 2'b0);
 
-  asm_chosen_byte_op1: assume property(disable iff(reset)
-    data_sel == 4'h1 |-> chosen_byte <= byte_cnt && chosen_byte[1] == 1'b0);
+  // asm_chosen_byte_op1: assume property(disable iff(reset)
+  //   data_sel == 4'h1 |-> chosen_byte <= byte_cnt && chosen_byte[1] == 1'b0);
   
-  asm_chosen_byte_op2: assume property(disable iff(reset)
-    data_sel == 4'h2 |-> chosen_byte <= byte_cnt);
+  // asm_chosen_byte_op2: assume property(disable iff(reset)
+  //   data_sel == 4'h2 |-> chosen_byte <= byte_cnt);
 
   reg[7:0] chosen_byte_data;
   logic chosen_byte_flag;
@@ -79,33 +80,33 @@ module checker_data_integrity(
 	  chosen_byte_flag <= 1'b0;	
     end
     else begin
-	  if(chosen_byte[3:2] == rpulse_cnt && rnext) begin
-
-			chosen_byte_flag <= 1'b1;
-
-			if(chosen_byte_flag)
+			if(chosen_byte_flag && chosen_packet_arrived)
 				chosen_byte_flag <= 1'b0;	
 
-			case(data_sel) 
-				OP0: begin
-				chosen_byte_data <= rdata[7:0];
-				end
-				OP1: begin
-				case(chosen_byte[0]) 
-					1'b0: chosen_byte_data <= rdata[7:0];
-					1'b1: chosen_byte_data <= rdata[15:8];
-				endcase
-				end
-				OP2: begin
-				case(chosen_byte[1:0]) 
-					2'b00: chosen_byte_data <= rdata[7:0];
-					2'b01: chosen_byte_data <= rdata[15:8];
-					2'b10: chosen_byte_data <= rdata[23:16];
-					2'b11: chosen_byte_data <= rdata[31:24];
-				endcase
-		  end
-		endcase
-	  end
+      if(chosen_byte_top[3:2] == rpulse_cnt && rnext) begin
+
+        chosen_byte_flag <= 1'b1;
+
+        case(data_sel_top) 
+          OP0: begin
+          chosen_byte_data <= rdata[7:0];
+          end
+          OP1: begin
+            case(chosen_byte_top[0]) 
+              1'b0: chosen_byte_data <= rdata[7:0];
+              1'b1: chosen_byte_data <= rdata[15:8];
+            endcase
+          end
+          OP2: begin
+            case(chosen_byte_top[1:0]) 
+              2'b00: chosen_byte_data <= rdata[7:0];
+              2'b01: chosen_byte_data <= rdata[15:8];
+              2'b10: chosen_byte_data <= rdata[23:16];
+              2'b11: chosen_byte_data <= rdata[31:24];
+            endcase
+          end
+        endcase
+      end
     end
   end
 
@@ -119,10 +120,10 @@ module checker_data_integrity(
       received_byte <= '0;
     end
     else begin
-      case(data_sel) 
-        OP0: received_byte <= (chosen_byte[3:2] + 2);
-        OP1: received_byte <= ((chosen_byte[3:2] * 2) + chosen_byte[0] + 2);
-        default: received_byte <= (chosen_byte + 2); 
+      case(data_sel_top) 
+        OP0: received_byte <= (chosen_byte_top[3:2] + 2);
+        OP1: received_byte <= ((chosen_byte_top[3:2] * 2) + chosen_byte_top[0] + 2);
+        default: received_byte <= (chosen_byte_top + 2); 
       endcase
     end
   end
@@ -172,13 +173,13 @@ module checker_data_integrity(
 
   cov_chosen_byte_occurence: cover property(rnext ##[0:15] chosen_byte_flag);
 
-  cov_chosen_byte_val0: cover property(chosen_byte == 4'h0);
-  cov_chosen_byte_val1: cover property(chosen_byte == 4'h1);
-  cov_chosen_byte_val2: cover property(chosen_byte == 4'h2);
-  cov_chosen_byte_val3: cover property(chosen_byte == 4'h3);
-  cov_chosen_byte_val4: cover property(chosen_byte == 4'h4);
-  cov_chosen_byte_val5: cover property(chosen_byte == 4'h5);
-  cov_chosen_byte_val15: cover property(chosen_byte == 4'hf);
+  cov_chosen_byte_val0: cover property(chosen_byte_top == 4'h0);
+  cov_chosen_byte_val1: cover property(chosen_byte_top == 4'h1);
+  cov_chosen_byte_val2: cover property(chosen_byte_top == 4'h2);
+  cov_chosen_byte_val3: cover property(chosen_byte_top == 4'h3);
+  cov_chosen_byte_val4: cover property(chosen_byte_top == 4'h4);
+  cov_chosen_byte_val5: cover property(chosen_byte_top == 4'h5);
+  cov_chosen_byte_val15: cover property(chosen_byte_top == 4'hf);
 
   logic[3:0] free_byte_cnt;
   asm_max_free_byte_cnt: assume property(free_byte_cnt <= 4'hf);
