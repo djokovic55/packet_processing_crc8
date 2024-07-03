@@ -19,7 +19,7 @@ module  checker_di_top(
   input[31:0] pb_addr_out,
   input[31:0] outmem_data_b_o,
 
-  output[13:0] inmem_addr_di,
+  output logic[13:0] inmem_addr_di,
   output[13:0] inmem_addr_crc,
   output[13:0] outmem_addr_di_crc,
   output[2:0] state_di,
@@ -43,7 +43,7 @@ module  checker_di_top(
   const logic[3:0] OP1 = 4'h1;
   const logic[3:0] OP2 = 4'h2;
 
-	logic[13:0] chosen_byte_addr; // CHECKER_OUTPUT inmem addr for di check
+	logic[13:0] chosen_byte_addr, chosen_byte_addr_reg; // CHECKER_OUTPUT inmem addr for di check
 	logic[13:0] di_crc_addr_reg, di_crc_addr_next; // CHECKER_OUTPUT inmem addr for crc check
 	logic[13:0] received_byte_addr; // CHECKER_OUTPUT outmem addr for both di and crc check
 
@@ -120,6 +120,7 @@ module  checker_di_top(
 			di_crc_addr_reg <= '0;
 			// di_crc_ext_reg <=  '0;
 			di_crc_calc_reg <=  '0;
+			chosen_byte_addr_reg <=  '0;
 
 			op1_data_cnt_reg <= '0;
 		end
@@ -130,6 +131,8 @@ module  checker_di_top(
 			di_crc_addr_reg <= di_crc_addr_next;
 			// di_crc_ext_reg <=  di_crc_ext_next;
 			di_crc_calc_reg <=  di_crc_calc_next;
+			chosen_byte_addr_reg <=  chosen_byte_addr;
+
 
 			op1_data_cnt_reg <= op1_data_cnt_next;
 		end
@@ -143,7 +146,7 @@ module  checker_di_top(
 		di_state_next = di_state_reg;
 		chosen_byte_data_next = chosen_byte_data;
 		received_byte_data_next = received_byte_data;
-		chosen_byte_addr = '0;
+		chosen_byte_addr = chosen_byte_addr_reg;
 		received_byte_addr = '0;
 		di_err = '0;
 		// default data for crc calculation
@@ -155,6 +158,10 @@ module  checker_di_top(
 		di_crc_err_s = 1'b0;
 
 		op1_data_cnt_next = op1_data_cnt_reg;
+    // PORT assignment 
+    inmem_addr_di = chosen_byte_addr_reg;
+    // ALWAYS STORE CHOSEN_BYTE_DATA BECAUSE ADDRESS SHOULD REMAIN STABLE
+    chosen_byte_data_next = inmem_data_b_o; // CHECKER_INPUT inmem_data_b_o
 
 		case(di_state_reg)
 			IDLE_DI: begin 
@@ -169,6 +176,7 @@ module  checker_di_top(
 			end
 			CHOOSE_BYTE: begin
 				chosen_byte_addr = pb_addr_in + chosen_byte;
+        inmem_addr_di = chosen_byte_addr;
 				chosen_byte_data_next = inmem_data_b_o; // CHECKER_INPUT inmem_data_b_o
 				// if crc calc disabled, use predefined value
 				if(pb_crc_en)
@@ -221,6 +229,8 @@ module  checker_di_top(
 				received_byte_addr = pb_addr_out + received_byte; // CHECKER_INPUT pb_addr_out
 				if(pb_irq_top) begin
 					received_byte_data_next = outmem_data_b_o; // CHECKER_INPUT outmem_data_b_o
+          // reset reg
+          chosen_byte_addr = '0;
 					if(chosen_byte_data != received_byte_data_next)
 						di_err = 1'b1; // CHOOSE_OUTPUT di_err
 
@@ -245,7 +255,7 @@ module  checker_di_top(
 	end 
 
 	// Port assignments
-	assign inmem_addr_di = chosen_byte_addr;
+	// assign inmem_addr_di = chosen_byte_addr;
 	assign inmem_addr_crc = di_crc_addr_reg;
 	assign outmem_addr_di_crc = received_byte_addr;
 	assign state_di = di_state_reg;
