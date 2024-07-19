@@ -325,6 +325,7 @@ check_assumptions -show -dead_end
 # include ps_lv5.1_di.tcl
 # include ps_lv5_di.tcl
 # include ps_lv3_di.tcl
+include coverage.tcl
 
 ################################################################################
 ## PROVE
