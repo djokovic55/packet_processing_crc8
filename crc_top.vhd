@@ -10,6 +10,8 @@ port(
         start_crc : in std_logic;
         pulse_cnt_max : in std_logic_vector(1 downto 0);
 				-- for every data sel
+        -- represent the position of last data byte in fifo_in
+        -- BUG for op0 it can only have the value of 0, op1 0 or 1 and op2 all values
         vld_bytes_last_pulse_cnt : in std_logic_vector(1 downto 0);
         data_sel : in std_logic_vector(3 downto 0);
 
@@ -45,11 +47,18 @@ architecture Behavioral of crc_top is
   signal crc_out_s : std_logic_vector(7 downto 0);
 
   signal q_s : std_logic_vector(31 downto 0);
+
+  signal vld_bytes_pb_fifo_in_s : std_logic_vector(1 downto 0);
 begin
 
   -- output crc8
   crc_out <= crc_reg;
 	crc_ready <= crc_ready_reg;
+
+  -- BUG solution
+  vld_bytes_pb_fifo_in_s <= "00" when data_sel = "0000" else
+                            '0' & (vld_bytes_last_pulse_cnt(0) or vld_bytes_last_pulse_cnt(1)) when data_sel = "0001" else
+                            vld_bytes_last_pulse_cnt;
 
   -- crc mid result register
   crc_mid_res_reg: process(clk) is
@@ -103,7 +112,7 @@ begin
   end process; 
 
   fsm_comb_proc:process(state_reg, pulse_cnt_reg, shift_cnt_reg, start_crc, data_in,
-                        crc_ready_reg, crc_ready_next, pulse_cnt_max, vld_bytes_last_pulse_cnt) is
+                        crc_ready_reg, crc_ready_next, pulse_cnt_max, vld_bytes_pb_fifo_in_s) is
   begin
 
     -- default values
@@ -217,7 +226,7 @@ begin
         shift_s <= '1';
         shift_cnt_next <= std_logic_vector(unsigned(shift_cnt_reg) + 1);
 
-        if(unsigned(shift_cnt_reg) = unsigned(vld_bytes_last_pulse_cnt)) then
+        if(unsigned(shift_cnt_reg) = unsigned(vld_bytes_pb_fifo_in_s)) then
           -- KEY signal crc calculation done
           crc_ready_next <= '1'; 
           ---------------------------------------- 

@@ -137,32 +137,22 @@ checker  checker_axi(
   ast_axi_aw_stable_awsize: assert property (ast_axi_stable_before_handshake(awvalid, awready, awsize));
   ast_axi_aw_stable_awburst: assert property (ast_axi_stable_before_handshake(awvalid, awready, awburst));
   ast_axi_aw_awvalid_until_awready: assert property (ast_axi_valid_before_handshake(awvalid, awready));
-
-	ast_axi_aw_valid_awsize: assert property(ast_axi_size(awvalid, awsize));
-  // ast_awready_max_wait: assert property (handshake_max_wait(awvalid, awready, 1'b1));
-
-
-  // cov_awvalid_before_awready: cover property (valid_before_ready(awvalid, awready));
-  // cov_awready_before_awvalid: cover property (ready_before_valid(awvalid, awready));
-  // cov_awready_with_awvalid: cover property (valid_with_ready(awvalid, awready));
+  ast_axi_aw_valid_awsize: assert property(ast_axi_size(awvalid, awsize));
 
   //SECTION W channel prop
 
-	// IMPORTANT will be removed until the main master logic is implemented
+  // IMPORTANT will be removed until the main master logic is implemented
   ast_axi_w_stable_wdata: assert property (ast_axi_stable_before_handshake(wvalid, wready, wdata));
   ast_axi_w_stable_wstrb: assert property (ast_axi_stable_before_handshake(wvalid, wready, wstrb));
-
   ast_axi_w_data_wlast: assert property (ast_axi_data_last(handshake_cnt_w, awlen, wlast));
   ast_axi_w_data_single_burst_wlast: assert property (ast_axi_single_burst_data_last(awlen, wlast, awready, awvalid));
   ast_axi_w_data_single_burst_wlast_stability: assert property (ast_axi_single_burst_data_last_stable(wlast, wready, wvalid));
 
-  // cov_w_data_wlast_axi_c: cover property (wlast);
-
-	//IMPORTANT fails beacuse wvalid does not falls after wlast_axi
+  //IMPORTANT fails beacuse wvalid does not falls after wlast_axi
   ast_axi_w_wvalid_until_wready: assert property (ast_axi_valid_before_handshake(wvalid, wready));
 
   //SECTION B channel prop
-	ast_axi_b_no_slave_error: assert property(ast_axi_resp(bresp, bvalid));
+  ast_axi_b_no_slave_error: assert property(ast_axi_resp(bresp, bvalid));
 	
 
   //SECTION AR channel prop
@@ -173,7 +163,7 @@ checker  checker_axi(
   ast_axi_ar_stable_arburst: assert property (ast_axi_stable_before_handshake(arvalid, arready, arburst));
 
   ast_axi_ar_arvalid_until_arready: assert property (ast_axi_valid_before_handshake(arvalid, arready));
-	ast_axi_ar_valid_arsize: assert property(ast_axi_size(arvalid, arsize));
+  ast_axi_ar_valid_arsize: assert property(ast_axi_size(arvalid, arsize));
   //ast_axi_arready_max_wait: assert property (handshake_max_wait(arvalid, arready, 1'b1));
 
   // cov_arvalid_c: cover property (arvalid);

@@ -904,6 +904,9 @@ begin
 				end if;
 			elsif(pp_irq_i = '1') then 
 				pp_ctrl1_s <= '1'; 
+			--not in spec
+			else
+				pp_ctrl1_s <= '0';
 			end if;
 		end if;
 	end process;

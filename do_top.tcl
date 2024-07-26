@@ -160,30 +160,6 @@ if {$csa == 1} {
 if {$iva == 1} {
   ## Create iva debug task
 	task -create iva_debug -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy * 
-#	{
-#	<embedded>::top.chk_top.cov_pp_pb0_work 
-#	<embedded>::top.chk_top.cov_pp_pb1_work  
-#	<embedded>::top.chk_top.cov_pb0_pb1_work 
-#	<embedded>::top.chk_top.cov_pb0_pb1_long_work 
-#	<embedded>::top.chk_top.cov_pb0_work 
-#
-#	<embedded>::top.chk_top.cov_pb0_check
-#	<embedded>::top.chk_top.cov_pb1_check
-#	<embedded>::top.chk_top.cov_2pb0
-#	<embedded>::top.chk_top.cov_2pb1
-#	<embedded>::top.chk_top.cov_2pp
-#
-#	<embedded>::top.chk_top.pb0_di.cov_no_zero_data
-#	<embedded>::top.chk_top.pb1_di.cov_no_zero_data
-#
-#	<embedded>::top.chk_top.ast_pb0_di 
-#	<embedded>::top.chk_top.ast_pb1_di 
-#	<embedded>::top.chk_top.ast_crc_pb0_di
-#	<embedded>::top.chk_top.ast_crc_pb1_di
-#	<embedded>::top.chk_top.ast_ecc_corr_err
-#	<embedded>::top.chk_top.ast_ecc_uncorr_err
-#	}
-
 ################################################################################
 # Apstraction - IVAs for Internal Registers 
 ################################################################################
