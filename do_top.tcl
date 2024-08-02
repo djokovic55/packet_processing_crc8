@@ -303,6 +303,7 @@ check_assumptions -show -dead_end
 # include ps_lv3_di.tcl
 include coverage.tcl
 
+# get_design_info -property <embedded>::top.chk_top.ast_pb0_di_coverage -gui
 ################################################################################
 ## PROVE
 ################################################################################
