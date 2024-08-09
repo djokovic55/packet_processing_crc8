@@ -7,7 +7,7 @@
 # set task_name = iva_debug
 
 # Create coverage task and add relevant checkers
-task -create coverage -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {<embedded>::top.chk_top.*coverage*
+task -create coverage -set -source_task iva_debug -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {<embedded>::top.chk_top.*coverage*
 	<embedded>::top.subsys.intcon.chk_axi_prot_pb0.ast_axi* 
 	<embedded>::top.subsys.intcon.chk_axi_prot_pb1.ast_axi* 
 	<embedded>::top.subsys.intcon.chk_axi_prot_pp.ast_axi*_r_* 
@@ -67,3 +67,20 @@ check_cov -waiver -add -cover_item_id { 1944} -comment {It can not occur because
 check_cov -waiver -add -cover_item_id { 2354 1964}  -comment {Design is not fully utilized}
 check_cov -waiver -add -cover_item_id { 3166 2759 2779}  -comment {Design is not fully utilized}
 check_cov -waiver -add -cover_item_id { 2760 3170 2780} -comment {Design is not fully utilized}
+
+
+# Checker COI checked, Proof core not checked
+
+check_cov -waiver -add -cover_item_id { 639 642} -comment {No axi write to inmem}
+check_cov -waiver -add -cover_item_id { 863 866} -comment {No axi read to outmem}
+check_cov -waiver -add -cover_item_id { 4106} -comment {lsb awaddr field always 0 - word allignment}
+check_cov -waiver -add -cover_item_id { 4458 4463 4449 4450 4451} -comment {No axi write to exreg}
+check_cov -waiver -add -cover_item_id { 4605} -comment {word allignment} 
+
+check_cov -waiver -add -cover_item_id { 3583} -comment {no axi write in parser}
+check_cov -waiver -add -cover_item_id { 4000 4003 4004} -comment {pp_sts_reg never used because this info is provided directly on top level}
+check_cov -waiver -add -cover_item_id { 3264 3319 3287 3339 3358 3360 3362 3295 3364} -comment {pkt_type data not used in the system}
+check_cov -waiver -add -cover_item_id { 3474 3476 3494 3482} -comment {pulse_cnt_reg not important for parser}
+check_cov -waiver -add -cover_item_id { 2614} -comment {checked in pb0}
+check_cov -waiver -add -cover_item_id { 3357 3359 3361 3363} -comment {pkt_type data not used in the system}
+check_cov -waiver -add -cover_item_id { 3673 3744 3751 3669} -comment {system is never reseted after reset analysis}
