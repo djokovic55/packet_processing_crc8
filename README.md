@@ -13,7 +13,7 @@
 The packet processing system fully verified with the application of the formal methods. 
 
 ## Run Project
-- Clone repositorium
+- Clone repository
 - Run make command
 ## System Overview
 
@@ -22,7 +22,6 @@ The packet processing system fully verified with the application of the formal m
 - The described system is an AXI4-based system operating in a single clock domain. 
 - The main purpose of the system is packet processing according to given transaction level protocol. 
 - It should build packets from incoming raw data and parse incoming packets to extract packet info and possible transmission errors.
-The system consists of following blocks:
 
 ## Formal Testbench Overview
 
