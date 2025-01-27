@@ -1,17 +1,5 @@
 main:
-	jg do.tcl
-
-int:
-	jg do_int.tcl
-
-top:
-	jg do_top.tcl -fpv
-
-pb:
-	jg do_pb.tcl
-
-pp:
-	jg do_pp.tcl
+	jg ./scripts/do_top.tcl
 
 .PHONY: clean
 clean:
