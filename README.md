@@ -31,8 +31,8 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
             FV tool mathematically analyses the full state space of a design, exploring all possible simulations, rather than trying specific values. It is not actually running all possible simulations, of course, but it will use clever mathematical techniques to consider all their possible behaviors. Simulation looks at individual points in the space of possible test, while FV covers the whole space at once. Simulation is like throwing darts at a target, while FV covers your whole target with a paint roller.
         </td>
         <td style="border: none; width: 50%;">
-            <img src="docs/formal_methodology1.png" alt="State space exploration" width="100%"><br>
-            <img src="docs/formal_methodology2.png" alt="State space exploration" width="100%">
+            <img src="docs/formal_methodology1.png" alt="State space exploration" style="width: 100%; max-width: 500px;"><br>
+            <img src="docs/formal_methodology2.png" alt="State space exploration" style="width: 100%; max-width: 500px;">
         </td>
     </tr>
 </table>
