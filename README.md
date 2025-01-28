@@ -24,16 +24,18 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
 2. Run make command
 
 ## Formal Methodology
-<div style="display: flex; align-items: flex-start;">
-    <div style="flex: 1;">
-        FV tool mathematically analyses the full state space of a design, exploring all possible simulations, rather than trying specific values. It is not actually running all possible simulations, of course, but it will use clever mathematical techniques to consider all their possible behaviors.
-        Simulation looks at individual points in the space of possible test, while FV covers the whole space at once. Simulation is like throwing darts at a target, while FV covers your whole target with a paint roller.
-    </div>
-    <div style="flex: 1; margin-left: 30px;">
-        <img src="docs/formal_methodology1.png" alt="State space exploration" style="width: 100%; margin-bottom: 15px;">
-        <img src="docs/formal_methodology2.png" alt="State space exploration" style="width: 100%;">
-    </div>
-</div>
+
+<table style="border: none;">
+    <tr style="border: none;">
+        <td style="border: none; width: 50%;">
+            FV tool mathematically analyses the full state space of a design, exploring all possible simulations, rather than trying specific values. It is not actually running all possible simulations, of course, but it will use clever mathematical techniques to consider all their possible behaviors. Simulation looks at individual points in the space of possible test, while FV covers the whole space at once. Simulation is like throwing darts at a target, while FV covers your whole target with a paint roller.
+        </td>
+        <td style="border: none; width: 50%;">
+            <img src="docs/formal_methodology1.png" alt="State space exploration" width="100%"><br>
+            <img src="docs/formal_methodology2.png" alt="State space exploration" width="100%">
+        </td>
+    </tr>
+</table>
 
 ## System Workflow
 
