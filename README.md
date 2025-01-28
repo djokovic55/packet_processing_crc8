@@ -7,15 +7,36 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
 ## Table of contents
 
 - [Run Project](#run-project)
-- [System Overview](#system-overview)
-- [Formal Testbench Environment](#formal-testbench-overview)
+- [Formal Methodology](#formal-methodology)
+- [System Workflow](#system-workflow)
+    - [Data Integrity](#data-integrity)
+    - [System Bottleneck](#system-bottleneck)
+- [Formal Testbench](#formal-testbench)
+    - [Complexity Reduction](#complexity-reduction)
 - [State Space Tunneling](#state-space-tunneling)
+    - [Proof By Induction](#proof-by-induction)
+    - [Helpers Development](#helpers-development)
+- [Results](#results)
+
 
 ## Run Project
 1. Clone repository
 2. Run make command
 
-## System Overview
+## Formal Methodology
+
+<div style="display: flex; align-items: center;">
+    <div style="flex: 1;">
+        FV tool mathematically analyses the full state space of a design, exploring all possible simulations, rather than trying specific values. It is not actually running all possible simulations, of course, but it will use clever mathematical techniques to consider all their possible behaviors.
+        Simulation looks at individual points in the space of possible test, while FV covers the whole space at once. Simulation is like throwing darts at a target, while FV covers your whole target with a paint roller.
+    </div>
+    <div style="flex: 1; margin-left: 30px;">
+        <img src="docs/formal_methodology1.png" alt="State space exploration" style="width: 40%;">
+        <img src="docs/formal_methodology2.png" alt="State space exploration" style="width: 40%;">
+    </div>
+</div>
+
+## System Workflow
 
 ![System Diagram](docs/system_overview.png)
 
@@ -23,6 +44,14 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
 - The main purpose of the system is packet processing according to given transaction level protocol. 
 - It should build packets from incoming, raw data and parse incoming packets to extract packet information and possible transmission errors.
 
-## Formal Testbench Overview
+### Data Integrity
+### System Bottleneck
+
+## Formal Testbench 
+### Complexity Reduction
 
 ## State Space Tunneling
+### Proof By Induction
+### Helpers Development
+## Results
+
