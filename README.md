@@ -22,6 +22,7 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
 ## Run Project
 1. Clone repository
 2. Run make command
+3. See [script description](./scripts/script_desc.md)
 
 ## Formal Methodology
 
@@ -33,8 +34,8 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
     </tr>
     <tr style="border: none; text-align: center;">
         <td style="border: none;">
-            <img src="docs/formal_methodology1.png" alt="State space exploration" style="width: 50%; max-width: 250px;"><br>
-            <img src="docs/formal_methodology2.png" alt="State space exploration" style="width: 50%; max-width: 250px;">
+            <img src="docs/formal_methodology1.png" alt="State space exploration" style="width: 75%; max-width: 250px;"><br>
+            <img src="docs/formal_methodology2.png" alt="State space exploration" style="width: 75%; max-width: 250px;">
         </td>
     </tr>
 </table>
