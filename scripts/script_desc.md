@@ -7,12 +7,13 @@
     - Run from here in tcl terminal following precedure calls.
 ### Abstractions
 - abstractions.tcl
+- **Applied to the task where called**
     - IVA for Internal Registers
         - **Call:** *registers_iva_abs_proc*
     - IVA Incomming Memory
-        - **Call:** *blackbox_controller_abs_proc*
-    - Cutout controller interaction with Internal Registers (Controller blackbox)
         - **Call:** *inmem_iva_abs_proc*
+    - Cutout controller interaction with Internal Registers (Controller blackbox)
+        - **Call:** *blackbox_controller_abs_proc*
     - Disable Packet Builder 1 (Assume always busy)
         - **Call:** *disable_pb1_abs_proc*
 ### Coverage analysis

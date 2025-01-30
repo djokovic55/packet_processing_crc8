@@ -1,7 +1,9 @@
 clear -all
 
+# Include path is relative to the repo root directory (packet_processing_crc8)
 include scripts/sst/ps_pb0_di.tcl
-include scripts/procedures.tcl
+include scripts/sst/sst_pb0_di.tcl
+include scripts/abstractions.tcl
 include scripts/coverage.tcl
 ################################################################################
 # Init coverage app 
@@ -49,11 +51,11 @@ check_assumptions -show -dead_end
 ################################################################################
 ## CALL SCRIPTS
 ################################################################################
-# script for further SST helper development
+# script for further SST helper development from scripts/sst/sst_pb0_di.tcl
 	# run_sst_pb0_proc
-# script to see helper proof structure 
+# script to see helper proof structure from scripts/sst/ps_pb0_di.tcl
 	# run_proof_structure_proc
-# script for coverage analysis
+# script for coverage analysis from scripts/coverage.tcl
 	# run_coverage_proc
 
 ################################################################################

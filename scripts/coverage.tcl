@@ -1,21 +1,16 @@
 
-include scripts/procedures.tcl
+include scripts/abstractions.tcl
 # With IVA many scenarious of parallel work of processing blocks can be seen. This helps coverage analysis in a way where interesting scenarious can be seen at lower bound.
 # Copy main embedded task and apply IVA on registers
 proc run_coverage_proc {} {
 
+	task -create coverage -set -source_task <embedded> -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {
+		{*coverage*} {*ast_axi*} } -set
+
+	cover -remove *
+
 	registers_iva_abs_proc
 
-	task -create coverage -set -source_task registers_iva -copy_stopats -copy_ratings -copy_abstractions all -copy_assumes -copy {<embedded>::top.chk_top.*coverage*
-		<embedded>::top.subsys.intcon.chk_axi_prot_pb0.ast_axi* 
-		<embedded>::top.subsys.intcon.chk_axi_prot_pb1.ast_axi* 
-		<embedded>::top.subsys.intcon.chk_axi_prot_pp.ast_axi*_r_* 
-		<embedded>::top.subsys.intcon.chk_axi_prot_pp.ast_axi*_ar_* 
-		<embedded>::top.subsys.intcon.chk_axi_prot_ctrl.ast_axi* 
-		<embedded>::top.subsys.intcon.chk_axi_prot_exreg.ast_axi* 
-		<embedded>::top.subsys.intcon.chk_axi_prot_reg.ast_axi* 
-	}
-	cover -remove *
 
 	# waive checker cover points
 	check_cov -waiver -add -instance chk_top -comment {Checker module}
@@ -82,4 +77,7 @@ proc run_coverage_proc {} {
 	check_cov -waiver -add -cover_item_id { 2614} -comment {checked in pb0}
 	check_cov -waiver -add -cover_item_id { 3357 3359 3361 3363} -comment {pkt_type data not used in the system}
 	check_cov -waiver -add -cover_item_id { 3673 3744 3751 3669} -comment {system is never reseted after reset analysis}
+
+
+	check_cov -measure -task {coverage} -bg
 }

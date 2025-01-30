@@ -189,5 +189,5 @@ proc inmem_iva_abs_proc {} {
 ################################################################################
 proc disable_pb1_abs_proc {} {
 	stopat subsys.system_regs.pb1_sts_s
-	assume -name pb1_always_busy -env {subsys.system_regs.pb1_sts_s = '0'}
+	assume -name pb1_always_busy {subsys.system_regs.pb1_sts_s = '0'}
 }
