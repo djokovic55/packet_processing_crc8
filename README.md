@@ -88,12 +88,15 @@ To address the complexity several techniques were used:
 1. Case splitting – Dividing the problem into smaller cases, hence making the property logic simpler. We constrain the design to use only specific work modes in hope to easier achieving full proof for this case.
 
 ![Case split](docs/case_split.png)
+
 2. IVAs – Registers can take any value from reset, which means that initially, all masters can start working in parallel regardless of the controller work.
 
 ![IVA](docs/iva.png)
+
 3. Stopats – Treating the controller as a black box whose outputs become free nets that the tool can drive. This generalizes the design, allowing blocks to start their processes regardless of the controller.
 
 ![Complexity Reduction](docs/compl_red.png)
+
 4. Assume-Guarantee (Helper Assertion) - Assertion that helps prove other assertions, as proven assertion can be effectively used as an assumption. Each helper has a smaller Cone of influence than the target property. Generally easier to prove.
 
 ![Helper COI](docs/helper.png)
@@ -106,6 +109,7 @@ To address the complexity several techniques were used:
 ## State Space Tunneling
 ### Proof By Induction
 ![Proof by induction](docs/proof_by_induction.png)
+
 - Let’s say we have a property P.
 - For it to be proven true, it must hold true for all reachable states from the reset state.
 The black square represents the full state space of the design, and the black circle represents the reachable state space, defined by the design implementation and formal assumptions.
@@ -119,22 +123,26 @@ The inductive step then asserts that if the property is true for K cycles from r
 
 ### Helpers Development
 
-![Helper Development 1](docs/helper_development1.png)
+![Helper Development 1](docs/developing_helpers.png)
+
 - Helper assertions can be derived from the engineer’s insights about the design. However, if that approach does not yield significant results, a state space tunneling technique can be used. This technique is best applied in the late stages when other methods haven’t achieved the desired results.
 - State space tunneling (SST) essentially allows any state element in the design to take any value, enabling the design to start from an arbitrary state. From this state, it can find a transition or counterexample (CEX) that will cause the property to fail. In most cases, this CEX will originate from unreachable state space.
 - SST provides a trace of this CEX, from which we can derive a helper to rule out this behavior. This process can be repeated until there are no more CEXs. These CEXs are not real bugs because they do not start from reset. New helper assertions should be proven before being used as assumptions, which will then reduce the state space and accelerate property convergence.
 - In each iteration, new helpers will be respected by the SST analysis, bringing us one step closer to proof closure.
-![Helper Development 2](docs/helper_development2.png)
+
+![Helper Development 2](docs/developing_helpers2.png)
 
 ## Results
 
 ![Results](docs/results.png)
+
 - After many SST iterations, we should achieve a result where the target immediately converges because good helpers drastically reduce the state space which needs to be analyzed. (when turned into assumptions).
 - This is the result in the Jasper Property table where SST-generated helpers were proven and converted into assumptions. 
 - Target which previously would not converge for a long period of time, now converges immediately.
 
 
 ![Blocked Waterflow](docs/blocked_waterflow.png)
+
 - The problem of achieving fast convergence is analog to water flow with multiple stones on its path. 
 - Stones prevent water from reaching the sink as fast as possible, accumulating more water before each stone which resembles tool struggling to calculate a particular cycle depth. 
 - Defining a new helper is similar to removing a stone obstacle allowing water to freely flow toward the sink, or in our case full proof.
