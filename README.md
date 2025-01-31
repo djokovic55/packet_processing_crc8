@@ -123,14 +123,14 @@ The inductive step then asserts that if the property is true for K cycles from r
 
 ### Helpers Development
 
-![Helper Development 1](docs/developing_helpers.png)
+![Helper SST Development 1](docs/developing_helpers_sst.png)
 
 - Helper assertions can be derived from the engineer’s insights about the design. However, if that approach does not yield significant results, a state space tunneling technique can be used. This technique is best applied in the late stages when other methods haven’t achieved the desired results.
 - State space tunneling (SST) essentially allows any state element in the design to take any value, enabling the design to start from an arbitrary state. From this state, it can find a transition or counterexample (CEX) that will cause the property to fail. In most cases, this CEX will originate from unreachable state space.
 - SST provides a trace of this CEX, from which we can derive a helper to rule out this behavior. This process can be repeated until there are no more CEXs. These CEXs are not real bugs because they do not start from reset. New helper assertions should be proven before being used as assumptions, which will then reduce the state space and accelerate property convergence.
 - In each iteration, new helpers will be respected by the SST analysis, bringing us one step closer to proof closure.
 
-![Helper Development 2](docs/developing_helpers2.png)
+![Helper SST Development 2](docs/developing_helpers_sst2.png)
 
 ## Results
 
