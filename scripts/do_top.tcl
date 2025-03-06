@@ -26,7 +26,8 @@ set_prove_time_limit 0s
 # Elaboration
 ################################################################################
 # verif
-analyze -sv09 -f verif/verif.f
+
+analyze -sv09 -f verif/verif.f +define+MACRO_TEST
 # src
 analyze -vhdl -f rtl/rtl.f
 

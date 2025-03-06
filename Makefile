@@ -1,5 +1,5 @@
 main:
-	jg ./scripts/do_top.tcl
+	jg ./scripts/do_top.tcl &
 
 .PHONY: clean
 clean:

@@ -108,6 +108,12 @@ module  checker_top(
 	logic[3:0] test_var1;
 	logic[3:0] test_var2;
 
+	`ifdef MACRO_TEST
+		cov_macro_test_pp: cover property(pp_start_top);
+	`else
+		cov_macro_test_pb: cover property(pb0_start_top);
+	`endif
+
 	// SECTION Builder - Parser combined work
 
 	cov_pb_pp_task:                       cover property((pb_byte_cnt == 4'h3 && pb0_start_top) ##[1:$] pp_start_top);
