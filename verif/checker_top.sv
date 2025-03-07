@@ -9,43 +9,43 @@ module  checker_top(
 ////////////////////////////////////////////////////////////////////////////////
 // Build task configuration
 ////////////////////////////////////////////////////////////////////////////////
-	output pb_irq,
-	output[31:0] pb_addr_in, // assumed
-	output[3:0] pb_byte_cnt,// assumed
-	output[3:0] pb_pkt_type,
-	output pb_ecc_en,
-	output pb_crc_en,
-	output pb_ins_ecc_err,
-	output pb_ins_crc_err,
-	output[3:0] pb_ecc_val,
-	output[7:0] pb_crc_val,
-	output[2:0] pb_sop_val,
-	output[3:0] pb_data_sel,// assumed
-	output[31:0] pb_addr_out,// assumed
+	input pb_irq,
+	input[31:0] pb_addr_in, // assumed
+	input[3:0] pb_byte_cnt,// assumed
+	input[3:0] pb_pkt_type,
+	input pb_ecc_en,
+	input pb_crc_en,
+	input pb_ins_ecc_err,
+	input pb_ins_crc_err,
+	input[3:0] pb_ecc_val,
+	input[7:0] pb_crc_val,
+	input[2:0] pb_sop_val,
+	input[3:0] pb_data_sel,// assumed
+	input[31:0] pb_addr_out,// assumed
 
 ////////////////////////////////////////////////////////////////////////////////
 // Parse task configuration
 ////////////////////////////////////////////////////////////////////////////////
-	output pp_irq,
-	output[31:0] pp_addr_hdr,
-	output pp_ignore_ecc_err,
+	input pp_irq,
+	input[31:0] pp_addr_hdr,
+	input pp_ignore_ecc_err,
 
 ////////////////////////////////////////////////////////////////////////////////
 // Inmem port B top interface, used for memory configuration
 ////////////////////////////////////////////////////////////////////////////////
-	output inmem_en_b_i,
-	output[31:0] inmem_data_b_i,
-	output[13:0] inmem_addr_b_i,
-	output inmem_we_b_i,
+	input inmem_en_b_i,
+	input[31:0] inmem_data_b_i,
+	input[13:0] inmem_addr_b_i,
+	input inmem_we_b_i,
 	input[31:0] inmem_data_b_o,
 
 ////////////////////////////////////////////////////////////////////////////////
 // Outmem port B top interface, memory read only
 ////////////////////////////////////////////////////////////////////////////////
-	output outmem_en_b_i,
-	output[31:0] outmem_data_b_i,
-	output[13:0] outmem_addr_b_i,
-	output outmem_we_b_i,
+	input outmem_en_b_i,
+	input[31:0] outmem_data_b_i,
+	input[13:0] outmem_addr_b_i,
+	input outmem_we_b_i,
 	input[31:0] outmem_data_b_o,
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,6 +105,9 @@ module  checker_top(
 	endclocking
 
 	default disable iff reset;
+
+
+
 
 	////////////////////////////////////////////////////////////////////////////////	
 	// Testing 
@@ -244,6 +247,30 @@ module  checker_top(
 	ast_top_reg_pp_addr_hdr_lv4_help_high:              assert property(pp_start_top |-> pp_addr_hdr_top == pp_addr_hdr);
 	ast_top_reg_pp_ignore_ecc_err_lv4_help_high:        assert property(pp_start_top |-> pp_ignore_ecc_err_top == pp_ignore_ecc_err);
 
+	////////////////////////////////////////////////////////////////////////////////	
+	// Checkers enable logic
+	////////////////////////////////////////////////////////////////////////////////	
+	logic pb0_checker_en;
+	logic pb1_checker_en;
+	logic pp_checker_en;
+	logic[2:0] chk_en;
+
+	assign chk_en = {pb0_checker_en, pb1_checker_en, pp_checker_en};
+
+	asm_pb0_chk_en_stability:             assume property($stable(pb0_checker_en));
+	asm_pb1_chk_en_stability:             assume property($stable(pb1_checker_en));
+	asm_pp_chk_en_stability:              assume property($stable(pp_checker_en));
+	asm_only_one_active_chk:              assume property($onehot(chk_en));
+
+	`ifdef ENV_TEST
+
+	// Interfaces
+
+	// Adapter
+
+	// Packet parser checker
+	
+	`else
 
 	////////////////////////////////////////////////////////////////////////////////	
 	//SECTION ECC CALCULATION IN PARSE TASK
@@ -352,7 +379,7 @@ module  checker_top(
 			crc_ext_reg <=  '0;
 			crc_calc_reg <=  '0;
 			byte_cnt_reg <=  '0;
-			addr_reg <=  '0;
+			// addr_reg <=  '0;
 			crc_err_reg <= 1'b0;
 
 			ecc_corr_err_pp_reg <= 1'b0;
@@ -520,6 +547,8 @@ module  checker_top(
 	ast_pp_ecc_corr_err_coverage:                   assert property(pp_checker_en && pp_pkt_ecc_corr_top |-> ecc_corr_err_pp_reg);
 	ast_pp_ecc_uncorr_err_coverage:                 assert property(pp_checker_en && pp_pkt_ecc_uncorr_top |-> ecc_uncorr_err_pp_reg);
 
+	`endif
+
 	////////////////////////////////////////////////////////////////////////////////	
 	// IMPORTANT Check data integrity
 	////////////////////////////////////////////////////////////////////////////////	
@@ -531,20 +560,6 @@ module  checker_top(
 	asm_chosen_byte_op1_top:              assume property(disable iff(reset) pb_data_sel == 4'h1 |-> chosen_byte <= pb_byte_cnt && chosen_byte[1] == 1'b0);
 	asm_chosen_byte_op2_top:              assume property(disable iff(reset) pb_data_sel == 4'h2 |-> chosen_byte <= pb_byte_cnt);
 
-	////////////////////////////////////////////////////////////////////////////////	
-	// Checkers enable logic
-	////////////////////////////////////////////////////////////////////////////////	
-	logic pb0_checker_en;
-	logic pb1_checker_en;
-	logic pp_checker_en;
-	logic[2:0] chk_en;
-
-	assign chk_en = {pb0_checker_en, pb1_checker_en, pp_checker_en};
-
-	asm_pb0_chk_en_stability:             assume property($stable(pb0_checker_en));
-	asm_pb1_chk_en_stability:             assume property($stable(pb1_checker_en));
-	asm_pp_chk_en_stability:              assume property($stable(pp_checker_en));
-	asm_only_one_active_chk:              assume property($onehot(chk_en));
 
 	////////////////////////////////////////////////////////////////////////////////	
 	// PB1 CHECKER

@@ -109,83 +109,78 @@ module fv_adapter (
 );
 
 
-    // assign pb_conf_port.pb_irq = pb_irq;
-    // assign pb_conf_port.pb_addr_in = pb_addr_in;
-    // assign pb_conf_port.pb_byte_cnt = pb_byte_cnt;
-    // assign pb_conf_port.pb_pkt_type = pb_pkt_type;
-    // assign pb_conf_port.pb_ecc_en = pb_ecc_en;
-    // assign pb_conf_port.pb_crc_en = pb_crc_en;
-    // assign pb_conf_port.pb_ins_ecc_err = pb_ins_ecc_err;
-    // assign pb_conf_port.pb_ins_crc_err = pb_ins_crc_err;
-    // assign pb_conf_port.pb_ecc_val = pb_ecc_val;
-    // assign pb_conf_port.pb_crc_val = pb_crc_val;
-    // assign pb_conf_port.pb_sop_val = pb_sop_val;
-    // assign pb_conf_port.pb_data_sel = pb_data_sel;
-    // assign pb_conf_port.pb_addr_out = pb_addr_out;
+    assign pb_conf_port.pb_irq = pb_irq;
+    assign pb_conf_port.pb_addr_in = pb_addr_in;
+    assign pb_conf_port.pb_byte_cnt = pb_byte_cnt;
+    assign pb_conf_port.pb_pkt_type = pb_pkt_type;
+    assign pb_conf_port.pb_ecc_en = pb_ecc_en;
+    assign pb_conf_port.pb_crc_en = pb_crc_en;
+    assign pb_conf_port.pb_ins_ecc_err = pb_ins_ecc_err;
+    assign pb_conf_port.pb_ins_crc_err = pb_ins_crc_err;
+    assign pb_conf_port.pb_ecc_val = pb_ecc_val;
+    assign pb_conf_port.pb_crc_val = pb_crc_val;
+    assign pb_conf_port.pb_sop_val = pb_sop_val;
+    assign pb_conf_port.pb_data_sel = pb_data_sel;
+    assign pb_conf_port.pb_addr_out = pb_addr_out;
 
-    // assign pp_conf_port.pp_irq = pp_irq;
-    // assign pp_conf_port.pp_addr_hdr = pp_addr_hdr;
-    // assign pp_conf_port.pp_ignore_ecc_err = pp_ignore_ecc_err;
+    assign pp_conf_port.pp_irq = pp_irq;
+    assign pp_conf_port.pp_addr_hdr = pp_addr_hdr;
+    assign pp_conf_port.pp_ignore_ecc_err = pp_ignore_ecc_err;
 
-    // assign inmem_port_b.inmem_en_b_i = inmem_en_b_i;
-    // assign inmem_port_b.inmem_data_b_i = inmem_data_b_i;
-    // assign inmem_port_b.inmem_addr_b_i = inmem_addr_b_i;
-    // assign inmem_port_b.inmem_we_b_i = inmem_we_b_i;
-    // assign inmem_port_b.inmem_data_b_o = inmem_data_b_o;
+    assign inmem_port_b.inmem_en_b_i = inmem_en_b_i;
+    assign inmem_port_b.inmem_data_b_i = inmem_data_b_i;
+    assign inmem_port_b.inmem_addr_b_i = inmem_addr_b_i;
+    assign inmem_port_b.inmem_we_b_i = inmem_we_b_i;
+    assign inmem_port_b.inmem_data_b_o = inmem_data_b_o;
 
-    // assign outmem_port_b.outmem_en_b_i = outmem_en_b_i;
-    // assign outmem_port_b.outmem_data_b_i = outmem_data_b_i;
-    // assign outmem_port_b.outmem_addr_b_i = outmem_addr_b_i;
-    // assign outmem_port_b.outmem_we_b_i = outmem_we_b_i;
-    // assign outmem_port_b.outmem_data_b_o = outmem_data_b_o;
+    assign outmem_port_b.outmem_en_b_i = outmem_en_b_i;
+    assign outmem_port_b.outmem_data_b_i = outmem_data_b_i;
+    assign outmem_port_b.outmem_addr_b_i = outmem_addr_b_i;
+    assign outmem_port_b.outmem_we_b_i = outmem_we_b_i;
+    assign outmem_port_b.outmem_data_b_o = outmem_data_b_o;
 
-    // assign regs_port.pb0_start_top = pb0_start_top;
-    // assign regs_port.pb0_busy_top = pb0_busy_top;
-    // assign regs_port.pb0_irq_top = pb0_irq_top;
-    // assign regs_port.pb0_addr_in_top = pb0_addr_in_top;
-    // assign regs_port.pb0_byte_cnt_top = pb0_byte_cnt_top;
-    // assign regs_port.pb0_pkt_type_top = pb0_pkt_type_top;
-    // assign regs_port.pb0_ecc_en_top = pb0_ecc_en_top;
-    // assign regs_port.pb0_crc_en_top = pb0_crc_en_top;
-    // assign regs_port.pb0_ins_ecc_err_top = pb0_ins_ecc_err_top;
-    // assign regs_port.pb0_ins_crc_err_top = pb0_ins_crc_err_top;
-    // assign regs_port.pb0_ecc_val_top = pb0_ecc_val_top;
-    // assign regs_port.pb0_crc_val_top = pb0_crc_val_top;
-    // assign regs_port.pb0_sop_val_top = pb0_sop_val_top;
-    // assign regs_port.pb0_data_sel_top = pb0_data_sel_top;
-    // assign regs_port.pb0_addr_out_top = pb0_addr_out_top;
+    assign regs_port.pb0_start_top = pb0_start_top;
+    assign regs_port.pb0_busy_top = pb0_busy_top;
+    assign regs_port.pb0_irq_top = pb0_irq_top;
+    assign regs_port.pb0_addr_in_top = pb0_addr_in_top;
+    assign regs_port.pb0_byte_cnt_top = pb0_byte_cnt_top;
+    assign regs_port.pb0_pkt_type_top = pb0_pkt_type_top;
+    assign regs_port.pb0_ecc_en_top = pb0_ecc_en_top;
+    assign regs_port.pb0_crc_en_top = pb0_crc_en_top;
+    assign regs_port.pb0_ins_ecc_err_top = pb0_ins_ecc_err_top;
+    assign regs_port.pb0_ins_crc_err_top = pb0_ins_crc_err_top;
+    assign regs_port.pb0_ecc_val_top = pb0_ecc_val_top;
+    assign regs_port.pb0_crc_val_top = pb0_crc_val_top;
+    assign regs_port.pb0_sop_val_top = pb0_sop_val_top;
+    assign regs_port.pb0_data_sel_top = pb0_data_sel_top;
+    assign regs_port.pb0_addr_out_top = pb0_addr_out_top;
 
-    // assign regs_port.pb1_start_top = pb1_start_top;
-    // assign regs_port.pb1_busy_top = pb1_busy_top;
-    // assign regs_port.pb1_irq_top = pb1_irq_top;
-    // assign regs_port.pb1_addr_in_top = pb1_addr_in_top;
-    // assign regs_port.pb1_byte_cnt_top = pb1_byte_cnt_top;
-    // assign regs_port.pb1_pkt_type_top = pb1_pkt_type_top;
-    // assign regs_port.pb1_ecc_en_top = pb1_ecc_en_top;
-    // assign regs_port.pb1_crc_en_top = pb1_crc_en_top;
-    // assign regs_port.pb1_ins_ecc_err_top = pb1_ins_ecc_err_top;
-    // assign regs_port.pb1_ins_crc_err_top = pb1_ins_crc_err_top;
-    // assign regs_port.pb1_ecc_val_top = pb1_ecc_val_top;
-    // assign regs_port.pb1_crc_val_top = pb1_crc_val_top;
-    // assign regs_port.pb1_sop_val_top = pb1_sop_val_top;
-    // assign regs_port.pb1_data_sel_top = pb1_data_sel_top;
-    // assign regs_port.pb1_addr_out_top = pb1_addr_out_top;
+    assign regs_port.pb1_start_top = pb1_start_top;
+    assign regs_port.pb1_busy_top = pb1_busy_top;
+    assign regs_port.pb1_irq_top = pb1_irq_top;
+    assign regs_port.pb1_addr_in_top = pb1_addr_in_top;
+    assign regs_port.pb1_byte_cnt_top = pb1_byte_cnt_top;
+    assign regs_port.pb1_pkt_type_top = pb1_pkt_type_top;
+    assign regs_port.pb1_ecc_en_top = pb1_ecc_en_top;
+    assign regs_port.pb1_crc_en_top = pb1_crc_en_top;
+    assign regs_port.pb1_ins_ecc_err_top = pb1_ins_ecc_err_top;
+    assign regs_port.pb1_ins_crc_err_top = pb1_ins_crc_err_top;
+    assign regs_port.pb1_ecc_val_top = pb1_ecc_val_top;
+    assign regs_port.pb1_crc_val_top = pb1_crc_val_top;
+    assign regs_port.pb1_sop_val_top = pb1_sop_val_top;
+    assign regs_port.pb1_data_sel_top = pb1_data_sel_top;
+    assign regs_port.pb1_addr_out_top = pb1_addr_out_top;
 
-    // assign regs_port.pp_start_top = pp_start_top;
-    // assign regs_port.pp_busy_top = pp_busy_top;
-    // assign regs_port.pp_irq_top = pp_irq_top;
-    // assign regs_port.pp_addr_hdr_top = pp_addr_hdr_top;
-    // assign regs_port.pp_ignore_ecc_err_top = pp_ignore_ecc_err_top;
-    // assign regs_port.pp_pkt_ecc_corr_top = pp_pkt_ecc_corr_top;
-    // assign regs_port.pp_pkt_ecc_uncorr_top = pp_pkt_ecc_uncorr_top;
-    // assign regs_port.pp_pkt_crc_err_top = pp_pkt_crc_err_top;
-    // assign regs_port.pp_pkt_byte_cnt_top = pp_pkt_byte_cnt_top;
-    // assign regs_port.pp_pkt_type_top = pp_pkt_type_top;
-
-
-
-
-
+    assign regs_port.pp_start_top = pp_start_top;
+    assign regs_port.pp_busy_top = pp_busy_top;
+    assign regs_port.pp_irq_top = pp_irq_top;
+    assign regs_port.pp_addr_hdr_top = pp_addr_hdr_top;
+    assign regs_port.pp_ignore_ecc_err_top = pp_ignore_ecc_err_top;
+    assign regs_port.pp_pkt_ecc_corr_top = pp_pkt_ecc_corr_top;
+    assign regs_port.pp_pkt_ecc_uncorr_top = pp_pkt_ecc_uncorr_top;
+    assign regs_port.pp_pkt_crc_err_top = pp_pkt_crc_err_top;
+    assign regs_port.pp_pkt_byte_cnt_top = pp_pkt_byte_cnt_top;
+    assign regs_port.pp_pkt_type_top = pp_pkt_type_top;
 
 
 endmodule
