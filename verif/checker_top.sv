@@ -1,3 +1,7 @@
+// `include "pp_env_pkg.sv"
+`ifdef ENV_TEST
+	import pp_env_pkg::*;
+`endif
 
 module  checker_top(
 	input clk,
@@ -623,7 +627,9 @@ module  checker_top(
 	ast_pb0_op2_di:                        assert property(pb_data_sel == 2 |-> !di_err_pb0);
 
 
+`ifdef SST
 	`include "sst/pb0_sst_helpers.sv"
+`endif
 
 	///////////////////////////////////////////////////////////////////////////////	
 	// Memory interface B arbitration logic between DI and CRC checkers
@@ -636,12 +642,12 @@ module  checker_top(
 	// when work between builder and parser can't be in conflict
 
 	// PB0 and PB1 are in conflict while working in parallel due to IVA
-	// Solution is to use free variable which will choose which builder will be checked // Conflict occurs only while trying to access inmem and outmem address ports 
-	// So free variable will be used as a selection signal in following logic to distinguish which builder's checker 
-	// is going to access memory 
+	// Solution is to use free variable which will choose which builder will be checked 
+	// Conflict occurs only while trying to access inmem and outmem address ports 
+	// So free variable will be used as a selection signal in following logic to distinguish which builder's checker is going to access memory 
 
 	// To simplify the di assertion it is important to register chosen data in receive byte state also
-	// This way tool does not have to remember data for many previous cycle
+	// This way tool does not have to remember data for many previous cycles
 	// When irq arrives read data from inmem and outmem, compare them and conlude wheather there is an error or not
 
 	// Every CEX provided by SST analysis relies on the case when data was never chosen because the inital checker state was RECEIVED_BYTE
