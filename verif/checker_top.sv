@@ -250,6 +250,7 @@ module  checker_top(
 	////////////////////////////////////////////////////////////////////////////////	
 	// Checkers enable logic
 	////////////////////////////////////////////////////////////////////////////////	
+	logic[13:0] addr_free;
 	logic pb0_checker_en;
 	logic pb1_checker_en;
 	logic pp_checker_en;
@@ -265,11 +266,28 @@ module  checker_top(
 	`ifdef ENV_TEST
 
 	// Interfaces
+	// Connected to fv_adapter
+	mem_port_intf inmem_port();
+	mem_port_intf outmem_port();
+	pb_conf_port_intf pb_conf_port();
+	pp_conf_port_intf pp_conf_port();
+	pb0_regs_port_intf pb0_regs_port();
+	pb1_regs_port_intf pb1_regs_port();
+	pp_regs_port_intf pp_regs_port();
+
+	// Connected to checkers
+	mem_port_intf inmem_port_pb0();
+	mem_port_intf inmem_port_pb1();
+	mem_port_intf inmem_port_pp();
+	mem_port_intf outmem_port_pb0();
+	mem_port_intf outmem_port_pb1();
 
 	// Adapter
+	fv_adapter fv_adapter(.*);
 
 	// Packet parser checker
-	
+	checker_pp checker_pp (.*);
+	assign inmem_port_pp.data_o = inmem_port.data_o;
 	`else
 
 	////////////////////////////////////////////////////////////////////////////////	
@@ -647,7 +665,7 @@ module  checker_top(
 `endif
 
 	///////////////////////////////////////////////////////////////////////////////	
-	// Memory interface B arbitration logic between DI and CRC checkers
+	// INMEM interface B arbitration logic between DI and CRC checkers
 	////////////////////////////////////////////////////////////////////////////////	
 
 	logic[13:0] inmem_addr_b_s;
@@ -671,7 +689,11 @@ module  checker_top(
 	// MEM ADDR selection
 	always_comb begin
 		if(!pp_busy_top && pp_checker_en)
+			`ifdef ENV_TEST
+			inmem_addr_b_s <= inmem_port_pp.addr;
+			`else
 			inmem_addr_b_s <= addr_reg;
+			`endif
 		else if(!pb0_busy_top && pb0_checker_en)
 			if(state_pb0_di != CRC_CALC_DI)
 				inmem_addr_b_s <= inmem_addr_pb0_di;
@@ -686,6 +708,15 @@ module  checker_top(
 			inmem_addr_b_s <= addr_free;
 	end
 
+	`ifdef ENV_TEST
+	asm_inmem_en:                          assume property(inmem_port.en == 1'b1);
+	asm_pp_write_only:                     assume property(!pp_busy_top || !pb0_busy_top || !pb1_busy_top |-> inmem_port.we == inmem_port_pp.we);
+	asm_pp_write_data:                     assume property(!pp_busy_top |-> inmem_port.data_i == inmem_port_pp.data_i);
+	asm_inmem_addr:                        assume property(inmem_port.addr == inmem_addr_b_s);
+	asm_in_addr_bound:                     assume property(addr_free <= 14'h12);
+	asm_out_addr_bound:                    assume property(outmem_addr_b_i <= 14'h12);
+
+	`else
 	asm_inmem_en:                          assume property(inmem_en_b_i == 1'b1);
 	// disable inmem write when builders are working to secure data integrity between rtl and checkers
 	// enable write when parser's checker configurs byte count info
@@ -696,6 +727,7 @@ module  checker_top(
 	asm_in_addr_bound:                     assume property(addr_free <= 14'h12);
 	// assume addr bound for inmem, addr_free has to be less than x"12" 
 	asm_out_addr_bound:                    assume property(outmem_addr_b_i <= 14'h12);
+	`endif
 
 	////////////////////////////////////////////////////////////////////////////////
 	//SECTION OUTMEM Interface Port B props
