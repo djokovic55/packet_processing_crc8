@@ -220,7 +220,7 @@ module checker_pp (
 					ecc_data_in_pp_calc_s[3:0] = pp_byte_cnt;
 
 					// enable write
-					inmem_pp_we_s = 1'b1;
+					inmem_pp_we_s = 4'b1111;
 					// write byte cnt data in inmem, preserve previous data
 					// IMPORTANT when we is held, tool can change any other bit as addition to byte cnt change
 					// Here correct ecc code must be inserted

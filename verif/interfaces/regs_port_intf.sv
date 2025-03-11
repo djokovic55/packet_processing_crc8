@@ -1,52 +1,25 @@
+interface pb_regs_port_intf;
+	logic pb_start;
+	logic pb_busy;
+	logic pb_irq;
+	logic[31:0] pb_addr_in;
+	logic[3:0] pb_byte_cnt;
+	logic[3:0] pb_pkt_type;
+	logic pb_ecc_en;
+	logic pb_crc_en;
+	logic[1:0] pb_ins_ecc_err;
+	logic pb_ins_crc_err;
+	logic[3:0] pb_ecc_val;
+	logic[7:0] pb_crc_val;
+	logic[2:0] pb_sop_val;
+	logic[3:0] pb_data_sel;
+	logic[31:0] pb_addr_out;
 
-interface pb0_regs_port_intf;
-	logic pb0_start_top;
-	logic pb0_busy_top;
-	logic pb0_irq_top;
-	logic[31:0] pb0_addr_in_top;
-	logic[3:0] pb0_byte_cnt_top;
-	logic[3:0] pb0_pkt_type_top;
-	logic pb0_ecc_en_top;
-	logic pb0_crc_en_top;
-	logic[1:0] pb0_ins_ecc_err_top;
-	logic pb0_ins_crc_err_top;
-	logic[3:0] pb0_ecc_val_top;
-	logic[7:0] pb0_crc_val_top;
-	logic[2:0] pb0_sop_val_top;
-	logic[3:0] pb0_data_sel_top;
-	logic[31:0] pb0_addr_out_top;
-
-    `define pb0_regs_port_intf_fields \
-	pb0_start_top, pb0_busy_top, pb0_irq_top, pb0_addr_in_top, pb0_byte_cnt_top, pb0_pkt_type_top, pb0_ecc_en_top, pb0_crc_en_top, pb0_ins_ecc_err_top, pb0_ins_crc_err_top, pb0_ecc_val_top, pb0_crc_val_top, pb0_sop_val_top, pb0_data_sel_top, pb0_addr_out_top
-    modport driver  (output `pb0_regs_port_intf_fields);
-    modport monitor (input `pb0_regs_port_intf_fields);
+    `define pb_regs_port_intf_fields \
+	pb_start, pb_busy, pb_irq, pb_addr_in, pb_byte_cnt, pb_pkt_type, pb_ecc_en, pb_crc_en, pb_ins_ecc_err, pb_ins_crc_err, pb_ecc_val, pb_crc_val, pb_sop_val, pb_data_sel, pb_addr_out
+    modport driver  (output `pb_regs_port_intf_fields);
+    modport monitor (input `pb_regs_port_intf_fields);
 endinterface
-
-
-interface pb1_regs_port_intf;
-
-	logic pb1_start_top;
-	logic pb1_busy_top;
-	logic pb1_irq_top;
-	logic[31:0] pb1_addr_in_top;
-	logic[3:0] pb1_byte_cnt_top;
-	logic[3:0] pb1_pkt_type_top;
-	logic pb1_ecc_en_top;
-	logic pb1_crc_en_top;
-	logic[1:0] pb1_ins_ecc_err_top;
-	logic pb1_ins_crc_err_top;
-	logic[3:0] pb1_ecc_val_top;
-	logic[7:0] pb1_crc_val_top;
-	logic[2:0] pb1_sop_val_top;
-	logic[3:0] pb1_data_sel_top;
-	logic[31:0] pb1_addr_out_top;
-
-    `define pb1_regs_port_intf_fields \
-    pb1_start_top, pb1_busy_top, pb1_irq_top, pb1_addr_in_top, pb1_byte_cnt_top, pb1_pkt_type_top, pb1_ecc_en_top, pb1_crc_en_top, pb1_ins_ecc_err_top, pb1_ins_crc_err_top, pb1_ecc_val_top, pb1_crc_val_top, pb1_sop_val_top, pb1_data_sel_top, pb1_addr_out_top
-    modport driver  (output `pb1_regs_port_intf_fields);
-    modport monitor (input `pb1_regs_port_intf_fields);
-endinterface
-
 
 interface pp_regs_port_intf;
 
@@ -66,4 +39,3 @@ interface pp_regs_port_intf;
     modport driver  (output `pp_regs_port_intf_fields);
     modport monitor (input `pp_regs_port_intf_fields);
 endinterface
-

@@ -1,47 +1,47 @@
 
 module  checker_di_top(
-  input clk,
-  input reset,
-  input checker_en,
+	input clk,
+	input reset,
+	input checker_en,
 	input pb_start,
 	input pb_irq_top,
 	input pb_crc_en,
 	input[7:0] pb_crc_val,
 
 
-  input[7:0] chosen_byte,
+	input[7:0] chosen_byte,
 
-  input[31:0] pb_addr_in,
-  input[3:0] pb_data_sel,
+	input[31:0] pb_addr_in,
+	input[3:0] pb_data_sel,
 	input[3:0] pb_byte_cnt,
-  input[31:0] inmem_data_b_o,
+	input[31:0] inmem_data_b_o,
 
-  input[31:0] pb_addr_out,
-  input[31:0] outmem_data_b_o,
+	input[31:0] pb_addr_out,
+	input[31:0] outmem_data_b_o,
 
-  output logic[13:0] inmem_addr_di,
-  output[13:0] inmem_addr_crc,
-  output[13:0] outmem_addr_di_crc,
-  output[2:0] state_di,
-  output di_err,
-  output di_crc_err
-	);
+	output logic[13:0] inmem_addr_di,
+	output[13:0] inmem_addr_crc,
+	output[13:0] outmem_addr_di_crc,
+	output[2:0] state_di,
+	output di_err,
+	output di_crc_err
+);
 	
-  default 
-  clocking @(posedge clk);
-  endclocking
+	default 
+	clocking @(posedge clk);
+	endclocking
 
-  default disable iff reset;
+	default disable iff reset;
 
 
 	typedef enum {IDLE_DI, CHOOSE_BYTE, CRC_CALC_DI, RECEIVE_BYTE, COMPARE_CRC_DI} di_State;
 	di_State di_state_reg, di_state_next;
 
-  reg[7:0] chosen_byte_data, chosen_byte_data_next;
-  logic chosen_byte_flag;
-  const logic[3:0] OP0 = 4'h0;
-  const logic[3:0] OP1 = 4'h1;
-  const logic[3:0] OP2 = 4'h2;
+	reg[7:0] chosen_byte_data, chosen_byte_data_next;
+	logic chosen_byte_flag;
+	const logic[3:0] OP0 = 4'h0;
+	const logic[3:0] OP1 = 4'h1;
+	const logic[3:0] OP2 = 4'h2;
 
 	logic[13:0] chosen_byte_addr, chosen_byte_addr_reg; // CHECKER_OUTPUT inmem addr for di check
 	logic[13:0] di_crc_addr_reg, di_crc_addr_next; // CHECKER_OUTPUT inmem addr for crc check
@@ -49,8 +49,8 @@ module  checker_di_top(
 
 	logic di_err; // Data integrity error flag
 
-  logic[4:0] received_byte; 
-  reg[7:0] received_byte_data, received_byte_data_next;
+	logic[4:0] received_byte; 
+	reg[7:0] received_byte_data, received_byte_data_next;
 
 	// crc check signals
 	reg[7:0] di_crc_mid_result_reg;
