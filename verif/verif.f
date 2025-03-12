@@ -1,5 +1,4 @@
 verif/bind_top.sv
-verif/checker_axi.sv
 verif/checker_data_integrity.sv
 verif/checker_di_top.sv
 verif/checker_fair_int.sv
@@ -15,4 +14,4 @@ verif/fv_adapter.sv
 verif/pp_env_pkg.sv
 verif/checkers/checker_pb.sv
 verif/checkers/checker_pp.sv
-verif/checkers/checker_axi_test.sv
+verif/checkers/checker_axi.sv

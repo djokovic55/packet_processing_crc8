@@ -1,5 +1,5 @@
 
-module  checker_axi_test(
+module  checker_axi (
 	input clk, reset,
     axi_probe_intf.monitor axi_probe
 );
