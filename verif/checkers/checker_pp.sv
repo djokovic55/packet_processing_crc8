@@ -12,28 +12,22 @@ module checker_pp (
 
 	default disable iff reset;
 
-    // assign inmem_port_pp.addr = addr_reg;
-	asm_inmem_addr: assume property(inmem_port_pp.addr == addr_reg);
-    // assign inmem_port_pp.we = inmem_pp_we_s;
-	asm_inmem_we: assume property(inmem_port_pp.we == inmem_pp_we_s);
-    // assign inmem_port_pp.data_i = inmem_pp_data_s;
-	asm_inmem_data_i: assume property(inmem_port_pp.data_i == inmem_pp_data_s);
 
-    logic pp_start_top;
-    logic pp_irq_top;
-    logic pp_pkt_crc_err_top;
-    logic pp_pkt_ecc_corr_top;
-    logic pp_pkt_ecc_uncorr_top;
-    logic[3:0] pp_addr_hdr_top;
-    logic[3:0] pp_pkt_byte_cnt_top;
+    logic pp_start;
+    logic pp_irq;
+    logic pp_pkt_crc_err;
+    logic pp_pkt_ecc_corr;
+    logic pp_pkt_ecc_uncorr;
+    logic[3:0] pp_addr_hdr;
+    logic[3:0] pp_pkt_byte_cnt;
 
-    assign pp_start_top = pp_regs_port.pp_start_top;
-    assign pp_irq_top = pp_regs_port.pp_irq_top;
-    assign pp_pkt_crc_err_top = pp_regs_port.pp_pkt_crc_err_top;
-    assign pp_pkt_ecc_corr_top = pp_regs_port.pp_pkt_ecc_corr_top;
-    assign pp_pkt_ecc_uncorr_top = pp_regs_port.pp_pkt_ecc_uncorr_top;
-    assign pp_addr_hdr_top = pp_regs_port.pp_addr_hdr_top;
-    assign pp_pkt_byte_cnt_top = pp_regs_port.pp_pkt_byte_cnt_top;
+    assign pp_start = pp_regs_port.pp_start;
+    assign pp_irq = pp_regs_port.pp_irq;
+    assign pp_pkt_crc_err = pp_regs_port.pp_pkt_crc_err;
+    assign pp_pkt_ecc_corr = pp_regs_port.pp_pkt_ecc_corr;
+    assign pp_pkt_ecc_uncorr = pp_regs_port.pp_pkt_ecc_uncorr;
+    assign pp_addr_hdr = pp_regs_port.pp_addr_hdr;
+    assign pp_pkt_byte_cnt = pp_regs_port.pp_pkt_byte_cnt;
 
 
 	////////////////////////////////////////////////////////////////////////////////	
@@ -102,37 +96,24 @@ module checker_pp (
 	logic ecc_corr_err_pp_reg, ecc_corr_err_pp_next;
 	logic ecc_uncorr_err_pp_reg, ecc_uncorr_err_pp_next;
 
-	// Mid-result crc register block
-	always @(posedge clk) begin
-		if(reset)
-			crc_mid_result_reg <= '0;
-		else if(pp_start_top || corr_err_irq_pulse) 
-			crc_mid_result_reg <= '0;
-		else
-			crc_mid_result_reg <= crc_out_s;
-	end
-
 	// CRC calc FSM
 	typedef enum {IDLE, HEADER_READ, CRC_CALC, COMPARE_CRC} State;
-
 	State state_reg, state_next;
-
-	assign corr_err_irq_pulse = !corr_err_irq_reg2 && corr_err_irq_reg;
 
 	// detect single error irq edge
 	always_ff @(posedge clk) begin
-	 	if(reset || pp_irq_top) begin
+	 	if(reset || pp_irq) begin
 			corr_err_irq_reg <= 1'b0;
 			corr_err_irq_reg2 <= 1'b0;
 		end
 		else begin
-			if(pp_pkt_ecc_corr_top)
+			if(pp_pkt_ecc_corr)
 				corr_err_irq_reg <= 1'b1;
 
 			corr_err_irq_reg2 <= corr_err_irq_reg;
 		end
 	end
-
+	assign corr_err_irq_pulse = !corr_err_irq_reg2 && corr_err_irq_reg;
 
 	// seq logic
 	always_ff @(posedge clk) begin
@@ -143,7 +124,7 @@ module checker_pp (
 			crc_ext_reg <=  '0;
 			crc_calc_reg <=  '0;
 			byte_cnt_reg <=  '0;
-			// addr_reg <=  '0;
+			addr_reg <=  '0;
 			crc_err_reg <= 1'b0;
 
 			ecc_corr_err_pp_reg <= 1'b0;
@@ -184,8 +165,8 @@ module checker_pp (
 		// start again and reset everything with correct byte count data
 		if(corr_err_irq_pulse) begin
 
-			byte_cnt_next = pp_pkt_byte_cnt_top;
-			addr_next = pp_addr_hdr_top + 2;
+			byte_cnt_next = pp_pkt_byte_cnt;
+			addr_next = pp_addr_hdr + 2;
 			crc_cnt_next = '0;
 			crc_ext_next = '0;
 			crc_calc_next = '0;
@@ -198,15 +179,15 @@ module checker_pp (
 			case(state_reg)
 				IDLE: begin 
 					crc_cnt_next = '0;
-					if(pp_irq_top) begin
+					if(pp_irq) begin
 						ecc_corr_err_pp_next = '0;
 						ecc_uncorr_err_pp_next = '0;
 						crc_err_next = '0;
 					end
 
-					if(pp_start_top && pp_checker_en) begin
+					if(pp_start && pp_checker_en) begin
 						crc_err_next = '0;
-						addr_next = pp_addr_hdr_top;
+						addr_next = pp_addr_hdr;
 						state_next = HEADER_READ;
 					end else
 						state_next = IDLE;
@@ -243,7 +224,7 @@ module checker_pp (
 					// increment address to start reading data
 					addr_next = addr_reg + 2;
 					// Check for errors and compare with parser's conclusion
-					//BUG byte count info must come from free variable
+					// BUG byte count info must come from free variable
 					ecc_data_in_pp_s[7:4] = inmem_port_pp.data_o[11:8];
 					ecc_data_in_pp_s[3:0] = pp_byte_cnt;
 					ecc_pp_s = inmem_port_pp.data_o[3:0];
@@ -263,15 +244,15 @@ module checker_pp (
 					// increment only if staying in current state
 					// addr_next = addr_reg + 1;
 					// store CRC
-					//BUG Dead-end 
+					// BUG Dead-end 
 					// if(crc_cnt_reg == byte_cnt_reg)
 					// BUG WRONG addr_reg, +2 must be added to skip header bytes
-					if(addr_reg == pp_addr_hdr_top + byte_cnt_reg + 2)
+					if(addr_reg == pp_addr_hdr + byte_cnt_reg + 2)
 						crc_calc_next = crc_out_s;
 
 					//if(crc_cnt_reg == byte_cnt_reg + 1) begin
 					//BUG Wrong CRC addr, +3 rather than +1
-					if(addr_reg == pp_addr_hdr_top + byte_cnt_reg + 3) begin
+					if(addr_reg == pp_addr_hdr + byte_cnt_reg + 3) begin
 						crc_ext_next = inmem_port_pp.data_o[7:0];
 						state_next = COMPARE_CRC;
 					end 
@@ -298,19 +279,38 @@ module checker_pp (
 		.crc_in(crc_mid_result_reg),
 		.data_in(data_in_s),
 		.crc_out(crc_out_s));
+
+	// Mid-result crc register block
+	always @(posedge clk) begin
+		if(reset)
+			crc_mid_result_reg <= '0;
+		else if(pp_start || corr_err_irq_pulse) 
+			crc_mid_result_reg <= '0;
+		else
+			crc_mid_result_reg <= crc_out_s;
+	end
+
     
-
-
 	// Asssert correct CRC
 	// It is important to have pp_checker_en precondition because that is the condition under which inmem_addr gets its value from parser block
-	cov_crc_err_sanity_test: cover property(pp_irq_top && pp_pkt_crc_err_top);
-	ast_pp_crc_err_coverage:                        assert property(##1 (pp_checker_en && pp_irq_top && $past(pp_pkt_crc_err_top) && !pp_pkt_ecc_uncorr_top && !pp_pkt_ecc_corr_top) |-> crc_err_reg);
-	ast_pp_crc_no_err_coverage:                     assert property(pp_checker_en && pp_irq_top && $past(!pp_pkt_crc_err_top) && !pp_pkt_ecc_uncorr_top && !pp_pkt_ecc_corr_top |-> !crc_err_reg);
-	ast_pp_crc_err_when_ecc_err_exists_coverage:    assert property(pp_checker_en && pp_irq_top && $past(pp_pkt_crc_err_top) && !pp_pkt_ecc_uncorr_top && pp_pkt_ecc_corr_top |-> crc_err_reg);
-	ast_pp_crc_no_err_when_ecc_err_exists_coverage: assert property(pp_checker_en && pp_irq_top && $past(!pp_pkt_crc_err_top) && !pp_pkt_ecc_uncorr_top && pp_pkt_ecc_corr_top |-> !crc_err_reg);
 
-	ast_pp_ecc_corr_err_coverage:                   assert property(pp_checker_en && pp_pkt_ecc_corr_top |-> ecc_corr_err_pp_reg);
-	ast_pp_ecc_uncorr_err_coverage:                 assert property(pp_checker_en && pp_pkt_ecc_uncorr_top |-> ecc_uncorr_err_pp_reg);
+	ast_pp_crc_err_coverage:                        assert property(##1 (pp_checker_en && pp_irq && $past(pp_pkt_crc_err) && !pp_pkt_ecc_uncorr && !pp_pkt_ecc_corr) |-> crc_err_reg);
+	ast_pp_crc_no_err_coverage:                     assert property(pp_checker_en && pp_irq && $past(!pp_pkt_crc_err) && !pp_pkt_ecc_uncorr && !pp_pkt_ecc_corr |-> !crc_err_reg);
+
+	// ast_pp_crc_err_when_ecc_err_exists_coverage:    assert property(pp_checker_en && pp_irq && $past(pp_pkt_crc_err) && !pp_pkt_ecc_uncorr && pp_pkt_ecc_corr |-> crc_err_reg);
+	ast_pp_crc_err_when_ecc_err_exists_coverage:    assert property(pp_checker_en && pp_irq && $past(pp_pkt_crc_err) && !pp_pkt_ecc_uncorr && $past(pp_pkt_ecc_corr) |-> crc_err_reg);
+	ast_pp_crc_no_err_when_ecc_err_exists_coverage: assert property(pp_checker_en && pp_irq && $past(!pp_pkt_crc_err) && !pp_pkt_ecc_uncorr && $past(pp_pkt_ecc_corr) |-> !crc_err_reg);
+
+	ast_pp_ecc_corr_err_coverage:                   assert property(pp_checker_en && pp_pkt_ecc_corr |-> ecc_corr_err_pp_reg);
+	ast_pp_ecc_uncorr_err_coverage:                 assert property(pp_checker_en && pp_pkt_ecc_uncorr |-> ecc_uncorr_err_pp_reg);
+
+	// Parser checker is driver to these signals
+    // assign inmem_port_pp.addr = addr_reg;
+	asm_inmem_addr: assume property(inmem_port_pp.addr == addr_reg);
+    // assign inmem_port_pp.we = inmem_pp_we_s;
+	asm_inmem_we: assume property(inmem_port_pp.we == inmem_pp_we_s);
+    // assign inmem_port_pp.data_i = inmem_pp_data_s;
+	asm_inmem_data_i: assume property(inmem_port_pp.data_i == inmem_pp_data_s);
 
 
 

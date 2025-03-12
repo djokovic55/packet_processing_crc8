@@ -23,19 +23,19 @@ endinterface
 
 interface pp_regs_port_intf;
 
-	logic pp_start_top;
-	logic pp_busy_top;
-	logic pp_irq_top;
-	logic[31:0] pp_addr_hdr_top;
-	logic pp_ignore_ecc_err_top;
-	logic pp_pkt_ecc_corr_top;
-	logic pp_pkt_ecc_uncorr_top;
-	logic pp_pkt_crc_err_top;
-	logic[3:0] pp_pkt_byte_cnt_top;
-	logic[3:0] pp_pkt_type_top;
+	logic pp_start;
+	logic pp_busy;
+	logic pp_irq;
+	logic[31:0] pp_addr_hdr;
+	logic pp_ignore_ecc_err;
+	logic pp_pkt_ecc_corr;
+	logic pp_pkt_ecc_uncorr;
+	logic pp_pkt_crc_err;
+	logic[3:0] pp_pkt_byte_cnt;
+	logic[3:0] pp_pkt_type;
 
     `define pp_regs_port_intf_fields \
-    pp_start_top, pp_busy_top, pp_irq_top, pp_addr_hdr_top, pp_ignore_ecc_err_top, pp_pkt_ecc_corr_top, pp_pkt_ecc_uncorr_top, pp_pkt_crc_err_top, pp_pkt_byte_cnt_top, pp_pkt_type_top
+    pp_start, pp_busy, pp_irq, pp_addr_hdr, pp_ignore_ecc_err, pp_pkt_ecc_corr, pp_pkt_ecc_uncorr, pp_pkt_crc_err, pp_pkt_byte_cnt, pp_pkt_type
     modport driver  (output `pp_regs_port_intf_fields);
     modport monitor (input `pp_regs_port_intf_fields);
 endinterface

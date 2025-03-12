@@ -46,7 +46,7 @@ checker  checker_axi(
 
 	default disable iff reset;
 
-	reg [4 : 0] handshake_cnt_w, handshake_cnt_r;
+	logic [4:0] handshake_cnt_w, handshake_cnt_r;
 
 	//SECTION Aux code
 

@@ -154,7 +154,9 @@ module checker_pb (
 
 	// crc calculation check logic will be embedded into this FSM
 	// received_byte_addr is used to read crc_ext from outmem
+    `ifdef ENV_TEST
 
+    `else
 	always_comb begin
 		// defaults
 		di_state_next = di_state_reg;
@@ -269,6 +271,7 @@ module checker_pb (
 			end
 		endcase
 	end 
+    `endif
 
     logic[31:0] inmem_addr;
 

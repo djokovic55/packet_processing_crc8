@@ -1,9 +1,9 @@
-// `include "pp_env_pkg.sv"
+`include "pp_env_pkg.sv"
 `ifdef ENV_TEST
 	import pp_env_pkg::*;
 `endif
 
-module  checker_top(
+module  fv_env(
 	input clk,
 	input reset,
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,28 +107,12 @@ module  checker_top(
 	default disable iff reset;
 
 
-
-
-	////////////////////////////////////////////////////////////////////////////////	
-	// Testing 
-	////////////////////////////////////////////////////////////////////////////////	
-	logic[3:0] test_var1;
-	logic[3:0] test_var2;
-
-	`ifdef MACRO_TEST
-		cov_macro_test_pp: cover property(pp_start_top);
-	`else
-		cov_macro_test_pb: cover property(pb0_start_top);
-	`endif
-
 	// SECTION Builder - Parser combined work
-
 	cov_pb_pp_task:                       cover property((pb_byte_cnt == 4'h3 && pb0_start_top) ##[1:$] pp_start_top);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Build task constraints
 	////////////////////////////////////////////////////////////////////////////////
-
 	asm_addr_in_stability:                assume property($stable(pb_addr_in));
 	asm_max_byte_cnt_stability:           assume property($stable(pb_byte_cnt));
 	asm_merg_op_stability:                assume property($stable(pb_data_sel));
@@ -150,10 +134,8 @@ module  checker_top(
 	////////////////////////////////////////////////////////////////////////////////
 	// Parse task constraints
 	////////////////////////////////////////////////////////////////////////////////
-
 	asm_addr_hdr_i_stability:             assume property ($stable(pp_addr_hdr));
 	asm_ignore_ecc_err_stability:         assume property ($stable(pp_ignore_ecc_err));
-
 	asm_addr_hdr_i:                       assume property (pp_addr_hdr[31:4] == '0);
 	////////////////////////////////////////////////////////////////////////////////
 	// Top interface cover properties
@@ -188,7 +170,7 @@ module  checker_top(
 	cov_2pb1:                             cover property(pb0_irq_top[->2]);
 	cov_2pp:                              cover property(pb0_irq_top[->2]);
 	////////////////////////////////////////////////////////////////////////////////	
-	// LIVENESS props
+	// LIVENESS props -> MOVE TO CHECHERS
 	////////////////////////////////////////////////////////////////////////////////	
 	
 	// asm_pb_irq_stable: assume property(pb_irq && !(pb0_start_top || pb1_start_top) |=> pb_irq)
@@ -215,7 +197,7 @@ module  checker_top(
 	ast_pp_finish_live:                    assert property(pp_start_top |=> s_eventually pp_irq_top);
 
 	////////////////////////////////////////////////////////////////////////////////	
-	// IMPORTANT Assert valid register values
+	// IMPORTANT Assert valid register values -> MOVE TO CHECKERS
 	////////////////////////////////////////////////////////////////////////////////	
 
 	ast_top_reg_pb0_addr_in_lv4_help_high:              assert property(pb0_start_top |-> pb0_addr_in_top == pb_addr_in);
@@ -280,6 +262,16 @@ module  checker_top(
 	mem_port_intf inmem_port_pp();
 	mem_port_intf outmem_port_pb0();
 	mem_port_intf outmem_port_pb1();
+	
+	// Axi 
+	axi_probe_intf axi_ctrl_probe();
+	axi_probe_intf axi_pb0_probe();
+	axi_probe_intf axi_pb1_probe();
+	axi_probe_intf axi_pp_probe();
+	axi_probe_intf axi_inmem_probe();
+	axi_probe_intf axi_outmem_probe();
+	axi_probe_intf axi_reg_probe();
+	axi_probe_intf axi_exreg_probe();
 
 	// Adapter
 	fv_adapter fv_adapter(.*);
@@ -292,10 +284,6 @@ module  checker_top(
 	// Main connection, the rest at the end
 	// assign inmem_port_pp.data_o = inmem_port.data_o;
 
-	////////////////////////////////////////////////////////////////////////////////	
-	// PB0 CHECKER
-	////////////////////////////////////////////////////////////////////////////////	
-	`ifdef ENV_TEST
 	checker_pb checker_pb0(
 		.clk(clk),
 		.reset(reset),
@@ -317,94 +305,17 @@ module  checker_top(
 	);
 
 
-
-	`else
-
-	logic[3:0] chosen_byte; // CHECKER_INPUT chosen_byte
-
-	asm_chosen_byte_stable_top:           assume property($stable(chosen_byte));
-	asm_chosen_byte_op0_top:              assume property(disable iff(reset) pb_data_sel == 4'h0 |-> chosen_byte <= pb_byte_cnt && chosen_byte[1:0] == 2'b0);
-	asm_chosen_byte_op1_top:              assume property(disable iff(reset) pb_data_sel == 4'h1 |-> chosen_byte <= pb_byte_cnt && chosen_byte[1] == 1'b0);
-	asm_chosen_byte_op2_top:              assume property(disable iff(reset) pb_data_sel == 4'h2 |-> chosen_byte <= pb_byte_cnt);
-	
-	logic[13:0] inmem_addr_pb0_di; 
-	logic[13:0] inmem_addr_pb0_crc; 
-	logic[13:0] outmem_addr_pb0_di_crc; 
-	logic[2:0] state_pb0_di; 
-	logic di_err_pb0; 
-	logic di_crc_err_pb0; 
-
-	checker_di_top pb0_di(
-		.clk(clk),
-		.reset(reset),
-
-		.checker_en(pb0_checker_en),
-		.pb_start(pb0_start_top),
-		.pb_irq_top(pb0_irq_top),
-		.pb_crc_en(pb_crc_en),
-		.pb_crc_val(pb_crc_val),
-		.chosen_byte(chosen_byte),
-		.pb_addr_in(pb_addr_in),
-		.pb_data_sel(pb_data_sel),
-		.pb_byte_cnt(pb_byte_cnt),
-
-		.inmem_data_b_o(inmem_data_b_o),
-		.pb_addr_out(pb_addr_out),
-		.outmem_data_b_o(outmem_data_b_o),
-
-		.inmem_addr_di(inmem_addr_pb0_di),
-		.inmem_addr_crc(inmem_addr_pb0_crc),
-		.outmem_addr_di_crc(outmem_addr_pb0_di_crc),
-		.state_di(state_pb0_di),
-		.di_err(di_err_pb0),
-		.di_crc_err(di_crc_err_pb0));
-
-	ast_pb0_di_coverage:                            assert property(pb0_checker_en |-> !di_err_pb0);
-	ast_crc_pb0_di_coverage:                        assert property(!di_crc_err_pb0);
-
-	ast_pb0_op2_di:                        assert property(pb_data_sel == 2 |-> !di_err_pb0);
+	// AXI checkers
+	checker_axi_test checker_axi_ctrl(.clk(clk), .reset(reset), .axi_probe(axi_ctrl_probe));
+	checker_axi_test checker_axi_pb0(.clk(clk), .reset(reset), .axi_probe(axi_pb0_probe));
+	checker_axi_test checker_axi_pb1(.clk(clk), .reset(reset), .axi_probe(axi_pb1_probe));
+	checker_axi_test checker_axi_pp(.clk(clk), .reset(reset), .axi_probe(axi_pp_probe));
+	checker_axi_test checker_axi_inmem(.clk(clk), .reset(reset), .axi_probe(axi_inmem_probe));
+	checker_axi_test checker_axi_outmem(.clk(clk), .reset(reset), .axi_probe(axi_outmem_probe));
+	checker_axi_test checker_axi_reg(.clk(clk), .reset(reset), .axi_probe(axi_reg_probe));
+	checker_axi_test checker_axi_exreg(.clk(clk), .reset(reset), .axi_probe(axi_exreg_probe));
 
 
-	////////////////////////////////////////////////////////////////////////////////	
-	// PB1 CHECKER
-	////////////////////////////////////////////////////////////////////////////////	
-	logic[13:0] inmem_addr_pb1_di; 
-	logic[13:0] inmem_addr_pb1_crc; 
-	logic[13:0] outmem_addr_pb1_di_crc; 
-	logic[2:0] state_pb1_di; 
-	logic di_err_pb1; 
-	logic di_crc_err_pb1; 
-
-	checker_di_top pb1_di(
-		.clk(clk),
-		.reset(reset),
-
-		.checker_en(pb1_checker_en),
-		.pb_start(pb1_start_top),
-		.pb_irq_top(pb1_irq_top),
-		.pb_crc_en(pb_crc_en),
-		.pb_crc_val(pb_crc_val),
-
-		.chosen_byte(chosen_byte),
-		.pb_addr_in(pb_addr_in),
-		.pb_data_sel(pb_data_sel),
-		.pb_byte_cnt(pb_byte_cnt),
-
-		.inmem_data_b_o(inmem_data_b_o),
-		.pb_addr_out(pb_addr_out),
-		.outmem_data_b_o(outmem_data_b_o),
-
-		.inmem_addr_di(inmem_addr_pb1_di),
-		.inmem_addr_crc(inmem_addr_pb1_crc),
-		.outmem_addr_di_crc(outmem_addr_pb1_di_crc),
-		.state_di(state_pb1_di),
-		.di_err(di_err_pb1),
-		.di_crc_err(di_crc_err_pb1));
-
-	ast_pb1_di_coverage:                            assert property(!di_err_pb1);
-	ast_crc_pb1_di_coverage:                        assert property(!di_crc_err_pb1);
-	cov_test: cover property(subsys.packet_builder1.state_reg == 1);
-	`endif
 
 `ifdef SST
 	`include "sst/pb0_sst_helpers.sv"
@@ -432,8 +343,6 @@ module  checker_top(
 	// Every CEX provided by SST analysis relies on the case when data was never chosen because the inital checker state was RECEIVED_BYTE
 	// This way CHOOSE_BYTE phase never occured 
 
-
-	`ifdef ENV_TEST
 	// MEM ADDR selection
 	// All checkers read from INMEM, arbitration required
 	always_comb begin
@@ -447,11 +356,7 @@ module  checker_top(
 			inmem_addr_s <= addr_free;
 	end
 
-	// en;
-	// we;
-	// addr;
-	// data_i;
-	// data_o;
+	// en; // we; // addr; // data_i; // data_o;
 
 	asm_inmem_en:                          assume property(inmem_port.en == 1'b1);
 	// disable inmem write when builders are working to secure data integrity between rtl and checkers
@@ -483,46 +388,6 @@ module  checker_top(
 	assign outmem_port_pb0.data_o = outmem_port.data_o;
 	assign outmem_port_pb1.data_o = outmem_port.data_o;
 
-	`else
-	// MEM ADDR selection
-	always_comb begin
-		if(!pp_busy_top && pp_checker_en)
-			inmem_addr_b_s <= addr_reg;
-		else if(!pb0_busy_top && pb0_checker_en)
-			if(state_pb0_di != CRC_CALC_DI)
-				inmem_addr_b_s <= inmem_addr_pb0_di;
-			else
-				inmem_addr_b_s <= inmem_addr_pb0_crc;
-		else if(!pb1_busy_top && pb1_checker_en)
-			if(state_pb1_di != CRC_CALC_DI)
-				inmem_addr_b_s <= inmem_addr_pb1_di;
-			else
-				inmem_addr_b_s <= inmem_addr_pb1_crc;
-		else
-			inmem_addr_b_s <= addr_free;
-	end
-
-	asm_inmem_en:                          assume property(inmem_en_b_i == 1'b1);
-	// disable inmem write when builders are working to secure data integrity between rtl and checkers
-	// enable write when parser's checker configurs byte count info
-	asm_pp_write_only:                     assume property(!pp_busy_top || !pb0_busy_top || !pb1_busy_top |-> inmem_we_b_i == inmem_pp_we_s);
-	asm_pp_write_data:                     assume property(!pp_busy_top |-> inmem_data_b_i == inmem_pp_data_s);
-	// assume address value
-	asm_inmem_addr:                        assume property(inmem_addr_b_i == inmem_addr_b_s);
-	asm_in_addr_bound:                     assume property(addr_free <= 14'h12);
-	// assume addr bound for inmem, addr_free has to be less than x"12" 
-	asm_out_addr_bound:                    assume property(outmem_addr_b_i <= 14'h12);
-
-	////////////////////////////////////////////////////////////////////////////////
-	//SECTION OUTMEM Interface Port B props
-	////////////////////////////////////////////////////////////////////////////////
-	// outmem port B top interface, memory read only
-	asm_outmem_en:                        assume property(outmem_en_b_i == 1'b1);
-	asm_outmem_we:                        assume property(outmem_we_b_i == 1'b0);
-	asm_pb0_outmem_addr_part1:             assume property(pb0_checker_en && !pb0_busy_top |-> outmem_addr_b_i == outmem_addr_pb0_di_crc);
-	asm_pb0_outmem_addr_part2:             assume property((!pb0_busy_top ##1 pb0_busy_top) and pb0_checker_en |-> outmem_addr_b_i == outmem_addr_pb0_di_crc);
-	asm_pb1_outmem_addr:                   assume property(pb1_checker_en and (!pb1_busy_top or (!pb1_busy_top ##1 pb1_busy_top)) |-> outmem_addr_b_i == outmem_addr_pb1_di_crc);
-	`endif
 
 
 endmodule

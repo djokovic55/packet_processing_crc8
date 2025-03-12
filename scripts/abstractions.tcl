@@ -14,27 +14,27 @@ proc registers_iva_abs_proc {} {
 	# Addr_in register
 	abstract -init_value subsys.system_regs.pb0_ctrl2_s
 	assume -bound 1 -name asm_iva_pb0_addr_in {subsys.system_regs.pb0_ctrl2_s < x"13"}
-	assume -bound 1 -name asm_iva_top_pb0_addr_in {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl2_s = chk_top.pb_addr_in}
+	assume -bound 1 -name asm_iva_top_pb0_addr_in {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl2_s = fv_env.pb_addr_in}
 
 	# Config register
 	abstract -init_value subsys.system_regs.pb0_ctrl3_s
 	assume -bound 1 -name asm_iva_pb0_data_sel {subsys.system_regs.pb0_ctrl3_s(31 downto 28) < x"3" }
 
-	assume -bound 1 -name asm_iva_top_pb0_byte_cnt {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
-	assume -bound 1 -name asm_iva_top_pb0_pkt_type {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
-	assume -bound 1 -name asm_iva_top_pb0_ecc_en {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(8) = chk_top.pb_ecc_en}
-	assume -bound 1 -name asm_iva_top_pb0_crc_en {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(9) = chk_top.pb_crc_en}
-	assume -bound 1 -name asm_iva_top_pb0_ins_ecc_err {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
-	assume -bound 1 -name asm_iva_top_pb0_ins_crc_err {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(12) = chk_top.pb_ins_crc_err}
-	assume -bound 1 -name asm_iva_top_pb0_ecc_val {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
-	assume -bound 1 -name asm_iva_top_pb0_crc_val {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
-	assume -bound 1 -name asm_iva_top_pb0_sop_val {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
-	assume -bound 1 -name asm_iva_top_pb0_data_sel {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
+	assume -bound 1 -name asm_iva_top_pb0_byte_cnt {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(3 downto 0) = fv_env.pb_byte_cnt}
+	assume -bound 1 -name asm_iva_top_pb0_pkt_type {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(7 downto 4) = fv_env.pb_pkt_type}
+	assume -bound 1 -name asm_iva_top_pb0_ecc_en {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(8) = fv_env.pb_ecc_en}
+	assume -bound 1 -name asm_iva_top_pb0_crc_en {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(9) = fv_env.pb_crc_en}
+	assume -bound 1 -name asm_iva_top_pb0_ins_ecc_err {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(11 downto 10) = fv_env.pb_ins_ecc_err}
+	assume -bound 1 -name asm_iva_top_pb0_ins_crc_err {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(12) = fv_env.pb_ins_crc_err}
+	assume -bound 1 -name asm_iva_top_pb0_ecc_val {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(16 downto 13) = fv_env.pb_ecc_val}
+	assume -bound 1 -name asm_iva_top_pb0_crc_val {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(24 downto 17) = fv_env.pb_crc_val}
+	assume -bound 1 -name asm_iva_top_pb0_sop_val {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(27 downto 25) = fv_env.pb_sop_val}
+	assume -bound 1 -name asm_iva_top_pb0_data_sel {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl3_s(31 downto 28) = fv_env.pb_data_sel}
 
 	# Addr_out register
 	abstract -init_value subsys.system_regs.pb0_ctrl4_s
 	assume -bound 1 -name asm_iva_pb0_addr_out {subsys.system_regs.pb0_ctrl4_s < x"13"}
-	assume -bound 1 -name asm_iva_top_pb0_addr_out {chk_top.pb0_checker_en |-> subsys.system_regs.pb0_ctrl4_s = chk_top.pb_addr_out}
+	assume -bound 1 -name asm_iva_top_pb0_addr_out {fv_env.pb0_checker_en |-> subsys.system_regs.pb0_ctrl4_s = fv_env.pb_addr_out}
 
 	################################################################################
 	# PB1 task
@@ -44,26 +44,26 @@ proc registers_iva_abs_proc {} {
 	# Addr_in register
 	abstract -init_value subsys.system_regs.pb1_ctrl2_s
 	assume -bound 1 -name asm_iva_pb1_addr_in {subsys.system_regs.pb1_ctrl2_s < x"13"}
-	assume -bound 1 -name asm_iva_top_pb1_addr_in {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl2_s = chk_top.pb_addr_in}
+	assume -bound 1 -name asm_iva_top_pb1_addr_in {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl2_s = fv_env.pb_addr_in}
 
 	# Config register
 	abstract -init_value subsys.system_regs.pb1_ctrl3_s
 	assume -bound 1 -name asm_iva_pb1_data_sel {subsys.system_regs.pb1_ctrl3_s(31 downto 28) < x"3" }
-	assume -bound 1 -name asm_iva_top_pb1_byte_cnt {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
-	assume -bound 1 -name asm_iva_top_pb1_pkt_type {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
-	assume -bound 1 -name asm_iva_top_pb1_ecc_en {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(8) = chk_top.pb_ecc_en}
-	assume -bound 1 -name asm_iva_top_pb1_crc_en {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(9) = chk_top.pb_crc_en}
-	assume -bound 1 -name asm_iva_top_pb1_ins_ecc_err {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
-	assume -bound 1 -name asm_iva_top_pb1_ins_crc_err {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(12) = chk_top.pb_ins_crc_err}
-	assume -bound 1 -name asm_iva_top_pb1_ecc_val {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
-	assume -bound 1 -name asm_iva_top_pb1_crc_val {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
-	assume -bound 1 -name asm_iva_top_pb1_sop_val {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
-	assume -bound 1 -name asm_iva_top_pb1_data_sel {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
+	assume -bound 1 -name asm_iva_top_pb1_byte_cnt {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(3 downto 0) = fv_env.pb_byte_cnt}
+	assume -bound 1 -name asm_iva_top_pb1_pkt_type {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(7 downto 4) = fv_env.pb_pkt_type}
+	assume -bound 1 -name asm_iva_top_pb1_ecc_en {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(8) = fv_env.pb_ecc_en}
+	assume -bound 1 -name asm_iva_top_pb1_crc_en {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(9) = fv_env.pb_crc_en}
+	assume -bound 1 -name asm_iva_top_pb1_ins_ecc_err {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(11 downto 10) = fv_env.pb_ins_ecc_err}
+	assume -bound 1 -name asm_iva_top_pb1_ins_crc_err {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(12) = fv_env.pb_ins_crc_err}
+	assume -bound 1 -name asm_iva_top_pb1_ecc_val {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(16 downto 13) = fv_env.pb_ecc_val}
+	assume -bound 1 -name asm_iva_top_pb1_crc_val {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(24 downto 17) = fv_env.pb_crc_val}
+	assume -bound 1 -name asm_iva_top_pb1_sop_val {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(27 downto 25) = fv_env.pb_sop_val}
+	assume -bound 1 -name asm_iva_top_pb1_data_sel {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl3_s(31 downto 28) = fv_env.pb_data_sel}
 
 	# Addr_out register
 	abstract -init_value subsys.system_regs.pb1_ctrl4_s
 	assume -bound 1 -name asm_iva_pb1_addr_out {subsys.system_regs.pb1_ctrl4_s < x"13"}
-	assume -bound 1 -name asm_iva_top_pb1_addr_out {chk_top.pb1_checker_en |-> subsys.system_regs.pb1_ctrl4_s = chk_top.pb_addr_out}
+	assume -bound 1 -name asm_iva_top_pb1_addr_out {fv_env.pb1_checker_en |-> subsys.system_regs.pb1_ctrl4_s = fv_env.pb_addr_out}
 
 	################################################################################
 	# PP task
@@ -73,11 +73,11 @@ proc registers_iva_abs_proc {} {
 	# Addr_hdr register
 	abstract -init_value subsys.system_regs.pp_ctrl2_s
 	assume -bound 1 -name asm_iva_pp_addr_hdr {subsys.system_regs.pp_ctrl2_s < x"13"}
-	assume -bound 1 -name asm_iva_top_pp_addr_hdr {subsys.system_regs.pp_ctrl2_s = chk_top.pp_addr_hdr}
+	assume -bound 1 -name asm_iva_top_pp_addr_hdr {subsys.system_regs.pp_ctrl2_s = fv_env.pp_addr_hdr}
 
 	# Ignore ecc errs register
 	abstract -init_value subsys.system_regs.pp_ctrl3_s
-	assume -bound 1 -name asm_iva_pp_ignore_ecc_err {subsys.system_regs.pp_ctrl3_s = chk_top.pp_ignore_ecc_err}
+	assume -bound 1 -name asm_iva_pp_ignore_ecc_err {subsys.system_regs.pp_ctrl3_s = fv_env.pp_ignore_ecc_err}
 
 }
 
@@ -97,28 +97,28 @@ proc blackbox_controller_abs_proc {} {
 	# Start register
 	stopat subsys.system_regs.pb0_ctrl0_s
 	# if pb0 is active, start should remain low because is serves as a reset signal for some registers
-	assume -name asm_stopat_top_pb0_start {chk_top.pb0_busy_top = 0 |->  subsys.system_regs.pb0_ctrl0_s = 0}
+	assume -name asm_stopat_top_pb0_start {fv_env.pb0_busy_top = 0 |->  subsys.system_regs.pb0_ctrl0_s = 0}
 	# Addr_in register
 	stopat subsys.system_regs.pb0_ctrl2_s
-	assume -name asm_stopat_top_pb0_addr_in {subsys.system_regs.pb0_ctrl2_s = chk_top.pb_addr_in}
+	assume -name asm_stopat_top_pb0_addr_in {subsys.system_regs.pb0_ctrl2_s = fv_env.pb_addr_in}
 
 	# Config register
 	stopat subsys.system_regs.pb0_ctrl3_s
 
-	assume -name asm_stopat_top_pb0_byte_cnt {subsys.system_regs.pb0_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
-	assume -name asm_stopat_top_pb0_pkt_type {subsys.system_regs.pb0_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
-	assume -name asm_stopat_top_pb0_ecc_en {subsys.system_regs.pb0_ctrl3_s(8) = chk_top.pb_ecc_en}
-	assume -name asm_stopat_top_pb0_crc_en {subsys.system_regs.pb0_ctrl3_s(9) = chk_top.pb_crc_en}
-	assume -name asm_stopat_top_pb0_ins_ecc_err {subsys.system_regs.pb0_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
-	assume -name asm_stopat_top_pb0_ins_crc_err {subsys.system_regs.pb0_ctrl3_s(12) = chk_top.pb_ins_crc_err}
-	assume -name asm_stopat_top_pb0_ecc_val {subsys.system_regs.pb0_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
-	assume -name asm_stopat_top_pb0_crc_val {subsys.system_regs.pb0_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
-	assume -name asm_stopat_top_pb0_sop_val {subsys.system_regs.pb0_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
-	assume -name asm_stopat_top_pb0_data_sel {subsys.system_regs.pb0_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
+	assume -name asm_stopat_top_pb0_byte_cnt {subsys.system_regs.pb0_ctrl3_s(3 downto 0) = fv_env.pb_byte_cnt}
+	assume -name asm_stopat_top_pb0_pkt_type {subsys.system_regs.pb0_ctrl3_s(7 downto 4) = fv_env.pb_pkt_type}
+	assume -name asm_stopat_top_pb0_ecc_en {subsys.system_regs.pb0_ctrl3_s(8) = fv_env.pb_ecc_en}
+	assume -name asm_stopat_top_pb0_crc_en {subsys.system_regs.pb0_ctrl3_s(9) = fv_env.pb_crc_en}
+	assume -name asm_stopat_top_pb0_ins_ecc_err {subsys.system_regs.pb0_ctrl3_s(11 downto 10) = fv_env.pb_ins_ecc_err}
+	assume -name asm_stopat_top_pb0_ins_crc_err {subsys.system_regs.pb0_ctrl3_s(12) = fv_env.pb_ins_crc_err}
+	assume -name asm_stopat_top_pb0_ecc_val {subsys.system_regs.pb0_ctrl3_s(16 downto 13) = fv_env.pb_ecc_val}
+	assume -name asm_stopat_top_pb0_crc_val {subsys.system_regs.pb0_ctrl3_s(24 downto 17) = fv_env.pb_crc_val}
+	assume -name asm_stopat_top_pb0_sop_val {subsys.system_regs.pb0_ctrl3_s(27 downto 25) = fv_env.pb_sop_val}
+	assume -name asm_stopat_top_pb0_data_sel {subsys.system_regs.pb0_ctrl3_s(31 downto 28) = fv_env.pb_data_sel}
 
 	# Addr_out register
 	stopat subsys.system_regs.pb0_ctrl4_s
-	assume -name asm_stopat_top_pb0_addr_out {subsys.system_regs.pb0_ctrl4_s = chk_top.pb_addr_out}
+	assume -name asm_stopat_top_pb0_addr_out {subsys.system_regs.pb0_ctrl4_s = fv_env.pb_addr_out}
 
 	################################################################################
 	# PB1 task
@@ -126,27 +126,27 @@ proc blackbox_controller_abs_proc {} {
 	#
 	# Start register
 	stopat subsys.system_regs.pb1_ctrl0_s
-	assume -name asm_stopat_top_pb1_start {chk_top.pb1_busy_top = 0 |->  subsys.system_regs.pb1_ctrl0_s = 0}
+	assume -name asm_stopat_top_pb1_start {fv_env.pb1_busy_top = 0 |->  subsys.system_regs.pb1_ctrl0_s = 0}
 	# Addr_in register
 	stopat subsys.system_regs.pb1_ctrl2_s
-	assume -name asm_stopat_top_pb1_addr_in {subsys.system_regs.pb1_ctrl2_s = chk_top.pb_addr_in}
+	assume -name asm_stopat_top_pb1_addr_in {subsys.system_regs.pb1_ctrl2_s = fv_env.pb_addr_in}
 
 	# Config register
 	stopat subsys.system_regs.pb1_ctrl3_s
-	assume -name asm_stopat_top_pb1_byte_cnt {subsys.system_regs.pb1_ctrl3_s(3 downto 0) = chk_top.pb_byte_cnt}
-	assume -name asm_stopat_top_pb1_pkt_type {subsys.system_regs.pb1_ctrl3_s(7 downto 4) = chk_top.pb_pkt_type}
-	assume -name asm_stopat_top_pb1_ecc_en {subsys.system_regs.pb1_ctrl3_s(8) = chk_top.pb_ecc_en}
-	assume -name asm_stopat_top_pb1_crc_en {subsys.system_regs.pb1_ctrl3_s(9) = chk_top.pb_crc_en}
-	assume -name asm_stopat_top_pb1_ins_ecc_err {subsys.system_regs.pb1_ctrl3_s(11 downto 10) = chk_top.pb_ins_ecc_err}
-	assume -name asm_stopat_top_pb1_ins_crc_err {subsys.system_regs.pb1_ctrl3_s(12) = chk_top.pb_ins_crc_err}
-	assume -name asm_stopat_top_pb1_ecc_val {subsys.system_regs.pb1_ctrl3_s(16 downto 13) = chk_top.pb_ecc_val}
-	assume -name asm_stopat_top_pb1_crc_val {subsys.system_regs.pb1_ctrl3_s(24 downto 17) = chk_top.pb_crc_val}
-	assume -name asm_stopat_top_pb1_sop_val {subsys.system_regs.pb1_ctrl3_s(27 downto 25) = chk_top.pb_sop_val}
-	assume -name asm_stopat_top_pb1_data_sel {subsys.system_regs.pb1_ctrl3_s(31 downto 28) = chk_top.pb_data_sel}
+	assume -name asm_stopat_top_pb1_byte_cnt {subsys.system_regs.pb1_ctrl3_s(3 downto 0) = fv_env.pb_byte_cnt}
+	assume -name asm_stopat_top_pb1_pkt_type {subsys.system_regs.pb1_ctrl3_s(7 downto 4) = fv_env.pb_pkt_type}
+	assume -name asm_stopat_top_pb1_ecc_en {subsys.system_regs.pb1_ctrl3_s(8) = fv_env.pb_ecc_en}
+	assume -name asm_stopat_top_pb1_crc_en {subsys.system_regs.pb1_ctrl3_s(9) = fv_env.pb_crc_en}
+	assume -name asm_stopat_top_pb1_ins_ecc_err {subsys.system_regs.pb1_ctrl3_s(11 downto 10) = fv_env.pb_ins_ecc_err}
+	assume -name asm_stopat_top_pb1_ins_crc_err {subsys.system_regs.pb1_ctrl3_s(12) = fv_env.pb_ins_crc_err}
+	assume -name asm_stopat_top_pb1_ecc_val {subsys.system_regs.pb1_ctrl3_s(16 downto 13) = fv_env.pb_ecc_val}
+	assume -name asm_stopat_top_pb1_crc_val {subsys.system_regs.pb1_ctrl3_s(24 downto 17) = fv_env.pb_crc_val}
+	assume -name asm_stopat_top_pb1_sop_val {subsys.system_regs.pb1_ctrl3_s(27 downto 25) = fv_env.pb_sop_val}
+	assume -name asm_stopat_top_pb1_data_sel {subsys.system_regs.pb1_ctrl3_s(31 downto 28) = fv_env.pb_data_sel}
 
 	# Addr_out register
 	stopat subsys.system_regs.pb1_ctrl4_s
-	assume -name asm_stopat_top_pb1_addr_out {subsys.system_regs.pb1_ctrl4_s = chk_top.pb_addr_out}
+	assume -name asm_stopat_top_pb1_addr_out {subsys.system_regs.pb1_ctrl4_s = fv_env.pb_addr_out}
 	################################################################################
 
 	################################################################################
@@ -154,14 +154,14 @@ proc blackbox_controller_abs_proc {} {
 	################################################################################
 	# Start register
 	stopat subsys.system_regs.pp_ctrl0_s
-	assume -name asm_stopat_top_pp_start {chk_top.pp_busy_top = 0 |->  subsys.system_regs.pp_ctrl0_s = 0}
+	assume -name asm_stopat_top_pp_start {fv_env.pp_busy_top = 0 |->  subsys.system_regs.pp_ctrl0_s = 0}
 	# Addr_hdr register
 	stopat subsys.system_regs.pp_ctrl2_s
-	assume -name asm_stopat_top_pp_addr_hdr {subsys.system_regs.pp_ctrl2_s = chk_top.pp_addr_hdr}
+	assume -name asm_stopat_top_pp_addr_hdr {subsys.system_regs.pp_ctrl2_s = fv_env.pp_addr_hdr}
 
 	# Ignore ecc errs register
 	stopat subsys.system_regs.pp_ctrl3_s
-	assume -name asm_stopat_pp_ignore_ecc_err {subsys.system_regs.pp_ctrl3_s = chk_top.pp_ignore_ecc_err}
+	assume -name asm_stopat_pp_ignore_ecc_err {subsys.system_regs.pp_ctrl3_s = fv_env.pp_ignore_ecc_err}
 } 
 
 
@@ -171,7 +171,7 @@ proc blackbox_controller_abs_proc {} {
 proc inmem_iva_abs_proc {} {
 	abstract -init_value inmem.inmem_bram.ram_s
 	for {set i 0} {$i < 19} {incr i} {
-		assume -name asm_inmem_loc${i}_val "chk_top.pb0_checker_en = 1 |-> 
+		assume -name asm_inmem_loc${i}_val "fv_env.pb0_checker_en = 1 |-> 
 			inmem.inmem_bram.ram_s($i) = 0 or 
 			inmem.inmem_bram.ram_s($i) = 2 or 
 			inmem.inmem_bram.ram_s($i) = 4 or 
