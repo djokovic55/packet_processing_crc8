@@ -1,7 +1,4 @@
-`include "pp_env_pkg.sv"
-`ifdef ENV_TEST
-	import pp_env_pkg::*;
-`endif
+import pp_env_pkg::*;
 
 module  fv_env(
 	input clk,

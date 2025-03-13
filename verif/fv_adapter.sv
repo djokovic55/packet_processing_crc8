@@ -1,10 +1,3 @@
-
-`include "pp_env_pkg.sv"
-`include "interfaces/pp_conf_port_intf.sv"
-`include "interfaces/pb_conf_port_intf.sv"
-`include "interfaces/mem_port_intf.sv"
-`include "interfaces/regs_port_intf.sv"
-`include "interfaces/axi_probe_intf.sv"
 module fv_adapter (
 	input clk,
 	input reset,
