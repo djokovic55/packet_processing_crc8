@@ -9,20 +9,21 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
 - [Run Project](#run-project)
 - [Formal Methodology](#formal-methodology)
 - [System Workflow](#system-workflow)
+- [Formal Testbench](#formal-testbench)
+- [Complexity Reduction](#complexity-reduction)
     - [Data Integrity](#data-integrity)
     - [System Bottleneck](#system-bottleneck)
-- [Formal Testbench](#formal-testbench)
-    - [Complexity Reduction](#complexity-reduction)
-- [State Space Tunneling](#state-space-tunneling)
-    - [Proof By Induction](#proof-by-induction)
-    - [Helpers Development](#helpers-development)
-- [Results](#results)
+    - [State Space Tunneling](#state-space-tunneling)
+        - [Proof By Induction](#proof-by-induction)
+        - [Helpers Development](#helpers-development)
+    - [Results](#results)
 
 
 ## Run Project
 1. Clone repository
-2. Run make command
-3. See [script description](./scripts/script_desc.md)
+2. Run source fv_setup.csh
+3. Run make command
+4. See [script description](./scripts/script_desc.md)
 
 ## Formal Methodology
 
@@ -51,6 +52,25 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
 - It should build packets from incoming, raw data and parse incoming packets to extract packet information and possible transmission errors.
 - The focus will be on the build task which consists of reading data from incoming memory, calculating the packet header and CRC based on it, and finally merging these parts into a packet which will be written into outgoing memory.
 
+
+## Formal Testbench 
+
+The testbench top-level is called fv_env. All of its ports are inputs, so it acts as a monitor of the DUT. It connects to the design via a bind statement. 
+
+Under fv_env there are different components:
+
+- SystemVerilog Modules
+    - Adapter (fv_adapter) - Converts wires connected to the DUT into SystemVerilog Interfaces (SVIs) used by the testbench
+    - Checkers (checker*) - Connect to DUT's interfaces and perform the checking of all design features.
+- SystemVerilog Interfaces
+    - Ports (*_port): Represents a group of DUT interface signals
+    - Probes (*_probe): Similar to ports, but for signals probed inside the DUT (not at the interface) 
+
+![Verification environment](docs/fv_adapter.png)
+
+
+## Complexity Reduction
+
 ### Data Integrity
 
 ![Data integrity op2](docs/di_op2.png)
@@ -70,18 +90,6 @@ Convergence was achieved with the application of the JasperGold's SST (State Spa
 - All these obstacles contribute to property complexity because the behavior of interest happens very far from the reset state, making it difficult for formal analysis.
 
 ![System bottleneck](docs/system_bottleneck.png)
-
-## Formal Testbench 
-
-- The verification environment consists of four main checker components, each responsible for verifying specific functionalities defined by the specification. 
-- At the top level, the checker_top module oversees the overall verification process, ensuring the correct configuration of registers and detecting errors during packet parsing. 
-- Within checker_top, the checker_di_top component plays a crucial role in validating the integrity of packet construction. 
-- Checkers checker_fair_int and checker_axi, ensure compliance with the AXI protocol by enforcing correct and fair communication.
-
-![Verification environment](docs/verif_env.png)
-
-
-### Complexity Reduction
 
 To address the complexity several techniques were used:
 
@@ -106,8 +114,8 @@ To address the complexity several techniques were used:
 
 ![IVA Impact on Coverage](docs/iva_cov_impact.png)
 
-## State Space Tunneling
-### Proof By Induction
+### State Space Tunneling
+#### Proof By Induction
 ![Proof by induction](docs/proof_by_induction.png)
 
 - Let’s say we have a property P.
@@ -121,7 +129,7 @@ The inductive step then asserts that if the property is true for K cycles from r
 
 - It essentially wastes time trying to reach counterexamples beyond the reachable state space because it does not know this boundary. Helpers then serve to eliminate these unreachable transitions which would cause P to fail.
 
-### Helpers Development
+#### Helpers Development
 
 ![Helper SST Development 1](docs/developing_helpers_sst.png)
 
@@ -132,7 +140,7 @@ The inductive step then asserts that if the property is true for K cycles from r
 
 ![Helper SST Development 2](docs/developing_helpers_sst2.png)
 
-## Results
+### Results
 
 ![Results](docs/results.png)
 

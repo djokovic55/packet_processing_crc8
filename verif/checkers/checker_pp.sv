@@ -312,6 +312,10 @@ module checker_pp (
     // assign inmem_port_pp.data_i = inmem_pp_data_s;
 	asm_inmem_data_i: assume property(inmem_port_pp.data_i == inmem_pp_data_s);
 
+	// Check pp registers 
+
+	ast_reg_pp_addr_hdr_lv4_help_high:              assert property(pp_regs_port.pp_start |-> pp_regs_port.pp_addr_hdr == pp_conf_port.pp_addr_hdr);
+	ast_reg_pp_ignore_ecc_err_lv4_help_high:        assert property(pp_regs_port.pp_start |-> pp_regs_port.pp_ignore_ecc_err == pp_conf_port.pp_ignore_ecc_err);
 
 
 endmodule

@@ -7,7 +7,7 @@ interface pb_regs_port_intf;
 	logic[3:0] pb_pkt_type;
 	logic pb_ecc_en;
 	logic pb_crc_en;
-	logic[1:0] pb_ins_ecc_err;
+	logic pb_ins_ecc_err;
 	logic pb_ins_crc_err;
 	logic[3:0] pb_ecc_val;
 	logic[7:0] pb_crc_val;

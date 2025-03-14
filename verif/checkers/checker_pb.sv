@@ -287,4 +287,18 @@ module checker_pb (
 	ast_data_integrity_coverage:                            assert property(pb_checker_en |-> !di_err);
 	ast_data_integrity_crc_coverage:                        assert property(pb_checker_en |-> !di_crc_err_s);
 
+	// Check pb registers
+	ast_reg_pb_addr_in_lv4_help_high:              assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_addr_in == pb_conf_port.pb_addr_in);
+	ast_reg_pb_byte_cnt_lv4_help_high:             assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_byte_cnt == pb_conf_port.pb_byte_cnt);
+	ast_reg_pb_pkt_type_lv4_help_high:             assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_pkt_type == pb_conf_port.pb_pkt_type);
+	ast_reg_pb_ecc_en_lv4_help_high:               assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_ecc_en == pb_conf_port.pb_ecc_en);
+	ast_reg_pb_crc_en_lv4_help_high:               assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_crc_en == pb_conf_port.pb_crc_en);
+	ast_reg_pb_ins_ecc_err_lv4_help_high:          assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_ins_ecc_err == pb_conf_port.pb_ins_ecc_err);
+	ast_reg_pb_ins_crc_err_lv4_help_high:          assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_ins_crc_err == pb_conf_port.pb_ins_crc_err);
+	ast_reg_pb_ecc_val_lv4_help_high:              assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_ecc_val == pb_conf_port.pb_ecc_val);
+	ast_reg_pb_crc_val_lv4_help_high:              assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_crc_val == pb_conf_port.pb_crc_val);
+	ast_reg_pb_sop_val_lv4_help_high:              assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_sop_val == pb_conf_port.pb_sop_val);
+	ast_reg_pb_data_sel_lv4_help_high:             assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_data_sel == pb_conf_port.pb_data_sel);
+	ast_reg_pb_addr_out_lv4_help_high:             assert property(pb_regs_port.pb_start |-> pb_regs_port.pb_addr_out == pb_conf_port.pb_addr_out);
+
 endmodule

@@ -253,7 +253,7 @@ module  fv_env(
 	// SECTION Builder - Parser combined work
 	cov_pb_pp_task:                       cover property((pb_byte_cnt == 4'h3 && pb0_start_top) ##[1:$] pp_start_top);
 	////////////////////////////////////////////////////////////////////////////////	
-	// LIVENESS props -> MOVE TO CHECHERS
+	// LIVENESS props -> MOVE TO CHECKERS
 	////////////////////////////////////////////////////////////////////////////////	
 	
 	// asm_pb_irq_stable: assume property(pb_irq && !(pb0_start_top || pb1_start_top) |=> pb_irq)
@@ -278,40 +278,6 @@ module  fv_env(
 
 	ast_pp_start_live:                     assert property(pp_irq && !pb_irq && pp_busy_top[*2] ##1 !(pp_irq_top || pb0_irq_top || pb1_irq_top) && !cont_busy_top |=> s_eventually pp_start_top);
 	ast_pp_finish_live:                    assert property(pp_start_top |=> s_eventually pp_irq_top);
-
-	////////////////////////////////////////////////////////////////////////////////	
-	// IMPORTANT Assert valid register values -> MOVE TO CHECKERS
-	////////////////////////////////////////////////////////////////////////////////	
-
-	ast_top_reg_pb0_addr_in_lv4_help_high:              assert property(pb0_start_top |-> pb0_addr_in_top == pb_addr_in);
-	ast_top_reg_pb0_byte_cnt_lv4_help_high:             assert property(pb0_start_top |-> pb0_byte_cnt_top == pb_byte_cnt);
-	ast_top_reg_pb0_pkt_type_lv4_help_high:             assert property(pb0_start_top |-> pb0_pkt_type_top == pb_pkt_type);
-	ast_top_reg_pb0_ecc_en_lv4_help_high:               assert property(pb0_start_top |-> pb0_ecc_en_top == pb_ecc_en);
-	ast_top_reg_pb0_crc_en_lv4_help_high:               assert property(pb0_start_top |-> pb0_crc_en_top == pb_crc_en);
-	ast_top_reg_pb0_ins_ecc_err_lv4_help_high:          assert property(pb0_start_top |-> pb0_ins_ecc_err_top == pb_ins_ecc_err);
-	ast_top_reg_pb0_ins_crc_err_lv4_help_high:          assert property(pb0_start_top |-> pb0_ins_crc_err_top == pb_ins_crc_err);
-	ast_top_reg_pb0_ecc_val_lv4_help_high:              assert property(pb0_start_top |-> pb0_ecc_val_top == pb_ecc_val);
-	ast_top_reg_pb0_crc_val_lv4_help_high:              assert property(pb0_start_top |-> pb0_crc_val_top == pb_crc_val);
-	ast_top_reg_pb0_sop_val_lv4_help_high:              assert property(pb0_start_top |-> pb0_sop_val_top == pb_sop_val);
-	ast_top_reg_pb0_data_sel_lv4_help_high:             assert property(pb0_start_top |-> pb0_data_sel_top == pb_data_sel);
-	ast_top_reg_pb0_addr_out_lv4_help_high:             assert property(pb0_start_top |-> pb0_addr_out_top == pb_addr_out);
-
-	ast_top_reg_pb1_addr_in_lv4_help_high:              assert property(pb1_start_top |-> pb1_addr_in_top == pb_addr_in);
-	ast_top_reg_pb1_byte_cnt_lv4_help_high:             assert property(pb1_start_top |-> pb1_byte_cnt_top == pb_byte_cnt);
-	ast_top_reg_pb1_pkt_type_lv4_help_high:             assert property(pb1_start_top |-> pb1_pkt_type_top == pb_pkt_type);
-	ast_top_reg_pb1_ecc_en_lv4_help_high:               assert property(pb1_start_top |-> pb1_ecc_en_top == pb_ecc_en);
-	ast_top_reg_pb1_crc_en_lv4_help_high:               assert property(pb1_start_top |-> pb1_crc_en_top == pb_crc_en);
-	ast_top_reg_pb1_ins_ecc_err_lv4_help_high:          assert property(pb1_start_top |-> pb1_ins_ecc_err_top == pb_ins_ecc_err);
-	ast_top_reg_pb1_ins_crc_err_lv4_help_high:          assert property(pb1_start_top |-> pb1_ins_crc_err_top == pb_ins_crc_err);
-	ast_top_reg_pb1_ecc_val_lv4_help_high:              assert property(pb1_start_top |-> pb1_ecc_val_top == pb_ecc_val);
-	ast_top_reg_pb1_crc_val_lv4_help_high:              assert property(pb1_start_top |-> pb1_crc_val_top == pb_crc_val);
-	ast_top_reg_pb1_sop_val_lv4_help_high:              assert property(pb1_start_top |-> pb1_sop_val_top == pb_sop_val);
-	ast_top_reg_pb1_data_sel_lv4_help_high:             assert property(pb1_start_top |-> pb1_data_sel_top == pb_data_sel);
-	ast_top_reg_pb1_addr_out_lv4_help_high:             assert property(pb1_start_top |-> pb1_addr_out_top == pb_addr_out);
-
-	ast_top_reg_pp_addr_hdr_lv4_help_high:              assert property(pp_start_top |-> pp_addr_hdr_top == pp_addr_hdr);
-	ast_top_reg_pp_ignore_ecc_err_lv4_help_high:        assert property(pp_start_top |-> pp_ignore_ecc_err_top == pp_ignore_ecc_err);
-
 
 
 	`ifdef SST
